@@ -46,7 +46,7 @@ export default function ARScene() {
                 enableZoom={true}
                 enableRotate={true}
                 minDistance={1}
-                maxDistance={10}
+                maxDistance={30}
             />
         </>
     );

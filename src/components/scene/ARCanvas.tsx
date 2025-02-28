@@ -40,7 +40,7 @@ export default function ARCanvas() {
             >
                 <Canvas
                     shadows
-                    camera={{ position: [0, 1.5, 3], fov: 50 }}
+                    camera={{ position: [3, 3, 3], fov: 50 }}
                     className="relative top-1 left-1 right-1 w-full h-full"
                     gl={{
                         antialias: true,

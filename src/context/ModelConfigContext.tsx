@@ -21,8 +21,8 @@ export function ModelConfigProvider({
     children: React.ReactNode;
 }) {
     const [config, setConfig] = useState<ModelConfig>({
-        position: [0, -1, -2],
-        rotation: [0, Math.PI / 4, 0],
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
     });
 
     const updateConfig = (newConfig: Partial<ModelConfig>) => {
