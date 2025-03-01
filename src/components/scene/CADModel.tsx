@@ -76,7 +76,7 @@ export default function CADModel({ url }: { url: string }) {
             <mesh
                 ref={meshRef}
                 geometry={mainMesh.geometry}
-                scale={0.05}
+                scale={0.01}
                 position={config.position}
                 rotation={config.rotation}
                 castShadow
