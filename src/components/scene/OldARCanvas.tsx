@@ -16,36 +16,26 @@ export default function ARCanvas() {
     useEffect(() => {
         const handleResize = () => {
             if (!containerRef.current) return;
+            // const { width, height } =
+            //     containerRef.current.getBoundingClientRect();
+
+            // // Update camera aspect ratio if needed
+            // // This will be handled automatically by r3f in most cases
         };
 
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // AR session configuration
-    const enterAR = () => {
-        store.enterAR();
-    };
-
     return (
         <ModelConfigProvider>
-            {/* AR Button for entering AR mode */}
-            <div className="fixed top-4 right-4 z-10">
-                <button
-                    onClick={enterAR}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    Enter AR
-                </button>
-            </div>
-
             {/* Canvas Container */}
             <div
                 ref={containerRef}
                 className="relative w-full max-w-6xl mx-auto"
                 style={{
                     aspectRatio: "2 / 1",
-                    height: "auto !important",
+                    height: "auto !important", // Override any inline styles
                 }}
             >
                 <Canvas
@@ -55,7 +45,6 @@ export default function ARCanvas() {
                     gl={{
                         antialias: true,
                         powerPreference: "high-performance",
-                        alpha: true, // Important for AR transparency
                     }}
                     onCreated={({ gl, camera }) => {
                         // Force initial size calculation
