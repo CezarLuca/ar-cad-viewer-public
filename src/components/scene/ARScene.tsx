@@ -5,21 +5,23 @@ import { useEffect, useState } from "react";
 import CADModel from "./CADModel";
 import { Environment, OrbitControls, useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { Group, Intersection } from "three";
+import { Group, Intersection, Vector3 } from "three";
 import { useRef } from "react";
 
 export default function ARScene() {
     const { session } = useXR();
     const [isPresenting, setIsPresenting] = useState(false);
+    const [modelPlaced, setModelPlaced] = useState(false);
+    const modelRef = useRef<Group>(null);
+    const { gl } = useThree();
+    const [modelScale, setModelScale] = useState(0.5);
+    const [modelRotation, setModelRotation] = useState(0);
 
     useEffect(() => {
         if (session) {
             setIsPresenting(session.visibilityState === "visible");
         }
     }, [session]);
-    const [modelPlaced, setModelPlaced] = useState(false);
-    const modelRef = useRef<Group>(null);
-    const { gl } = useThree();
 
     // Set up AR session with camera passthrough
     useEffect(() => {
@@ -60,6 +62,14 @@ export default function ARScene() {
         }
     };
 
+    // Handlers for model adjustments
+    const increaseScale = () =>
+        setModelScale((prev) => Math.min(prev + 0.1, 2));
+    const decreaseScale = () =>
+        setModelScale((prev) => Math.max(prev - 0.1, 0.1));
+    const rotateLeft = () => setModelRotation((prev) => prev + Math.PI / 4);
+    const rotateRight = () => setModelRotation((prev) => prev - Math.PI / 4);
+
     return (
         <>
             {/* Lighting setup */}
@@ -98,7 +108,11 @@ export default function ARScene() {
                     </Interactive>
 
                     {/* Model with reference positioning */}
-                    <group ref={modelRef}>
+                    <group
+                        ref={modelRef}
+                        scale={new Vector3(modelScale, modelScale, modelScale)}
+                        rotation={[0, modelRotation, 0]}
+                    >
                         <CADModel url="/models/engine.glb" />
                     </group>
                 </>
