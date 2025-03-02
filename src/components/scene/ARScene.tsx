@@ -8,14 +8,25 @@ import { useThree } from "@react-three/fiber";
 import { Group, Intersection, Vector3 } from "three";
 import { useRef } from "react";
 
-export default function ARScene() {
-    const [modelPlaced, setModelPlaced] = useState(false);
+interface ARSceneProps {
+    modelScale: number;
+    modelRotation: number;
+    setModelPlaced: (placed: boolean) => void;
+}
+
+export default function ARScene({
+    modelScale,
+    modelRotation,
+    setModelPlaced,
+}: ARSceneProps) {
+    // const [modelPlaced, setModelPlaced] = useState(false);
     const modelRef = useRef<Group>(null);
     const { gl } = useThree();
-    const [modelScale, setModelScale] = useState(0.5);
-    const [modelRotation, setModelRotation] = useState(0);
+    // const [modelScale, setModelScale] = useState(0.5);
+    // const [modelRotation, setModelRotation] = useState(0);
     const { session } = useXR();
     const [isPresenting, setIsPresenting] = useState(false);
+    const [localModelPlaced, setLocalModelPlaced] = useState(false);
 
     useEffect(() => {
         if (session) {
@@ -50,25 +61,30 @@ export default function ARScene() {
         return () => {
             setModelPlaced(false);
         };
-    }, [session, gl]);
+    }, [session, gl, setModelPlaced]);
+
+    // Update parent state when local state changes
+    useEffect(() => {
+        setModelPlaced(localModelPlaced);
+    }, [localModelPlaced, setModelPlaced]);
 
     // Place model handler for AR
     const handleSelect = (event: { intersection: Intersection }) => {
-        if (modelRef.current && !modelPlaced) {
+        if (modelRef.current && !localModelPlaced) {
             // Position the model at the hit point
             const hitPoint = event.intersection.point;
             modelRef.current.position.set(hitPoint.x, hitPoint.y, hitPoint.z);
-            setModelPlaced(true);
+            setLocalModelPlaced(true);
         }
     };
 
-    // Handlers for model adjustments
-    const increaseScale = () =>
-        setModelScale((prev) => Math.min(prev + 0.1, 2));
-    const decreaseScale = () =>
-        setModelScale((prev) => Math.max(prev - 0.1, 0.1));
-    const rotateLeft = () => setModelRotation((prev) => prev + Math.PI / 4);
-    const rotateRight = () => setModelRotation((prev) => prev - Math.PI / 4);
+    // // Handlers for model adjustments
+    // const increaseScale = () =>
+    //     setModelScale((prev) => Math.min(prev + 0.1, 2));
+    // const decreaseScale = () =>
+    //     setModelScale((prev) => Math.max(prev - 0.1, 0.1));
+    // const rotateLeft = () => setModelRotation((prev) => prev + Math.PI / 4);
+    // const rotateRight = () => setModelRotation((prev) => prev - Math.PI / 4);
 
     return (
         <>
@@ -95,7 +111,7 @@ export default function ARScene() {
                         <mesh
                             rotation={[-Math.PI / 2, 0, 0]}
                             position={[0, 0, 0]}
-                            visible={!modelPlaced}
+                            visible={!localModelPlaced}
                         >
                             <planeGeometry args={[100, 100]} />
                             <meshBasicMaterial

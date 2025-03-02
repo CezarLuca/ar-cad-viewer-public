@@ -5,12 +5,18 @@ import { XR, createXRStore } from "@react-three/xr";
 import { Suspense, useEffect, useRef } from "react";
 import ARScene from "./ARScene";
 import ModelControls from "./ui/ModelControls";
+import ARControls from "./ui/ARControls";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
 
 const store = createXRStore();
 
 export default function ARCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // States for model adjustments - shared between AR Scene and controls
+    const [modelScale, setModelScale] = useState(0.5);
+    const [modelRotation, setModelRotation] = useState(0);
+    const [modelPlaced, setModelPlaced] = useState(false);
 
     // Handle canvas resize
     useEffect(() => {
@@ -26,6 +32,14 @@ export default function ARCanvas() {
     const enterAR = () => {
         store.enterAR();
     };
+
+    // Handlers for model adjustments
+    const increaseScale = () =>
+        setModelScale((prev) => Math.min(prev + 0.1, 2.0));
+    const decreaseScale = () =>
+        setModelScale((prev) => Math.max(prev - 0.1, 0.1));
+    const rotateLeft = () => setModelRotation((prev) => prev - Math.PI / 12);
+    const rotateRight = () => setModelRotation((prev) => prev + Math.PI / 12);
 
     return (
         <ModelConfigProvider>
@@ -50,7 +64,7 @@ export default function ARCanvas() {
             >
                 <Canvas
                     shadows
-                    camera={{ position: [3, 3, 3], fov: 50 }}
+                    camera={{ position: [0.5, 0.5, 0.5], fov: 50 }}
                     className="relative top-1 left-1 right-1 w-full h-full"
                     gl={{
                         antialias: true,
@@ -80,7 +94,11 @@ export default function ARCanvas() {
                 >
                     <XR store={store}>
                         <Suspense fallback={null}>
-                            <ARScene />
+                            <ARScene
+                                modelScale={modelScale}
+                                modelRotation={modelRotation}
+                                setModelPlaced={setModelPlaced}
+                            />
                         </Suspense>
                     </XR>
                 </Canvas>
