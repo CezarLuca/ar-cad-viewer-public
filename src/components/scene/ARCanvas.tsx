@@ -71,16 +71,6 @@ export default function ARCanvas() {
                 </button>
             </div>
 
-            {/* AR Controls */}
-            <ARControls
-                onIncreaseScale={increaseScale}
-                onDecreaseScale={decreaseScale}
-                onRotateLeft={rotateLeft}
-                onRotateRight={rotateRight}
-                scale={modelScale}
-                modelPlaced={modelPlaced}
-            />
-
             {/* Canvas Container */}
             <div
                 ref={containerRef}
@@ -128,6 +118,15 @@ export default function ARCanvas() {
                                 setModelPlaced={setModelPlaced}
                             />
                         </Suspense>
+                        {/* AR Controls */}
+                        <ARControls
+                            onIncreaseScale={increaseScale}
+                            onDecreaseScale={decreaseScale}
+                            onRotateLeft={rotateLeft}
+                            onRotateRight={rotateRight}
+                            scale={modelScale}
+                            modelPlaced={modelPlaced}
+                        />
                     </XR>
                 </Canvas>
             </div>
