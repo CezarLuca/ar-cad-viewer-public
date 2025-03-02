@@ -9,13 +9,13 @@ import { Group, Intersection, Vector3 } from "three";
 import { useRef } from "react";
 
 export default function ARScene() {
-    const { session } = useXR();
-    const [isPresenting, setIsPresenting] = useState(false);
     const [modelPlaced, setModelPlaced] = useState(false);
     const modelRef = useRef<Group>(null);
     const { gl } = useThree();
     const [modelScale, setModelScale] = useState(0.5);
     const [modelRotation, setModelRotation] = useState(0);
+    const { session } = useXR();
+    const [isPresenting, setIsPresenting] = useState(false);
 
     useEffect(() => {
         if (session) {
