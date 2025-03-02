@@ -2,7 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { XR, createXRStore } from "@react-three/xr";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import ARScene from "./ARScene";
 import ModelControls from "./ui/ModelControls";
 import ARControls from "./ui/ARControls";
@@ -34,12 +34,30 @@ export default function ARCanvas() {
     };
 
     // Handlers for model adjustments
-    const increaseScale = () =>
-        setModelScale((prev) => Math.min(prev + 0.1, 2.0));
-    const decreaseScale = () =>
-        setModelScale((prev) => Math.max(prev - 0.1, 0.1));
-    const rotateLeft = () => setModelRotation((prev) => prev - Math.PI / 12);
-    const rotateRight = () => setModelRotation((prev) => prev + Math.PI / 12);
+    interface IncreaseScaleFunction {
+        (): void;
+    }
+
+    const increaseScale: IncreaseScaleFunction = (): void =>
+        setModelScale((prev: number): number => Math.min(prev + 0.1, 2.0));
+    interface DecreaseScaleFunction {
+        (): void;
+    }
+
+    const decreaseScale: DecreaseScaleFunction = () =>
+        setModelScale((prev: number): number => Math.max(prev - 0.1, 0.1));
+    interface RotateLeftFunction {
+        (): void;
+    }
+
+    const rotateLeft: RotateLeftFunction = (): void =>
+        setModelRotation((prev: number): number => prev - Math.PI / 12);
+    interface RotateRightFunction {
+        (): void;
+    }
+
+    const rotateRight: RotateRightFunction = (): void =>
+        setModelRotation((prev: number): number => prev + Math.PI / 12);
 
     return (
         <ModelConfigProvider>
@@ -52,6 +70,16 @@ export default function ARCanvas() {
                     Enter AR
                 </button>
             </div>
+
+            {/* AR Controls */}
+            <ARControls
+                onIncreaseScale={increaseScale}
+                onDecreaseScale={decreaseScale}
+                onRotateLeft={rotateLeft}
+                onRotateRight={rotateRight}
+                scale={modelScale}
+                modelPlaced={modelPlaced}
+            />
 
             {/* Canvas Container */}
             <div
