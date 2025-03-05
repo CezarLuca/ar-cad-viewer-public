@@ -30,8 +30,21 @@ export default function ARScene({
             const isVisible = session.visibilityState === "visible";
             setIsPresenting(isVisible);
             setIsARPresenting(isVisible);
+
+            // Auto-place the model when entering AR mode
+            if (isVisible) {
+                // Small delay to ensure AR session is fully initialized
+                setTimeout(() => {
+                    setLocalModelPlaced(true);
+                    // Default position in front of the user
+                    updateConfig({
+                        position: [0, 0, -1],
+                    });
+                }, 300);
+            }
         }
-    }, [session, setIsARPresenting]);
+    }, [session, setIsARPresenting, updateConfig]);
+
     // Set up AR session with camera passthrough
     useEffect(() => {
         if (session) {

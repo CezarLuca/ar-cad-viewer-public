@@ -1,6 +1,5 @@
 "use client";
 
-// import { useEffect, useState } from "react";
 import { useModelConfig } from "@/context/ModelConfigContext";
 
 interface ARControlsProps {
@@ -14,11 +13,21 @@ export default function ARControls({
 }: ARControlsProps) {
     const { config, updateConfig } = useModelConfig();
 
+    // Debug logging to verify states
+    console.log("AR Controls - Model Placed:", modelPlaced);
+    console.log("AR Controls - Is Presenting:", isPresenting);
+
     // Calculate scale value from model position for display purposes
     const scale = Math.max(0.1, Math.min(2.0, config.position[1] + 0.5));
 
     // Only show controls in AR mode and when model is placed
-    if (!isPresenting || !modelPlaced) return null;
+    if (!isPresenting || !modelPlaced) {
+        console.log("AR Controls not showing because:", {
+            isPresenting,
+            modelPlaced,
+        });
+        return null;
+    }
 
     // Handlers for model adjustments using ModelConfigContext
     const increaseScale = () => {
@@ -57,7 +66,7 @@ export default function ARControls({
 
     return (
         <div
-            className="fixed bottom-10 left-0 right-0 flex justify-center z-50"
+            className="fixed bottom-10 left-0 right-0 flex justify-center z-[1000]"
             style={{ pointerEvents: "auto", touchAction: "auto" }}
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
