@@ -5,35 +5,33 @@ import { useEffect, useState } from "react";
 import CADModel from "./CADModel";
 import { Environment, OrbitControls, useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { Group, Intersection, Vector3 } from "three";
+import { Group, Intersection } from "three";
 import { useRef } from "react";
+import { useModelConfig } from "@/context/ModelConfigContext";
 
 interface ARSceneProps {
-    modelScale: number;
-    modelRotation: number;
     setModelPlaced: (placed: boolean) => void;
+    setIsARPresenting: (isPresenting: boolean) => void;
 }
 
 export default function ARScene({
-    modelScale,
-    modelRotation,
     setModelPlaced,
+    setIsARPresenting,
 }: ARSceneProps) {
-    // const [modelPlaced, setModelPlaced] = useState(false);
     const modelRef = useRef<Group>(null);
     const { gl } = useThree();
-    // const [modelScale, setModelScale] = useState(0.5);
-    // const [modelRotation, setModelRotation] = useState(0);
     const { session } = useXR();
     const [isPresenting, setIsPresenting] = useState(false);
     const [localModelPlaced, setLocalModelPlaced] = useState(false);
+    const { updateConfig } = useModelConfig();
 
     useEffect(() => {
         if (session) {
-            setIsPresenting(session.visibilityState === "visible");
+            const isVisible = session.visibilityState === "visible";
+            setIsPresenting(isVisible);
+            setIsARPresenting(isVisible);
         }
-    }, [session]);
-
+    }, [session, setIsARPresenting]);
     // Set up AR session with camera passthrough
     useEffect(() => {
         if (session) {
@@ -73,18 +71,12 @@ export default function ARScene({
         if (modelRef.current && !localModelPlaced) {
             // Position the model at the hit point
             const hitPoint = event.intersection.point;
-            modelRef.current.position.set(hitPoint.x, hitPoint.y, hitPoint.z);
+            updateConfig({
+                position: [hitPoint.x, hitPoint.y, hitPoint.z],
+            });
             setLocalModelPlaced(true);
         }
     };
-
-    // // Handlers for model adjustments
-    // const increaseScale = () =>
-    //     setModelScale((prev) => Math.min(prev + 0.1, 2));
-    // const decreaseScale = () =>
-    //     setModelScale((prev) => Math.max(prev - 0.1, 0.1));
-    // const rotateLeft = () => setModelRotation((prev) => prev + Math.PI / 4);
-    // const rotateRight = () => setModelRotation((prev) => prev - Math.PI / 4);
 
     return (
         <>
@@ -124,11 +116,7 @@ export default function ARScene({
                     </Interactive>
 
                     {/* Model with reference positioning */}
-                    <group
-                        ref={modelRef}
-                        scale={new Vector3(modelScale, modelScale, modelScale)}
-                        rotation={[0, modelRotation, 0]}
-                    >
+                    <group ref={modelRef}>
                         <CADModel url="/models/engine.glb" />
                     </group>
                 </>

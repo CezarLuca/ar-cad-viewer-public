@@ -12,11 +12,9 @@ const store = createXRStore();
 
 export default function ARCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
-
-    // States for model adjustments - shared between AR Scene and controls
-    const [modelScale, setModelScale] = useState(0.5);
-    const [modelRotation, setModelRotation] = useState(0);
     const [modelPlaced, setModelPlaced] = useState(false);
+    // Add AR session state to be passed down
+    const [isARPresenting, setIsARPresenting] = useState(false);
 
     // Handle canvas resize
     useEffect(() => {
@@ -32,32 +30,6 @@ export default function ARCanvas() {
     const enterAR = () => {
         store.enterAR();
     };
-
-    // Handlers for model adjustments
-    interface IncreaseScaleFunction {
-        (): void;
-    }
-
-    const increaseScale: IncreaseScaleFunction = (): void =>
-        setModelScale((prev: number): number => Math.min(prev + 0.1, 2.0));
-    interface DecreaseScaleFunction {
-        (): void;
-    }
-
-    const decreaseScale: DecreaseScaleFunction = () =>
-        setModelScale((prev: number): number => Math.max(prev - 0.1, 0.1));
-    interface RotateLeftFunction {
-        (): void;
-    }
-
-    const rotateLeft: RotateLeftFunction = (): void =>
-        setModelRotation((prev: number): number => prev - Math.PI / 12);
-    interface RotateRightFunction {
-        (): void;
-    }
-
-    const rotateRight: RotateRightFunction = (): void =>
-        setModelRotation((prev: number): number => prev + Math.PI / 12);
 
     return (
         <ModelConfigProvider>
@@ -113,23 +85,20 @@ export default function ARCanvas() {
                     <XR store={store}>
                         <Suspense fallback={null}>
                             <ARScene
-                                modelScale={modelScale}
-                                modelRotation={modelRotation}
                                 setModelPlaced={setModelPlaced}
+                                setIsARPresenting={setIsARPresenting}
                             />
                         </Suspense>
-                        {/* AR Controls */}
-                        <ARControls
-                            onIncreaseScale={increaseScale}
-                            onDecreaseScale={decreaseScale}
-                            onRotateLeft={rotateLeft}
-                            onRotateRight={rotateRight}
-                            scale={modelScale}
-                            modelPlaced={modelPlaced}
-                        />
                     </XR>
                 </Canvas>
+
+                {/* AR Controls rendered outside the Canvas for better touch handling */}
+                <ARControls
+                    modelPlaced={modelPlaced}
+                    isPresenting={isARPresenting}
+                />
             </div>
+
             {/* Controls container - overlay on top */}
             <div className="top-1 left-1 w-full h-full pointer-events-auto">
                 <ModelControls />
