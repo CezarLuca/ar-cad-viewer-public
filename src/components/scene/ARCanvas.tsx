@@ -12,8 +12,8 @@ const store = createXRStore();
 
 export default function ARCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
+    const overlayRef = useRef<HTMLDivElement>(null);
     const [modelPlaced, setModelPlaced] = useState(false);
-    // Add AR session state to be passed down
     const [isARPresenting, setIsARPresenting] = useState(false);
 
     // Handle canvas resize
@@ -26,9 +26,17 @@ export default function ARCanvas() {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // AR session configuration
-    const enterAR = () => {
-        store.enterAR();
+    // AR session configuration with DOM Overlay
+    const enterAR = async () => {
+        // Check if the browser supports DOM Overlay
+        if (navigator.xr && "domOverlayState" in XRSession.prototype) {
+            // Configure XR with DOM overlay
+            store.enterAR();
+        } else {
+            // Fallback for browsers without DOM Overlay support
+            store.enterAR();
+            console.warn("DOM Overlay not supported in this browser");
+        }
     };
 
     return (
@@ -59,7 +67,7 @@ export default function ARCanvas() {
                     gl={{
                         antialias: true,
                         powerPreference: "high-performance",
-                        alpha: true, // Important for AR transparency
+                        alpha: true,
                     }}
                     onCreated={({ gl, camera }) => {
                         // Force initial size calculation
@@ -92,17 +100,32 @@ export default function ARCanvas() {
                     </XR>
                 </Canvas>
 
-                {/* AR Controls rendered outside the Canvas for better touch handling */}
-                <ARControls
-                    modelPlaced={modelPlaced}
-                    isPresenting={isARPresenting}
-                />
+                {/* DOM Overlay container - IMPORTANT part for AR UI */}
+                <div
+                    ref={overlayRef}
+                    className="ar-overlay"
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        pointerEvents: "none", // Only allow interaction with buttons
+                    }}
+                >
+                    <ARControls
+                        modelPlaced={modelPlaced}
+                        isPresenting={isARPresenting}
+                    />
+                </div>
             </div>
 
-            {/* Controls container - overlay on top */}
-            <div className="top-1 left-1 w-full h-full pointer-events-auto">
-                <ModelControls />
-            </div>
+            {/* Controls container for non-AR mode */}
+            {!isARPresenting && (
+                <div className="top-1 left-1 w-full h-full pointer-events-auto">
+                    <ModelControls />
+                </div>
+            )}
         </ModelConfigProvider>
     );
 }

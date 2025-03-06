@@ -4,7 +4,7 @@ import { useModelConfig } from "@/context/ModelConfigContext";
 
 interface ARControlsProps {
     modelPlaced: boolean;
-    isPresenting: boolean; // Use this prop instead of useXR
+    isPresenting: boolean;
 }
 
 export default function ARControls({
@@ -13,21 +13,11 @@ export default function ARControls({
 }: ARControlsProps) {
     const { config, updateConfig } = useModelConfig();
 
-    // Debug logging to verify states
-    console.log("AR Controls - Model Placed:", modelPlaced);
-    console.log("AR Controls - Is Presenting:", isPresenting);
-
     // Calculate scale value from model position for display purposes
     const scale = Math.max(0.1, Math.min(2.0, config.position[1] + 0.5));
 
     // Only show controls in AR mode and when model is placed
-    if (!isPresenting || !modelPlaced) {
-        console.log("AR Controls not showing because:", {
-            isPresenting,
-            modelPlaced,
-        });
-        return null;
-    }
+    if (!isPresenting || !modelPlaced) return null;
 
     // Handlers for model adjustments using ModelConfigContext
     const increaseScale = () => {
@@ -66,10 +56,8 @@ export default function ARControls({
 
     return (
         <div
-            className="fixed bottom-10 left-0 right-0 flex justify-center z-[1000]"
-            style={{ pointerEvents: "auto", touchAction: "auto" }}
-            onClick={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
+            className="absolute bottom-10 left-0 right-0 flex justify-center"
+            style={{ pointerEvents: "auto" }} // Important for DOM overlay
         >
             <div className="bg-gray-800 bg-opacity-70 rounded-lg p-4 flex items-center space-x-4">
                 <div className="flex flex-col items-center">
@@ -83,7 +71,8 @@ export default function ARControls({
                                 e.stopPropagation();
                                 decreaseScale();
                             }}
-                            className="bg-red-500 hover:bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center text-xl"
+                            className="bg-red-500 hover:bg-red-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl"
+                            style={{ touchAction: "manipulation" }}
                         >
                             -
                         </button>
@@ -93,7 +82,8 @@ export default function ARControls({
                                 e.stopPropagation();
                                 increaseScale();
                             }}
-                            className="bg-green-500 hover:bg-green-600 text-white w-10 h-10 rounded-full flex items-center justify-center text-xl"
+                            className="bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl"
+                            style={{ touchAction: "manipulation" }}
                         >
                             +
                         </button>
@@ -109,7 +99,8 @@ export default function ARControls({
                                 e.stopPropagation();
                                 rotateLeft();
                             }}
-                            className="bg-blue-500 hover:bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center"
+                            className="bg-blue-500 hover:bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl"
+                            style={{ touchAction: "manipulation" }}
                         >
                             ⟲
                         </button>
@@ -119,7 +110,8 @@ export default function ARControls({
                                 e.stopPropagation();
                                 rotateRight();
                             }}
-                            className="bg-blue-500 hover:bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center"
+                            className="bg-blue-500 hover:bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl"
+                            style={{ touchAction: "manipulation" }}
                         >
                             ⟳
                         </button>
