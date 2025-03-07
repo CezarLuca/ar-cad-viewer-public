@@ -31,3 +31,19 @@ canvas {
     height: 100% !important;
     display: block !important;
 } */
+
+.threejs-html-container {
+    transform-style: preserve-3d;
+}
+
+.threejs-html-container button {
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Optional shadow to help with visibility */
+.threejs-html-container > div {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}

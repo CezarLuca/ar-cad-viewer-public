@@ -8,6 +8,7 @@ import { useThree } from "@react-three/fiber";
 import { Group, Intersection } from "three";
 import { useRef } from "react";
 import { useModelConfig } from "@/context/ModelConfigContext";
+import ARSceneControls from "./ui/ARSceneControls";
 
 interface ARSceneProps {
     setModelPlaced: (placed: boolean) => void;
@@ -30,20 +31,8 @@ export default function ARScene({
             const isVisible = session.visibilityState === "visible";
             setIsPresenting(isVisible);
             setIsARPresenting(isVisible);
-
-            // Auto-place the model when entering AR mode
-            if (isVisible) {
-                // Small delay to ensure AR session is fully initialized
-                setTimeout(() => {
-                    setLocalModelPlaced(true);
-                    // Default position in front of the user
-                    updateConfig({
-                        position: [0, 0, -1],
-                    });
-                }, 300);
-            }
         }
-    }, [session, setIsARPresenting, updateConfig]);
+    }, [session, setIsARPresenting]);
 
     // Set up AR session with camera passthrough
     useEffect(() => {
@@ -132,6 +121,11 @@ export default function ARScene({
                     <group ref={modelRef}>
                         <CADModel url="/models/engine.glb" />
                     </group>
+
+                    {/* 3D UI Controls - only show when in AR and model is placed */}
+                    {isPresenting && (
+                        <ARSceneControls modelPlaced={localModelPlaced} />
+                    )}
                 </>
             ) : (
                 <>
