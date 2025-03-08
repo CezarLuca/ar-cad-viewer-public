@@ -50,19 +50,15 @@ export default function ARCanvas() {
                 </button>
             </div>
 
-            {/* Canvas Container */}
+            {/* Canvas Container - Updated for full width and 4/5 height */}
             <div
                 ref={containerRef}
-                className="relative w-full max-w-6xl mx-auto"
-                style={{
-                    aspectRatio: "2 / 1",
-                    height: "auto !important",
-                }}
+                className="relative w-full h-[80vh] mx-auto z-0"
             >
                 <Canvas
                     shadows
                     camera={{ position: [0.5, 0.5, 0.5], fov: 50 }}
-                    className="relative top-1 left-1 right-1 w-full h-full"
+                    className="w-full h-full"
                     gl={{
                         antialias: true,
                         powerPreference: "high-performance",
@@ -98,14 +94,14 @@ export default function ARCanvas() {
                         </Suspense>
                     </XR>
                 </Canvas>
-            </div>
 
-            {/* Controls container for non-AR mode */}
-            {!isARPresenting && (
-                <div className="top-1 left-1 w-full h-full pointer-events-auto">
-                    <ModelControls />
-                </div>
-            )}
+                {/* Controls overlay */}
+                {!isARPresenting && (
+                    <div className="absolute top-0 left-0 right-0 bottom-0 z-20 pointer-events-auto">
+                        <ModelControls />
+                    </div>
+                )}
+            </div>
         </ModelConfigProvider>
     );
 }
