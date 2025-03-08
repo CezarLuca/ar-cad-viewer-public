@@ -39,7 +39,7 @@ export default function ARCanvas() {
     return (
         <ModelConfigProvider>
             {/* AR Button for entering AR mode */}
-            <div className="fixed top-4 right-4 z-10">
+            <div className="fixed top-4 right-4 z-20">
                 <button
                     onClick={enterAR}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -53,7 +53,7 @@ export default function ARCanvas() {
             {/* Canvas Container - Updated for full width and 4/5 height */}
             <div
                 ref={containerRef}
-                className="relative w-full h-[80vh] mx-auto z-0"
+                className="relative w-full h-[80vh] mx-auto z-10"
             >
                 <Canvas
                     shadows
@@ -97,7 +97,7 @@ export default function ARCanvas() {
 
                 {/* Controls overlay */}
                 {!isARPresenting && (
-                    <div className="absolute top-0 left-0 right-0 bottom-0 z-20 pointer-events-auto">
+                    <div className="absolute top-0 left-0 right-0 bottom-0 z-30 pointer-events-none">
                         <ModelControls />
                     </div>
                 )}

@@ -6,11 +6,11 @@ export default function ModelControls() {
     const { config, updateConfig } = useModelConfig();
 
     return (
-        <div className="w-full flex justify-center pointer-events-auto">
+        <div className="w-full flex justify-center">
             <div className="bg-white/90 p-4 rounded-lg shadow-lg space-y-4 max-w-xl w-full mx-4 mt-4">
                 <div className="grid grid-cols-2 gap-4">
                     {/* Position Controls */}
-                    <div className="space-y-2">
+                    <div className="space-y-2 pointer-events-auto">
                         <h4 className="font-medium text-sm text-gray-700">
                             Position
                         </h4>
@@ -44,7 +44,7 @@ export default function ModelControls() {
                     </div>
 
                     {/* Rotation Controls */}
-                    <div className="space-y-2">
+                    <div className="space-y-2 pointer-events-auto">
                         <h4 className="font-medium text-sm text-gray-700">
                             Rotation
                         </h4>
