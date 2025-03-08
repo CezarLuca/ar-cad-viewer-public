@@ -8,7 +8,7 @@ export default function Home() {
                 href="/ar"
                 className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
             >
-                Start AR Experience
+                Start 3D Model Visualizer
             </Link>
         </main>
     );

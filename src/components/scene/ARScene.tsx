@@ -1,6 +1,6 @@
 "use client";
 
-import { Interactive, useXR } from "@react-three/xr";
+import { useXR } from "@react-three/xr";
 import { useEffect, useState } from "react";
 import CADModel from "./CADModel";
 import { Environment, OrbitControls, useGLTF } from "@react-three/drei";
@@ -68,11 +68,26 @@ export default function ARScene({
         setModelPlaced(localModelPlaced);
     }, [localModelPlaced, setModelPlaced]);
 
+    useEffect(() => {
+        // For testing: Auto-place the model after a short delay when entering AR
+        if (isPresenting && !localModelPlaced) {
+            const timer = setTimeout(() => {
+                console.log("Auto-placing model for testing");
+                updateConfig({
+                    position: [0, 0, -1], // Position in front of user
+                });
+                setLocalModelPlaced(true);
+            }, 1000); // 1 second delay
+
+            return () => clearTimeout(timer);
+        }
+    }, [isPresenting, localModelPlaced, updateConfig]);
+
     // Place model handler for AR
-    const handleSelect = (event: { intersection: Intersection }) => {
+    const handleSelect = (event: Intersection) => {
         if (modelRef.current && !localModelPlaced) {
             // Position the model at the hit point
-            const hitPoint = event.intersection.point;
+            const hitPoint = event.point;
             updateConfig({
                 position: [hitPoint.x, hitPoint.y, hitPoint.z],
             });
@@ -100,8 +115,11 @@ export default function ARScene({
             {/* Model placement in AR mode */}
             {isPresenting ? (
                 <>
-                    {/* AR placement surface */}
-                    <Interactive onSelect={handleSelect}>
+                    {/* AR placement surface - updated to use group instead of Interactive */}
+                    <group
+                        onClick={handleSelect}
+                        onPointerMissed={() => console.log("Missed click")}
+                    >
                         <mesh
                             rotation={[-Math.PI / 2, 0, 0]}
                             position={[0, 0, 0]}
@@ -115,16 +133,19 @@ export default function ARScene({
                                 wireframe
                             />
                         </mesh>
-                    </Interactive>
+                    </group>
 
                     {/* Model with reference positioning */}
                     <group ref={modelRef}>
                         <CADModel url="/models/engine.glb" />
                     </group>
 
-                    {/* 3D UI Controls - only show when in AR and model is placed */}
+                    {/* 3D UI Controls - pass both required props */}
                     {isPresenting && (
-                        <ARSceneControls modelPlaced={localModelPlaced} />
+                        <ARSceneControls
+                            modelPlaced={localModelPlaced}
+                            isPresenting={isPresenting}
+                        />
                     )}
                 </>
             ) : (
