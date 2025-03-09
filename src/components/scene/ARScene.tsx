@@ -8,7 +8,7 @@ import { useThree } from "@react-three/fiber";
 import { Group, Intersection } from "three";
 import { useRef } from "react";
 import { useModelConfig } from "@/context/ModelConfigContext";
-import ARSceneControls from "./ui/ARSceneControls";
+// import ARSceneControls from "./ui/ARSceneControls";
 
 interface ARSceneProps {
     setModelPlaced: (placed: boolean) => void;
@@ -140,13 +140,13 @@ export default function ARScene({
                         <CADModel url="/models/engine.glb" />
                     </group>
 
-                    {/* 3D UI Controls - pass both required props */}
+                    {/* 3D UI Controls - pass both required props
                     {isPresenting && (
                         <ARSceneControls
                             modelPlaced={localModelPlaced}
                             isPresenting={isPresenting}
                         />
-                    )}
+                    )} */}
                 </>
             ) : (
                 <>
