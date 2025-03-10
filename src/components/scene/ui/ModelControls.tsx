@@ -3,6 +3,7 @@
 import { useModelConfig } from "@/context/ModelConfigContext";
 import { useState } from "react";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
+import EditableValue from "./EditableValue";
 
 const CADSCALE = 0.01;
 
@@ -14,6 +15,7 @@ export default function ModelControls() {
         scale: false,
     });
     const [asymmetricScale, setAsymmetricScale] = useState(false);
+    // const [editingField, setEditingField] = useState<string | null>(null);
 
     const toggleSection = (section: "position" | "rotation" | "scale") => {
         setExpandedSections((prev) => ({
@@ -98,11 +100,29 @@ export default function ModelControls() {
                                     >
                                         <div className="flex justify-between text-xs text-gray-500">
                                             <span>{`${axis}: `}</span>
-                                            <span>
+                                            {/* <span>
                                                 {config.position[index].toFixed(
                                                     2
                                                 )}
-                                            </span>
+                                            </span> */}
+                                            <EditableValue
+                                                value={config.position[index]}
+                                                onValueChange={(newValue) => {
+                                                    const newPosition = [
+                                                        ...config.position,
+                                                    ] as typeof config.position;
+                                                    newPosition[index] =
+                                                        newValue;
+                                                    updateConfig({
+                                                        position: newPosition,
+                                                    });
+                                                }}
+                                                fieldId={`position-${axis}`}
+                                                min={-3}
+                                                max={3}
+                                                step={0.1}
+                                                toFixed={2}
+                                            />
                                         </div>
                                         <input
                                             type="range"
@@ -150,15 +170,39 @@ export default function ModelControls() {
                                         key={`rot-${axis}`}
                                         className="space-y-1 text-gray-500"
                                     >
-                                        <div className="flex justify-between text-xs">
+                                        <div className="flex justify-between text-xs text-gray-500">
                                             <span>{`${axis}: `}</span>
-                                            <span>
+                                            {/* <span>
                                                 {(
                                                     config.rotation[index] *
                                                     (180 / Math.PI)
                                                 ).toFixed(1)}
                                                 °
-                                            </span>
+                                            </span> */}
+                                            <EditableValue
+                                                value={
+                                                    config.rotation[index] *
+                                                    (180 / Math.PI)
+                                                }
+                                                onValueChange={(newValue) => {
+                                                    const radValue =
+                                                        newValue *
+                                                        (Math.PI / 180);
+                                                    const newRotation = [
+                                                        ...config.rotation,
+                                                    ] as typeof config.rotation;
+                                                    newRotation[index] =
+                                                        radValue;
+                                                    updateConfig({
+                                                        rotation: newRotation,
+                                                    });
+                                                }}
+                                                fieldId={`rotation-${axis}`}
+                                                suffix="°"
+                                                min={-180}
+                                                max={180}
+                                                toFixed={1}
+                                            />
                                         </div>
                                         <input
                                             type="range"
@@ -202,16 +246,16 @@ export default function ModelControls() {
                         {expandedSections.scale && (
                             <div className="pt-2 space-y-3">
                                 {/* Asymmetric scale toggle */}
-                                <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center justify-start mb-2">
                                     <span className="text-xs font-medium text-gray-700">
-                                        Scale asymmetrically
+                                        Scale unlock:
                                     </span>
                                     <button
                                         onClick={toggleAsymmetricScale}
-                                        className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                                        className={`mx-2 px-2 py-1 rounded text-xs font-medium transition-colors ${
                                             asymmetricScale
                                                 ? "bg-blue-500 text-white"
-                                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                                : "bg-gray-300 text-gray-700 hover:bg-gray-400"
                                         }`}
                                     >
                                         {asymmetricScale ? "On" : "Off"}
@@ -226,12 +270,28 @@ export default function ModelControls() {
                                     >
                                         <div className="flex justify-between text-xs text-gray-500">
                                             <span>{`${axis}: `}</span>
-                                            <span>
+                                            {/* <span>
                                                 {getDisplayScale(index).toFixed(
                                                     2
                                                 )}
                                                 ×
-                                            </span>
+                                            </span> */}
+                                            <EditableValue
+                                                value={getDisplayScale(index)}
+                                                onValueChange={(
+                                                    displayValue
+                                                ) => {
+                                                    handleScaleChange(
+                                                        index,
+                                                        displayValue
+                                                    );
+                                                }}
+                                                fieldId={`scale-${axis}`}
+                                                suffix="×"
+                                                min={0.1}
+                                                max={3}
+                                                step={0.05}
+                                            />
                                         </div>
                                         <input
                                             type="range"
