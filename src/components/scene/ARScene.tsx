@@ -3,12 +3,11 @@
 import { useXR } from "@react-three/xr";
 import { useEffect, useState } from "react";
 import CADModel from "./CADModel";
-import { Environment, OrbitControls, useGLTF } from "@react-three/drei";
+import { Environment, Grid, OrbitControls, useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { Group, Intersection } from "three";
 import { useRef } from "react";
 import { useModelConfig } from "@/context/ModelConfigContext";
-// import ARSceneControls from "./ui/ARSceneControls";
 
 interface ARSceneProps {
     setModelPlaced: (placed: boolean) => void;
@@ -139,19 +138,29 @@ export default function ARScene({
                     <group ref={modelRef}>
                         <CADModel url="/models/engine.glb" />
                     </group>
-
-                    {/* 3D UI Controls - pass both required props
-                    {isPresenting && (
-                        <ARSceneControls
-                            modelPlaced={localModelPlaced}
-                            isPresenting={isPresenting}
-                        />
-                    )} */}
                 </>
             ) : (
                 <>
                     {/* Regular non-AR viewing */}
                     <CADModel url="/models/engine.glb" />
+
+                    {/* XYZ Axis helper - red=X, green=Y, blue=Z */}
+                    <axesHelper args={[5]} />
+
+                    {/* Reference grid */}
+                    <Grid
+                        position={[0, 0, 0]}
+                        args={[10, 10]}
+                        cellSize={0.1}
+                        cellThickness={1}
+                        cellColor="#6f6f6f"
+                        sectionSize={0.5}
+                        sectionThickness={1.2}
+                        sectionColor="#a59595"
+                        fadeDistance={30}
+                        fadeStrength={1.5}
+                    />
+
                     <OrbitControls
                         enablePan={true}
                         enableZoom={true}

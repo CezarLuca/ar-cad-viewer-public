@@ -94,7 +94,7 @@ export default function ModelControls() {
     return (
         <div className="w-full flex justify-start">
             <div
-                className={`bg-white/90 p-4 rounded-lg shadow-lg space-y-4 mx-4 mt-4 transition-all duration-300 ${
+                className={`bg-white/70 p-4 rounded-lg shadow-lg space-y-4 mx-4 mt-4 transition-all duration-300 ${
                     anySectionExpanded ? "max-w-xl w-full" : "w-auto"
                 }`}
             >
