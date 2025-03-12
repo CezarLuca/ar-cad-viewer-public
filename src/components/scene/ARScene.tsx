@@ -1,35 +1,29 @@
 "use client";
 
 import { useXR } from "@react-three/xr";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import CADModel from "./CADModel";
-import { Environment, Grid, OrbitControls, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { Group, Intersection } from "three";
+import { Group } from "three";
 import { useRef } from "react";
-import { useModelConfig } from "@/context/ModelConfigContext";
 
 interface ARSceneProps {
-    setModelPlaced: (placed: boolean) => void;
     setIsARPresenting: (isPresenting: boolean) => void;
 }
 
-export default function ARScene({
-    setModelPlaced,
-    setIsARPresenting,
-}: ARSceneProps) {
+export default function ARScene({ setIsARPresenting }: ARSceneProps) {
     const modelRef = useRef<Group>(null);
     const { gl } = useThree();
     const { session } = useXR();
-    const [isPresenting, setIsPresenting] = useState(false);
-    const [localModelPlaced, setLocalModelPlaced] = useState(false);
-    const { updateConfig } = useModelConfig();
 
+    // Update parent about AR session status
     useEffect(() => {
         if (session) {
             const isVisible = session.visibilityState === "visible";
-            setIsPresenting(isVisible);
             setIsARPresenting(isVisible);
+        } else {
+            setIsARPresenting(false);
         }
     }, [session, setIsARPresenting]);
 
@@ -55,44 +49,7 @@ export default function ARScene({
                 }
             })();
         }
-
-        // Clean up
-        return () => {
-            setModelPlaced(false);
-        };
-    }, [session, gl, setModelPlaced]);
-
-    // Update parent state when local state changes
-    useEffect(() => {
-        setModelPlaced(localModelPlaced);
-    }, [localModelPlaced, setModelPlaced]);
-
-    useEffect(() => {
-        // For testing: Auto-place the model after a short delay when entering AR
-        if (isPresenting && !localModelPlaced) {
-            const timer = setTimeout(() => {
-                console.log("Auto-placing model for testing");
-                updateConfig({
-                    position: [0, 0, -1], // Position in front of user
-                });
-                setLocalModelPlaced(true);
-            }, 1000); // 1 second delay
-
-            return () => clearTimeout(timer);
-        }
-    }, [isPresenting, localModelPlaced, updateConfig]);
-
-    // Place model handler for AR
-    const handleSelect = (event: Intersection) => {
-        if (modelRef.current && !localModelPlaced) {
-            // Position the model at the hit point
-            const hitPoint = event.point;
-            updateConfig({
-                position: [hitPoint.x, hitPoint.y, hitPoint.z],
-            });
-            setLocalModelPlaced(true);
-        }
-    };
+    }, [session, gl]);
 
     return (
         <>
@@ -106,70 +63,10 @@ export default function ARScene({
                 shadow-mapSize-height={2048}
             />
 
-            {/* Environment for non-AR mode */}
-            {!isPresenting && (
-                <Environment preset="sunset" background blur={0.5} />
-            )}
-
-            {/* Model placement in AR mode */}
-            {isPresenting ? (
-                <>
-                    {/* AR placement surface - updated to use group instead of Interactive */}
-                    <group
-                        onClick={handleSelect}
-                        onPointerMissed={() => console.log("Missed click")}
-                    >
-                        <mesh
-                            rotation={[-Math.PI / 2, 0, 0]}
-                            position={[0, 0, 0]}
-                            visible={!localModelPlaced}
-                        >
-                            <planeGeometry args={[100, 100]} />
-                            <meshBasicMaterial
-                                color="#fff"
-                                opacity={0.2}
-                                transparent
-                                wireframe
-                            />
-                        </mesh>
-                    </group>
-
-                    {/* Model with reference positioning */}
-                    <group ref={modelRef}>
-                        <CADModel url="/models/engine.glb" />
-                    </group>
-                </>
-            ) : (
-                <>
-                    {/* Regular non-AR viewing */}
-                    <CADModel url="/models/engine.glb" />
-
-                    {/* XYZ Axis helper - red=X, green=Y, blue=Z */}
-                    <axesHelper args={[5]} />
-
-                    {/* Reference grid */}
-                    <Grid
-                        position={[0, 0, 0]}
-                        args={[10, 10]}
-                        cellSize={0.1}
-                        cellThickness={1}
-                        cellColor="#6f6f6f"
-                        sectionSize={0.5}
-                        sectionThickness={1.2}
-                        sectionColor="#a59595"
-                        fadeDistance={30}
-                        fadeStrength={1.5}
-                    />
-
-                    <OrbitControls
-                        enablePan={true}
-                        enableZoom={true}
-                        enableRotate={true}
-                        minDistance={1}
-                        maxDistance={30}
-                    />
-                </>
-            )}
+            {/* Model with reference positioning */}
+            <group ref={modelRef}>
+                <CADModel url="/models/engine.glb" />
+            </group>
         </>
     );
 }

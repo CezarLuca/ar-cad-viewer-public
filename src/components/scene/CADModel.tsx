@@ -42,13 +42,16 @@ export default function CADModel({ url }: { url: string }) {
         }
     }, [nodes]);
 
-    // Optional: Smooth transitions
+    // Use the position from context with smooth transitions
     useFrame(() => {
         if (meshRef.current) {
+            // Smoothly interpolate to the target position
             meshRef.current.position.lerp(
                 new THREE.Vector3(...config.position),
                 0.1
             );
+
+            // Smoothly interpolate to the target rotation
             meshRef.current.rotation.set(
                 THREE.MathUtils.lerp(
                     meshRef.current.rotation.x,
