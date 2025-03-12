@@ -5,15 +5,17 @@ import { XR, createXRStore } from "@react-three/xr";
 import { Suspense, useEffect, useRef, useState } from "react";
 import ARScene from "./ARScene";
 import ModelControls from "./ui/ModelControls";
+import OrbitControlsUI from "./ui/OrbitControlsUI";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import * as THREE from "three";
 import Regular3DScene from "./Regular3DScene";
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 const store = createXRStore();
 
 export default function ARCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
-    // const [modelPlaced, setModelPlaced] = useState(false);
+    const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
     const [isARPresenting, setIsARPresenting] = useState(false);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
@@ -53,7 +55,7 @@ export default function ARCanvas() {
     return (
         <ModelConfigProvider>
             {/* AR Button for entering AR mode */}
-            <div className="fixed top-2 right-14 z-20">
+            <div className="fixed top-2 right-14">
                 <button
                     onClick={enterAR}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -65,7 +67,7 @@ export default function ARCanvas() {
             {/* Canvas Container - Fixed responsive classes */}
             <div
                 ref={containerRef}
-                className="relative w-full h-[80vh] md:w-[95vw] mx-auto pt-14 z-10"
+                className="relative w-full h-[80vh] md:w-[95vw] mx-auto pt-14"
             >
                 <Canvas
                     shadows
@@ -91,25 +93,32 @@ export default function ARCanvas() {
                     {/* Regular scene outside of XR context */}
                     {!isARPresenting && (
                         <Suspense fallback={null}>
-                            <Regular3DScene />
+                            <Regular3DScene
+                                orbitControlsRef={orbitControlsRef}
+                            />
                         </Suspense>
                     )}
 
                     {/* AR scene inside XR context */}
                     <XR store={store}>
                         <Suspense fallback={null}>
-                            <ARScene
-                                // setModelPlaced={setModelPlaced}
-                                setIsARPresenting={setIsARPresenting}
-                            />
+                            <ARScene setIsARPresenting={setIsARPresenting} />
                         </Suspense>
                     </XR>
                 </Canvas>
-                {/* Controls overlay - MOVED OUTSIDE THE CANVAS, Three doesn't like DOM elem */}
+
+                {/* Controls overlay - MOVED OUTSIDE THE CANVAS */}
                 {!isARPresenting && (
-                    <div className="absolute top-12 left-0 right-0 bottom-0 z-30 pointer-events-none">
-                        <ModelControls />
-                    </div>
+                    <>
+                        <div className="absolute top-12 left-0 right-0 bottom-0 z-20 pointer-events-none">
+                            <ModelControls />
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
+                            <OrbitControlsUI
+                                orbitControlsRef={orbitControlsRef}
+                            />
+                        </div>
+                    </>
                 )}
             </div>
         </ModelConfigProvider>

@@ -1,9 +1,29 @@
 "use client";
 
 import { Environment, Grid, OrbitControls } from "@react-three/drei";
+import { useRef, useEffect, RefObject } from "react";
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import CADModel from "./CADModel";
 
-export default function Regular3DScene() {
+interface Regular3DSceneProps {
+    orbitControlsRef?: RefObject<OrbitControlsImpl | null>;
+}
+
+export default function Regular3DScene({
+    orbitControlsRef,
+}: Regular3DSceneProps) {
+    const localControlsRef = useRef<OrbitControlsImpl | null>(null);
+
+    // If an external ref is provided, sync it with our local ref
+    useEffect(() => {
+        if (orbitControlsRef && localControlsRef.current) {
+            // Use type assertion to handle the readonly constraint of RefObject
+            (
+                orbitControlsRef as { current: OrbitControlsImpl | null }
+            ).current = localControlsRef.current;
+        }
+    }, [orbitControlsRef]); // Removed localControlsRef.current from dependencies
+
     return (
         <>
             <CADModel url="/models/engine.glb" />
@@ -29,11 +49,13 @@ export default function Regular3DScene() {
             />
 
             <OrbitControls
+                ref={localControlsRef}
                 enablePan={true}
                 enableZoom={true}
                 enableRotate={true}
-                minDistance={1}
+                minDistance={0.1}
                 maxDistance={30}
+                makeDefault
             />
         </>
     );

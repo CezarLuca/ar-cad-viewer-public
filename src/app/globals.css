@@ -16,6 +16,14 @@
         --foreground: #ededed;
     }
 }
+@layer utilities {
+    .rotate-60 {
+        transform: rotate(60deg);
+    }
+    .-rotate-60 {
+        transform: rotate(-60deg);
+    }
+}
 
 body {
     color: var(--foreground);
