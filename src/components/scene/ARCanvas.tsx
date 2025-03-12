@@ -55,19 +55,19 @@ export default function ARCanvas() {
     return (
         <ModelConfigProvider>
             {/* AR Button for entering AR mode */}
-            <div className="fixed top-2 right-14">
+            <div className="fixed z-10 top-2 right-4">
                 <button
                     onClick={enterAR}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                 >
-                    {isARPresenting ? "Adjust Model" : "Enter AR"}
+                    Enter AR
                 </button>
             </div>
 
             {/* Canvas Container - Fixed responsive classes */}
             <div
                 ref={containerRef}
-                className="relative w-full h-[80vh] md:w-[95vw] mx-auto pt-14"
+                className="relative w-full h-[90vh] md:h-[80vh] mx-auto pt-14"
             >
                 <Canvas
                     shadows
