@@ -94,7 +94,7 @@ export default function ModelControls() {
     return (
         <div className="w-full flex justify-start">
             <div
-                className={`bg-white/70 p-4 rounded-lg shadow-lg space-y-4 mx-4 mt-4 transition-all duration-300 ${
+                className={`bg-white/50 p-4 rounded-lg shadow-lg space-y-4 mx-4 mt-4 transition-all duration-300 ${
                     anySectionExpanded ? "max-w-xl w-full" : "w-auto"
                 }`}
             >
@@ -104,7 +104,7 @@ export default function ModelControls() {
                         <div className="flex items-center justify-between">
                             <button
                                 onClick={() => toggleSection("position")}
-                                className="flex items-center text-left font-medium text-sm text-gray-700 hover:text-gray-900 transition-colors whitespace-nowrap"
+                                className="flex items-center text-left font-medium text-sm text-gray-800 hover:text-gray-950 transition-colors whitespace-nowrap"
                             >
                                 <span>Position</span>
                                 {expandedSections.position ? (
@@ -132,7 +132,7 @@ export default function ModelControls() {
                                         key={`pos-${axis}`}
                                         className="space-y-1"
                                     >
-                                        <div className="flex justify-between text-xs text-gray-500">
+                                        <div className="flex justify-between text-xs text-gray-600">
                                             <span>{`${axis}: `}</span>
                                             <EditableValue
                                                 value={config.position[index]}
@@ -183,7 +183,7 @@ export default function ModelControls() {
                         <div className="flex items-center justify-between">
                             <button
                                 onClick={() => toggleSection("rotation")}
-                                className="flex items-center text-left font-medium text-sm text-gray-700 hover:text-gray-900 transition-colors whitespace-nowrap"
+                                className="flex items-center text-left font-medium text-sm text-gray-800 hover:text-gray-950 transition-colors whitespace-nowrap"
                             >
                                 <span>Rotation</span>
                                 {expandedSections.rotation ? (
@@ -207,7 +207,7 @@ export default function ModelControls() {
                         {expandedSections.rotation && (
                             <div className="pt-2 space-y-3">
                                 <div className="flex items-center justify-start mb-2">
-                                    <span className="text-xs font-medium text-gray-700">
+                                    <span className="text-xs font-medium text-gray-800">
                                         Use radians:
                                     </span>
                                     <button
@@ -227,7 +227,7 @@ export default function ModelControls() {
                                         key={`rot-${axis}`}
                                         className="space-y-1 text-gray-500"
                                     >
-                                        <div className="flex justify-between text-xs text-gray-500">
+                                        <div className="flex justify-between text-xs text-gray-600">
                                             <span>{`${axis}: `}</span>
                                             <EditableValue
                                                 value={
@@ -300,7 +300,7 @@ export default function ModelControls() {
                         <div className="flex items-center justify-between">
                             <button
                                 onClick={() => toggleSection("scale")}
-                                className="flex items-center text-left font-medium text-sm text-gray-700 hover:text-gray-900 transition-colors whitespace-nowrap"
+                                className="flex items-center text-left font-medium text-sm text-gray-800 hover:text-gray-950 transition-colors whitespace-nowrap"
                             >
                                 <span>Scale</span>
                                 {expandedSections.scale ? (
@@ -325,7 +325,7 @@ export default function ModelControls() {
                             <div className="pt-2 space-y-3">
                                 {/* Asymmetric scale toggle */}
                                 <div className="flex items-center justify-start mb-2">
-                                    <span className="text-xs font-medium text-gray-700">
+                                    <span className="text-xs font-medium text-gray-800">
                                         Scale unlock:
                                     </span>
                                     <button
@@ -346,14 +346,8 @@ export default function ModelControls() {
                                         key={`scale-${axis}`}
                                         className="space-y-1"
                                     >
-                                        <div className="flex justify-between text-xs text-gray-500">
+                                        <div className="flex justify-between text-xs text-gray-600">
                                             <span>{`${axis}: `}</span>
-                                            {/* <span>
-                                                {getDisplayScale(index).toFixed(
-                                                    2
-                                                )}
-                                                ×
-                                            </span> */}
                                             <EditableValue
                                                 value={getDisplayScale(index)}
                                                 onValueChange={(

@@ -23,6 +23,15 @@
     .-rotate-60 {
         transform: rotate(-60deg);
     }
+    .rotate-120 {
+        transform: rotate(120deg);
+    }
+    .rotate-180 {
+        transform: rotate(180deg);
+    }
+    .rotate-240 {
+        transform: rotate(240deg);
+    }
 }
 
 body {
