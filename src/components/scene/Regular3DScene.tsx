@@ -3,6 +3,7 @@
 import { Environment, Grid, OrbitControls } from "@react-three/drei";
 import { useRef, useEffect, RefObject } from "react";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import * as THREE from "three";
 import CADModel from "./CADModel";
 
 interface Regular3DSceneProps {
@@ -29,7 +30,9 @@ export default function Regular3DScene({
             <CADModel url="/models/engine.glb" />
 
             {/* Environment lighting */}
-            <Environment preset="sunset" background blur={0.5} />
+            <Environment preset="sunset" background blur={0.4} />
+            <ambientLight intensity={0.2} color="#ffffff" />
+            <directionalLight position={[5, 5, 5]} intensity={1} />
 
             {/* XYZ Axis helper - red=X, green=Y, blue=Z */}
             <axesHelper args={[5]} />
@@ -46,8 +49,10 @@ export default function Regular3DScene({
                 sectionColor="#a59595"
                 fadeDistance={30}
                 fadeStrength={1.5}
+                side={THREE.DoubleSide}
             />
 
+            {/* Orbit controls for camera */}
             <OrbitControls
                 ref={localControlsRef}
                 enablePan={true}

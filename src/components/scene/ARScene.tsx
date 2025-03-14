@@ -3,7 +3,7 @@
 import { useXR } from "@react-three/xr";
 import { useEffect } from "react";
 import CADModel from "./CADModel";
-import { useGLTF } from "@react-three/drei";
+import { Environment, useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { Group } from "three";
 import { useRef } from "react";
@@ -62,6 +62,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
                 shadow-mapSize-width={2048}
                 shadow-mapSize-height={2048}
             />
+            <Environment preset="sunset" />
 
             {/* Model with reference positioning */}
             <group ref={modelRef}>

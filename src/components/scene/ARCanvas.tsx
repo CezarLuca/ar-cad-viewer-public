@@ -10,6 +10,7 @@ import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import * as THREE from "three";
 import Regular3DScene from "./Regular3DScene";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { createPortal } from "react-dom";
 
 const store = createXRStore();
 
@@ -18,6 +19,15 @@ export default function ARCanvas() {
     const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
     const [isARPresenting, setIsARPresenting] = useState(false);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+    const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+        null
+    );
+
+    // Find the navbar to portal the AR button into it
+    useEffect(() => {
+        const container = document.querySelector("header");
+        if (container) setPortalContainer(container);
+    }, []);
 
     // Handle canvas resize
     useEffect(() => {
@@ -52,17 +62,24 @@ export default function ARCanvas() {
         store.enterAR();
     };
 
+    // Create the AR button to be added to the navbar
+    const arButton = (
+        <button
+            onClick={enterAR}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+        >
+            Enter AR
+        </button>
+    );
+
     return (
         <ModelConfigProvider>
-            {/* AR Button for entering AR mode */}
-            <div className="fixed z-10 top-2 right-4">
-                <button
-                    onClick={enterAR}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    Enter AR
-                </button>
-            </div>
+            {/* Portal the AR button into the navbar */}
+            {portalContainer &&
+                createPortal(
+                    <div className="ml-auto">{arButton}</div>,
+                    portalContainer
+                )}
 
             {/* Canvas Container - Fixed responsive classes */}
             <div
