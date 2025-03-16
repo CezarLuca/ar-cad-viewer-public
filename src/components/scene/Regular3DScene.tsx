@@ -27,7 +27,7 @@ export default function Regular3DScene({
 
     return (
         <>
-            <CADModel url="/models/engine.glb" />
+            <CADModel />
 
             {/* Environment lighting */}
             <Environment preset="sunset" background blur={0.4} />
