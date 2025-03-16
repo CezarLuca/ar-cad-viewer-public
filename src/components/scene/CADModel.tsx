@@ -6,6 +6,7 @@ import { GLTF } from "three-stdlib";
 import { useRef, useEffect, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useModelConfig } from "@/context/ModelConfigContext";
+import { useModelUrl } from "@/context/ModelUrlContext";
 
 // More flexible type definition that doesn't assume a specific mesh name
 type GLTFResult = GLTF & {
@@ -13,11 +14,12 @@ type GLTFResult = GLTF & {
     materials: Record<string, THREE.Material>;
 };
 
-export default function CADModel({ url }: { url: string }) {
+export default function CADModel() {
+    const { modelUrl } = useModelUrl();
     const meshRef = useRef<THREE.Mesh>(null!);
     const { config } = useModelConfig();
     // const { nodes, materials } = useGLTF(url) as GLTFResult;
-    const { nodes } = useGLTF(url) as GLTFResult;
+    const { nodes } = useGLTF(modelUrl) as GLTFResult;
     const [mainMesh, setMainMesh] = useState<THREE.Mesh | null>(null);
 
     const [metalness, roughness] = useTexture([

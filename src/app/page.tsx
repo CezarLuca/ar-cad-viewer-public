@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
+import FileUpload from "@/components/FileUpload";
+import ModelsList from "@/components/ModelsList";
 
 export default function Home() {
     const navbarButton = (
@@ -14,8 +16,19 @@ export default function Home() {
     return (
         <>
             <Navbar rightContent={navbarButton} />
-            <main className="flex flex-col min-h-screen items-center justify-center p-24 pt-20">
+            <main className="flex flex-col min-h-screen items-center p-24 pt-20">
                 <h1 className="text-4xl mb-8 text-center">AR CAD Viewer</h1>
+
+                <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h2 className="text-2xl mb-4">Upload Your 3D Model</h2>
+                        <FileUpload />
+                    </div>
+
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <ModelsList />
+                    </div>
+                </div>
             </main>
         </>
     );
