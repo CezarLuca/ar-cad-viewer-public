@@ -6,7 +6,7 @@ import { sql } from "@/lib/db";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
             name: "Credentials",
@@ -62,8 +62,10 @@ export const authOptions: NextAuthOptions = {
             return token;
         },
         async session({ session, token }: { session: Session; token: JWT }) {
-            session.user.role = token.role;
-            session.user.id = token.id;
+            if (session.user) {
+                session.user.role = token.role as string;
+                session.user.id = token.id as string;
+            }
             return session;
         },
     },
@@ -77,6 +79,6 @@ export const authOptions: NextAuthOptions = {
     },
 };
 
+// Create the handler and export as GET/POST:
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };
