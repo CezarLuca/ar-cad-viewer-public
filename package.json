@@ -16,8 +16,10 @@
         "@react-three/fiber": "^9.0.4",
         "@react-three/xr": "^6.6.6",
         "@vercel/blob": "^0.27.3",
+        "bcrypt": "^5.1.1",
         "dotenv": "^16.4.7",
         "next": "^15.1.7",
+        "next-auth": "^5.0.0-beta.25",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-icons": "^5.5.0",
@@ -26,6 +28,7 @@
     "devDependencies": {
         "@eslint/eslintrc": "^3",
         "@tailwindcss/postcss": "^4.0.8",
+        "@types/bcrypt": "^5.0.2",
         "@types/node": "^22.13.5",
         "@types/react": "^19.0.10",
         "@types/react-dom": "^19.0.4",
