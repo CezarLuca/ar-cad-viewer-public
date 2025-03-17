@@ -7,7 +7,7 @@ export default function Home() {
     const navbarButton = (
         <Link
             href="/ar"
-            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
+            className="bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-600 transition-colors"
         >
             Start 3D Model Visualizer
         </Link>
@@ -16,16 +16,18 @@ export default function Home() {
     return (
         <>
             <Navbar rightContent={navbarButton} />
-            <main className="flex flex-col min-h-screen items-center p-24 pt-20">
-                <h1 className="text-4xl mb-8 text-center">AR CAD Viewer</h1>
+            <main className="flex flex-col min-h-screen items-center p-12 pt-22">
+                {/* <h1 className="text-4xl mb-8 text-center">AR CAD Viewer</h1> */}
 
                 <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h2 className="text-2xl mb-4">Upload Your 3D Model</h2>
+                    <div className="bg-gray-300 p-6 rounded-lg shadow-md">
+                        <h2 className="text-2xl font-bold text-gray-700 mb-4">
+                            Upload Your 3D Model
+                        </h2>
                         <FileUpload />
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg shadow-md">
+                    <div className="bg-gray-300 text-gray-700 p-6 rounded-lg shadow-md">
                         <ModelsList />
                     </div>
                 </div>

@@ -61,29 +61,40 @@ export default function FileUpload() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full px-3 py-2 border bg-gray-200 border-gray-400 text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     required
                 />
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-gray-700">
-                    {" "}
-                    Upload .glb File
+                    Upload .glb CAD file:
                 </label>
-                <input
-                    type="file"
-                    accept=".glb"
-                    onChange={handleFileChange}
-                    className="mt-1 block w-full"
-                    required
-                />
+                <div className="mt-1 flex items-center">
+                    <label className="cursor-pointer w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm bg-gray-200 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <span className="block truncate justify-center text-center">
+                            {file ? file.name : "Click here to add a file"}
+                        </span>
+                        <input
+                            type="file"
+                            accept=".glb"
+                            onChange={handleFileChange}
+                            className="sr-only"
+                            required
+                        />
+                    </label>
+                </div>
+                {file && (
+                    <div className="mt-1 text-xs text-gray-500">
+                        Size: {(file.size / (1024 * 1024)).toFixed(2)} MB
+                    </div>
+                )}
             </div>
 
             <button
                 type="submit"
                 disabled={loading || !file || !name}
-                className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed"
             >
                 {loading ? "Uploading..." : "Upload Model"}
             </button>

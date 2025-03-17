@@ -52,7 +52,7 @@ export default function ModelList() {
                         <div className="flex justify-between items-center">
                             <div>
                                 <h3 className="font-medium">{model.name}</h3>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-md text-gray-600">
                                     {model.filename}
                                 </p>
                             </div>
