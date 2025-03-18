@@ -22,7 +22,13 @@ export default function UserModelsList() {
     useEffect(() => {
         async function fetchModels() {
             try {
-                const response = await fetch("/api/models/user");
+                const response = await fetch("/api/models/user", {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include", // Important for sending cookies
+                });
+
                 if (!response.ok) {
                     throw new Error("Failed to fetch models");
                 }

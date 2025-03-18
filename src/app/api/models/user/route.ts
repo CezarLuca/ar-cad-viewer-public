@@ -16,11 +16,11 @@ export async function GET(request: NextRequest) {
 
         // Get only the models uploaded by this user
         const rows = await sql`
-                SELECT id, name, filename, blob_url, size, user_id, created_at 
-                FROM models 
-                WHERE user_id = ${parseInt(session.id)} 
-                ORDER BY created_at DESC
-            `;
+            SELECT id, name, filename, blob_url, size, user_id, created_at 
+            FROM models 
+            WHERE user_id = ${parseInt(session.id)} 
+            ORDER BY created_at DESC
+        `;
 
         return NextResponse.json({ models: rows });
     } catch (err) {
