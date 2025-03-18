@@ -59,6 +59,7 @@ const authOptions: NextAuthOptions = {
         async jwt({ token, user }: { token: JWT; user: User | undefined }) {
             if (user) {
                 token.role = user.role;
+                token.id = user.id; //  include ID in token
             }
             return token;
         },
