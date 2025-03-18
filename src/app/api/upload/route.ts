@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { sql } from "@/lib/db";
+import { getToken } from "next-auth/jwt";
 
 export async function POST(request: NextRequest) {
     try {
+        // Get the user's session
+        const session = await getToken({ req: request });
+
+        if (!session || !session.id) {
+            return NextResponse.json(
+                { error: "You must be logged in to upload models." },
+                { status: 401 }
+            );
+        }
+
         const formData = await request.formData();
         const file = formData.get("model") as File;
         const modelName = formData.get("name") as string;
@@ -31,14 +42,16 @@ export async function POST(request: NextRequest) {
             access: "public",
         });
 
-        // Store metadata in the Neon Postgres database
-        await sql`INSERT INTO models (name, filename, blob_url, size) VALUES (${modelName}, ${filename}, ${blob.url}, ${file.size})`;
+        // Store in the database with user ID
+        const result = await sql`
+            INSERT INTO models (name, filename, blob_url, size, user_id)
+            VALUES (${modelName}, ${filename}, ${blob.url}, ${
+            file.size
+        }, ${parseInt(session.id)})
+            RETURNING id, name, filename, blob_url, size, created_at
+        `;
 
-        return NextResponse.json({
-            success: true,
-            url: blob.url,
-            name: modelName,
-        });
+        return NextResponse.json({ success: true, model: result[0] });
     } catch (err) {
         console.error("Upload error:", err);
         return NextResponse.json(
