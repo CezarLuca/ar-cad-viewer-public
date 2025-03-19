@@ -15,20 +15,14 @@ export default async function Home() {
     const navbarButton = (
         <div className="flex space-x-2">
             <Link
-                href="/ar"
-                className="bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-600 transition-colors"
-            >
-                Start 3D Model Visualizer
-            </Link>
-            <Link
                 href="/auth/login"
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                className="bg-green-600 text-gray-200 px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
             >
                 Login
             </Link>
             <Link
                 href="/auth/register"
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                className="bg-blue-600 text-gray-200 px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
                 Register
             </Link>
@@ -39,26 +33,36 @@ export default async function Home() {
         <>
             <Navbar rightContent={navbarButton} />
             <main className="flex flex-col min-h-screen items-center p-12 pt-22">
-                <h1 className="text-4xl font-bold mb-8 text-center">
-                    AR CAD Viewer
-                </h1>
                 <div className="max-w-3xl text-center mb-12">
-                    <p className="text-xl mb-4">
+                    <h1 className="text-4xl text-gray-200 font-bold mb-8 text-center">
                         Welcome to AR CAD Viewer, the platform for visualizing
                         3D models in augmented reality.
-                    </p>
-                    <p className="mb-6">
+                    </h1>
+                    <h2 className="text-xl text-gray-200 mb-4">
                         Sign up to upload your own 3D models and view them in 3D
                         and AR.
-                    </p>
+                    </h2>
                     <div className="flex justify-center space-x-4">
                         <Link
                             href="/auth/login"
-                            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors text-lg"
+                            className="bg-green-600 text-gray-200 px-6 py-3 rounded-lg hover:bg-green-700 transition-colors text-lg"
                         >
                             Get Started
                         </Link>
                     </div>
+                </div>
+                <div className="max-w-3xl text-center mb-12">
+                    <h3 className="text-xl text-gray-200 mb-4">
+                        Try out the 3D model visualizer. Adjust its properties
+                        and then place the default 3D part in AR space using
+                        your phone&apos;s camera passthrough.
+                    </h3>
+                    <Link
+                        href="/ar"
+                        className="bg-blue-600 text-xl text-gray-200 px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Try the 3D Model Visualizer
+                    </Link>
                 </div>
             </main>
         </>

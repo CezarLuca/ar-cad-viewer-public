@@ -62,7 +62,7 @@ export default function RegisterForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-sm mx-auto">
+        <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
             {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
                     {error}
@@ -125,7 +125,7 @@ export default function RegisterForm() {
                     {loading ? "Loading..." : "Register"}
                 </button>
                 <a
-                    className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+                    className="inline-block align-baseline font-bold py-2 px-4 rounded border-1 hover:bg-gray-200 border-blue-600 hover:border-blue-700 text-blue-600 hover:text-blue-700"
                     href="/auth/login"
                 >
                     Login

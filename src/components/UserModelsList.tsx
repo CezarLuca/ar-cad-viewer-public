@@ -58,11 +58,13 @@ export default function UserModelsList() {
                 {models.map((model) => (
                     <li
                         key={model.id}
-                        className="border p-4 rounded bg-white shadow-sm"
+                        className="border p-4 rounded bg-gray-100 shadow-sm"
                     >
                         <div className="flex justify-between items-center">
                             <div>
-                                <h3 className="font-semibold">{model.name}</h3>
+                                <h3 className="font-semibold text-gray-500">
+                                    {model.name}
+                                </h3>
                                 <p className="text-sm text-gray-500">
                                     {new Date(
                                         model.created_at
@@ -74,7 +76,7 @@ export default function UserModelsList() {
                                     href={`/ar?model=${encodeURIComponent(
                                         model.blob_url
                                     )}`}
-                                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded mr-2"
+                                    className="bg-blue-600 hover:bg-blue-700 text-gray-200 px-3 py-1 rounded mr-2"
                                 >
                                     View in AR
                                 </Link>

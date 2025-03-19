@@ -14,7 +14,9 @@ export default async function Dashboard() {
     return (
         <DashboardLayout>
             <div className="p-6">
-                <h1 className="text-2xl font-bold mb-6">Your Dashboard</h1>
+                <h1 className="text-2xl text-gray-500 font-bold mb-6">
+                    Personal Dashboard
+                </h1>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-gray-300 p-6 rounded-lg shadow-md">

@@ -46,7 +46,7 @@ export default function LoginForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-sm mx-auto">
+        <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
             {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
                     {error}
@@ -86,14 +86,14 @@ export default function LoginForm() {
             </div>
             <div className="flex items-center justify-between">
                 <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className="bg-blue-600 hover:bg-blue-700 text-gray-100 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="submit"
                     disabled={loading}
                 >
                     {loading ? "Loading..." : "Sign In"}
                 </button>
                 <a
-                    className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+                    className="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-700 border-1 bg-gray-100 hover:bg-gray-200 py-2 px-4 rounded border-blue-600 hover:border-blue-700"
                     href="/auth/register"
                 >
                     Register

@@ -269,34 +269,35 @@ export default function OrbitControlsUI({
                 onClick={handleHomeView}
                 onMouseEnter={() => setHoveredButton("home")}
                 onMouseLeave={() => setHoveredButton(null)}
-                className={`absolute top-0 transition-all duration-200 
+                className={`absolute top-0 left-0 transition-all duration-300 
                         ${
-                            hoveredButton === "home" ? "scale-110" : "scale-100"
+                            hoveredButton === "home"
+                                ? "scale-110 rotate-180"
+                                : "scale-100 rotate-0"
                         }`}
                 aria-label="Reset to default view"
             >
                 <svg
-                    width="60"
-                    height="60"
+                    width="42"
+                    height="42"
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                 >
-                    <rect
-                        x="2"
-                        y="2"
-                        width="20"
-                        height="20"
-                        rx="2"
-                        fill="#CBD5E1"
-                        fillOpacity="0.3"
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        fill="#526d9c"
+                        fillOpacity="0.2"
+                        stroke="#3b82f6"
+                        strokeWidth="1"
                     />
                     <path
-                        d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15"
-                        stroke="#353535"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        d="M17.65 6.35C16.2 4.9 14.21 4 12 4C7.58 4 4 7.58 4 12C4 16.42 7.58 20 12 20C15.73 20 18.84 17.45 19.73 14H17.65C16.83 16.33 14.61 18 12 18C8.69 18 6 15.31 6 12C6 8.69 8.69 6 12 6C13.66 6 15.14 6.69 16.22 7.78L13 11H20V4L17.65 6.35Z"
+                        fill="#cfdeff"
+                        stroke="#1d4ed8"
+                        strokeWidth="0.5"
                     />
                 </svg>
             </button>
