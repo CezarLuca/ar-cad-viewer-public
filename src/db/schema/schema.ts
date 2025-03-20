@@ -8,6 +8,7 @@ export async function createTablesIfNotExist() {
             filename VARCHAR(255) NOT NULL,
             blob_url TEXT NOT NULL,
             size INTEGER NOT NULL,
+            user_name VARCHAR(255) NOT NULL,
             user_id INTEGER,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

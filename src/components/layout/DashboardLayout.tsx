@@ -13,6 +13,8 @@ export default function DashboardLayout({
     const { data: session, status } = useSession();
     const router = useRouter();
 
+    console.log("Session", session);
+
     if (status === "loading") {
         return <div>Loading...</div>;
     }

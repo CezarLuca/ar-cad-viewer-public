@@ -37,11 +37,20 @@ export default function ModelList() {
     }, []);
 
     if (loading)
-        return <div className="text-center py-4"> Loading models...</div>;
+        return (
+            <div className="text-center text-gray-500 py-4">
+                {" "}
+                Loading models...
+            </div>
+        );
     if (error)
         return <div className="text-center text-red-500 py-4">{error}</div>;
     if (models.length === 0)
-        return <div className="text-center py-4">No models uploaded yet</div>;
+        return (
+            <div className="text-center text-gray-500 py-4">
+                No models uploaded yet
+            </div>
+        );
 
     return (
         <div className="space-y-4">

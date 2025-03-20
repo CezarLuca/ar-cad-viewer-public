@@ -13,6 +13,12 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(url);
     }
 
+    // Check if accessing admin routes and user is not an admin
+    if (req.nextUrl.pathname.startsWith("/admin") && session.role !== "admin") {
+        // Redirect to dashboard if user is not an admin
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
     // Allow access to the requested page if authenticated
     return NextResponse.next();
 }

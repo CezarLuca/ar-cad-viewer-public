@@ -47,10 +47,15 @@ export default function UserModelsList() {
         }
     }, [session]);
 
-    if (loading) return <div>Loading your models...</div>;
+    if (loading)
+        return <div className="text-gray-500">Loading your models...</div>;
     if (error) return <div className="text-red-500">{error}</div>;
     if (models.length === 0)
-        return <div>You haven&apos;t uploaded any models yet.</div>;
+        return (
+            <div className="text-gray-500">
+                You haven&apos;t uploaded any models yet.
+            </div>
+        );
 
     return (
         <div>

@@ -44,11 +44,11 @@ export async function POST(request: NextRequest) {
 
         // Store in the database with user ID
         const result = await sql`
-            INSERT INTO models (name, filename, blob_url, size, user_id)
+            INSERT INTO models (name, filename, blob_url, size, user_id, user_name)
             VALUES (${modelName}, ${filename}, ${blob.url}, ${
             file.size
-        }, ${parseInt(session.id)})
-            RETURNING id, name, filename, blob_url, size, created_at
+        }, ${parseInt(session.id)}, ${session.name})
+            RETURNING id, name, filename, blob_url, size, user_name, created_at
         `;
 
         return NextResponse.json({ success: true, model: result[0] });
