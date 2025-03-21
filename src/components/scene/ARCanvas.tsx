@@ -10,24 +10,29 @@ import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import * as THREE from "three";
 import Regular3DScene from "./Regular3DScene";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { createPortal } from "react-dom";
+// import { createPortal } from "react-dom";
 
 const store = createXRStore();
+
+// Export the enterAR function so the AR page can use it
+export const enterAR = () => {
+    store.enterAR();
+};
 
 export default function ARCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
     const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
     const [isARPresenting, setIsARPresenting] = useState(false);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-    const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-        null
-    );
+    // const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+    //     null
+    // );
 
-    // Find the navbar to portal the AR button into it
-    useEffect(() => {
-        const container = document.querySelector("header");
-        if (container) setPortalContainer(container);
-    }, []);
+    // // Find the navbar to portal the AR button into it
+    // useEffect(() => {
+    //     const container = document.querySelector("header");
+    //     if (container) setPortalContainer(container);
+    // }, []);
 
     // Handle canvas resize
     useEffect(() => {
@@ -57,29 +62,29 @@ export default function ARCanvas() {
         };
     }, []);
 
-    // AR session configuration - simplified
-    const enterAR = () => {
-        store.enterAR();
-    };
+    // // AR session configuration - simplified
+    // const enterAR = () => {
+    //     store.enterAR();
+    // };
 
-    // Create the AR button to be added to the navbar
-    const arButton = (
-        <button
-            onClick={enterAR}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
-        >
-            Enter AR
-        </button>
-    );
+    // // Create the AR button to be added to the navbar
+    // const arButton = (
+    //     <button
+    //         onClick={enterAR}
+    //         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+    //     >
+    //         Enter AR
+    //     </button>
+    // );
 
     return (
         <ModelConfigProvider>
             {/* Portal the AR button into the navbar */}
-            {portalContainer &&
+            {/* {portalContainer &&
                 createPortal(
                     <div className="ml-auto">{arButton}</div>,
                     portalContainer
-                )}
+                )} */}
 
             {/* Canvas Container - Fixed responsive classes */}
             <div

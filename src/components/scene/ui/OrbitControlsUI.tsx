@@ -195,7 +195,7 @@ export default function OrbitControlsUI({
                 onClick={handleInvertView}
                 onMouseEnter={() => setHoveredButton("invert")}
                 onMouseLeave={() => setHoveredButton(null)}
-                className={`absolute right-[-20px] bottom-1 transition-all duration-200 group
+                className={`absolute right-[-5px] bottom-1 transition-all duration-200 group
         ${hoveredButton === "invert" ? "scale-105" : "scale-100"}`}
                 aria-label="Invert View"
             >
@@ -264,12 +264,12 @@ export default function OrbitControlsUI({
                 </div>
             </button>
 
-            {/* Home Button */}
+            {/* Reset View Button */}
             <button
                 onClick={handleHomeView}
                 onMouseEnter={() => setHoveredButton("home")}
                 onMouseLeave={() => setHoveredButton(null)}
-                className={`absolute top-0 left-0 transition-all duration-300 
+                className={`absolute top-18 left-2 transition-all duration-300 
                         ${
                             hoveredButton === "home"
                                 ? "scale-110 rotate-180"

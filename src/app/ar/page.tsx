@@ -5,12 +5,23 @@ import Loading from "@/app/loading";
 import Navbar from "@/components/layout/Navbar";
 import { useSearchParams } from "next/navigation";
 import { ModelUrlProvider } from "@/context/ModelUrlContext";
+import { Suspense } from "react";
 
-// We'll pass an empty placeholder for rightContent as ARCanvas will handle the button
-const ARCanvas = dynamic(() => import("@/components/scene/ARCanvas"), {
-    ssr: false,
-    loading: () => <Loading />,
-});
+// Import without SSR
+const DynamicARCanvas = dynamic(
+    () =>
+        import("@/components/scene/ARCanvas").then((mod) => {
+            // Store the enterAR function for later use
+            return { default: mod.default };
+        }),
+    {
+        ssr: false,
+        loading: () => <Loading />,
+    }
+);
+
+// Also import the enterAR function
+import { enterAR } from "@/components/scene/ARCanvas";
 
 export default function ARPage() {
     const searchParams = useSearchParams();
@@ -18,9 +29,11 @@ export default function ARPage() {
 
     return (
         <ModelUrlProvider modelUrl={modelUrl}>
-            <Navbar />
+            <Navbar onEnterAR={enterAR} />
             <main className="h-screen w-screen">
-                <ARCanvas />
+                <Suspense fallback={<Loading />}>
+                    <DynamicARCanvas />
+                </Suspense>
             </main>
         </ModelUrlProvider>
     );
