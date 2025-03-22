@@ -15,6 +15,15 @@ export default {
             transitionProperty: {
                 slider: "all 0.1s cubic-bezier(0.4, 0, 0.2, 1)",
             },
+            animation: {
+                fadeIn: "fadeIn 0.3s ease-in-out",
+            },
+            keyframes: {
+                fadeIn: {
+                    "0%": { opacity: "0", transform: "translateY(-10px)" },
+                    "100%": { opacity: "1", transform: "translateY(0)" },
+                },
+            },
         },
     },
     plugins: [],

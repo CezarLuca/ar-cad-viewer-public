@@ -1,38 +1,61 @@
-Augmented Reality Project to Visualize CAD 3D Parts
+# My AR CAD Viewer
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Overview
 
-## Getting Started
+My AR CAD Viewer is an admin dashboard application designed for managing users and models in an augmented reality CAD viewer. The application provides functionalities for user management, model management, and a responsive design that adapts to different device sizes.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+-   **User Management**: Admins can view, sort, and delete users.
+-   **Model Management**: Admins can view, sort, and delete models.
+-   **Responsive Design**: The tables for users and models are responsive, hiding specific columns based on device size.
+-   **Expandable Rows**: Clickable rows that reveal additional information in a dropdown format.
+
+## Project Structure
+
+```
+my-ar-cad-viewer
+├── src
+│   ├── app
+│   │   ├── admin
+│   │   ├── api
+│   ├── components
+│   └── lib
+│       └── db.ts
+├── package.json
+├── tailwind.config.js
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+    ```
+    git clone <repository-url>
+    ```
+2. Navigate to the project directory:
+    ```
+    cd my-ar-cad-viewer
+    ```
+3. Install the dependencies:
+    ```
+    npm install
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Usage
 
-## Learn More
+To start the development server, run:
 
-To learn more about Next.js, take a look at the following resources:
+```
+npm run dev
+```
 
--   [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
--   [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Visit `http://localhost:3000` in your browser to access the application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Contributing
 
-## Deploy on Vercel
+Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License. See the LICENSE file for details.
