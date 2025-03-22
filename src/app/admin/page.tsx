@@ -24,7 +24,7 @@ export default async function AdminPage() {
 
     return (
         <DashboardLayout>
-            <div className="p-6 bg-gray-100">
+            <div className="p-2 sm:p-6 bg-gray-100">
                 <h1 className="text-3xl font-bold mb-8 text-gray-500">
                     Admin Dashboard
                 </h1>

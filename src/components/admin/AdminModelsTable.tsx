@@ -142,10 +142,10 @@ export default function AdminModelsTable() {
 
     return (
         <div className="overflow-x-auto">
-            <table className="min-w-full bg-gray-200 rounded-lg overflow-hidden shadow-lg">
+            <table className="w-full table-fixed bg-gray-200 rounded-lg overflow-hidden shadow-lg">
                 <thead className="bg-gray-800 text-gray-100">
                     <tr>
-                        <th className="py-3 px-4 text-left">
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-left w-[10%]">
                             <button
                                 onClick={() => handleSort("id")}
                                 className="font-bold hover:text-blue-300 transition-colors"
@@ -153,7 +153,7 @@ export default function AdminModelsTable() {
                                 ID{renderSortIndicator("id")}
                             </button>
                         </th>
-                        <th className="py-3 px-4 text-left">
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-left w-[30%]">
                             <button
                                 onClick={() => handleSort("name")}
                                 className="font-bold hover:text-blue-300 transition-colors"
@@ -161,7 +161,7 @@ export default function AdminModelsTable() {
                                 Name{renderSortIndicator("name")}
                             </button>
                         </th>
-                        <th className="py-3 px-4 text-left sm:table-cell hidden">
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-left sm:table-cell hidden w-[15%]">
                             <button
                                 onClick={() => handleSort("user_name")}
                                 className="font-bold hover:text-blue-300 transition-colors"
@@ -169,7 +169,7 @@ export default function AdminModelsTable() {
                                 User{renderSortIndicator("user_name")}
                             </button>
                         </th>
-                        <th className="py-3 px-4 text-left sm:table-cell hidden">
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-left sm:table-cell hidden w-[10%]">
                             <button
                                 onClick={() => handleSort("size")}
                                 className="font-bold hover:text-blue-300 transition-colors"
@@ -177,7 +177,7 @@ export default function AdminModelsTable() {
                                 Size{renderSortIndicator("size")}
                             </button>
                         </th>
-                        <th className="py-3 px-4 text-left md:table-cell hidden">
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-left md:table-cell hidden w-[15%]">
                             <button
                                 onClick={() => handleSort("created_at")}
                                 className="font-bold hover:text-blue-300 transition-colors"
@@ -185,7 +185,9 @@ export default function AdminModelsTable() {
                                 Created At{renderSortIndicator("created_at")}
                             </button>
                         </th>
-                        <th className="py-3 px-4 text-right">Actions</th>
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-center sm:w-[15%] w-[12%]">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-300">
@@ -195,31 +197,35 @@ export default function AdminModelsTable() {
                                 className="hover:bg-gray-100 text-gray-600 cursor-pointer"
                                 onClick={() => toggleRowExpansion(model.id)}
                             >
-                                <td className="py-3 px-4">{model.id}</td>
-                                <td className="py-3 px-4">
-                                    {model.name} ({model.filename})
+                                <td className="py-2 sm:py-3 px-2 sm:px-4">
+                                    {model.id}
                                 </td>
-                                <td className="py-3 px-4 sm:table-cell hidden">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4">
+                                    <div className="truncate hover:text-clip hover:overflow-visible">
+                                        {model.name} ({model.filename})
+                                    </div>
+                                </td>
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 sm:table-cell hidden">
                                     {model.user_name}
                                 </td>
-                                <td className="py-3 px-4 sm:table-cell hidden">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 sm:table-cell hidden">
                                     {formatFileSize(model.size)}
                                 </td>
-                                <td className="py-3 px-4 md:table-cell hidden">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 md:table-cell hidden">
                                     {new Date(
                                         model.created_at
                                     ).toLocaleString()}
                                 </td>
-                                <td className="py-3 px-4 text-right">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-center whitespace-nowrap">
                                     <div
-                                        className="flex justify-end space-x-2"
+                                        className="flex flex-col sm:flex-row sm:justify-end space-y-1 sm:space-y-0 sm:space-x-2"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <Link
                                             href={`/ar?model=${encodeURIComponent(
                                                 model.blob_url
                                             )}`}
-                                            className="bg-blue-500 hover:bg-blue-700 text-gray-100 font-bold py-1 px-3 rounded text-xs"
+                                            className="bg-blue-500 hover:bg-blue-700 text-gray-100 font-bold py-1 px-2 sm:px-3 rounded text-xs text-center"
                                         >
                                             View
                                         </Link>
@@ -227,7 +233,7 @@ export default function AdminModelsTable() {
                                             onClick={(e) =>
                                                 deleteModel(model.id, e)
                                             }
-                                            className="bg-red-500 hover:bg-red-700 text-gray-100 font-bold py-1 px-3 rounded text-xs"
+                                            className="bg-red-500 hover:bg-red-700 text-gray-100 font-bold py-1 px-2 sm:px-3 rounded text-xs"
                                         >
                                             Delete
                                         </button>
@@ -236,6 +242,7 @@ export default function AdminModelsTable() {
                             </tr>
                             <ExpandableRow
                                 isOpen={expandedRow === model.id}
+                                tableType="models"
                                 hiddenFields={{
                                     sm: [
                                         {

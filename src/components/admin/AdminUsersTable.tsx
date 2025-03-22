@@ -126,10 +126,10 @@ export default function AdminUsersTable() {
 
     return (
         <div className="overflow-x-auto">
-            <table className="min-w-full bg-gray-200 rounded-lg overflow-hidden shadow-lg">
+            <table className="w-full table-fixed bg-gray-200 rounded-lg overflow-hidden shadow-lg">
                 <thead className="bg-gray-800 text-gray-100">
                     <tr>
-                        <th className="py-3 px-4 text-left">
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-left w-[10%]">
                             <button
                                 onClick={() => handleSort("id")}
                                 className="font-bold hover:text-blue-300 transition-colors"
@@ -137,7 +137,7 @@ export default function AdminUsersTable() {
                                 ID{renderSortIndicator("id")}
                             </button>
                         </th>
-                        <th className="py-3 px-4 text-left">
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-left w-[20%]">
                             <button
                                 onClick={() => handleSort("name")}
                                 className="font-bold hover:text-blue-300 transition-colors"
@@ -145,7 +145,7 @@ export default function AdminUsersTable() {
                                 Name{renderSortIndicator("name")}
                             </button>
                         </th>
-                        <th className="py-3 px-4 text-left sm:table-cell hidden">
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-left sm:table-cell hidden w-[30%]">
                             <button
                                 onClick={() => handleSort("email")}
                                 className="font-bold hover:text-blue-300 transition-colors"
@@ -153,7 +153,7 @@ export default function AdminUsersTable() {
                                 Email{renderSortIndicator("email")}
                             </button>
                         </th>
-                        <th className="py-3 px-4 text-left">
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-left w-[10%]">
                             <button
                                 onClick={() => handleSort("role")}
                                 className="font-bold hover:text-blue-300 transition-colors"
@@ -161,7 +161,7 @@ export default function AdminUsersTable() {
                                 Role{renderSortIndicator("role")}
                             </button>
                         </th>
-                        <th className="py-3 px-4 text-left md:table-cell hidden">
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-left md:table-cell hidden w-[15%]">
                             <button
                                 onClick={() => handleSort("created_at")}
                                 className="font-bold hover:text-blue-300 transition-colors"
@@ -169,7 +169,9 @@ export default function AdminUsersTable() {
                                 Created At{renderSortIndicator("created_at")}
                             </button>
                         </th>
-                        <th className="py-3 px-4 text-right">Actions</th>
+                        <th className="py-2 sm:py-3 px-2 sm:px-4 text-center w-[15%]">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-300">
@@ -179,12 +181,20 @@ export default function AdminUsersTable() {
                                 className="hover:bg-gray-100 text-gray-600 cursor-pointer"
                                 onClick={() => toggleRowExpansion(user.id)}
                             >
-                                <td className="py-3 px-4">{user.id}</td>
-                                <td className="py-3 px-4">{user.name}</td>
-                                <td className="py-3 px-4 sm:table-cell hidden">
-                                    {user.email}
+                                <td className="py-2 sm:py-3 px-2 sm:px-4">
+                                    {user.id}
                                 </td>
-                                <td className="py-3 px-4">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4">
+                                    <div className="truncate hover:text-clip hover:overflow-visible">
+                                        {user.name}
+                                    </div>
+                                </td>
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 sm:table-cell hidden">
+                                    <div className="truncate hover:text-clip hover:overflow-visible">
+                                        {user.email}
+                                    </div>
+                                </td>
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 whitespace-nowrap">
                                     <span
                                         className={`px-2 py-1 rounded-full text-xs ${
                                             user.role === "admin"
@@ -195,10 +205,10 @@ export default function AdminUsersTable() {
                                         {user.role}
                                     </span>
                                 </td>
-                                <td className="py-3 px-4 md:table-cell hidden">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 md:table-cell hidden">
                                     {new Date(user.created_at).toLocaleString()}
                                 </td>
-                                <td className="py-3 px-4 text-right">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-center whitespace-nowrap">
                                     {/* Don't show delete button for current user or other admins */}
                                     {user.id.toString() !== session?.user?.id &&
                                         user.role !== "admin" && (
@@ -206,7 +216,7 @@ export default function AdminUsersTable() {
                                                 onClick={(e) =>
                                                     deleteUser(user.id, e)
                                                 }
-                                                className="bg-red-500 hover:bg-red-700 text-gray-100 font-bold py-1 px-3 rounded text-xs"
+                                                className="bg-red-500 hover:bg-red-700 text-gray-100 font-bold py-1 px-4 sm:px-3 rounded text-xs"
                                             >
                                                 Delete
                                             </button>
@@ -215,6 +225,7 @@ export default function AdminUsersTable() {
                             </tr>
                             <ExpandableRow
                                 isOpen={expandedRow === user.id}
+                                tableType="users"
                                 hiddenFields={{
                                     sm: [{ label: "Email", value: user.email }],
                                     md: [
