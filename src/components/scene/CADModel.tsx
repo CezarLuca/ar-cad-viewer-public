@@ -1,6 +1,7 @@
 "use client";
 
-import * as THREE from "three";
+// import * as THREE from "three";
+import { Mesh, Vector3, MathUtils, Material } from "three";
 import { useGLTF, useTexture } from "@react-three/drei";
 import { GLTF } from "three-stdlib";
 import { useRef, useEffect, useState } from "react";
@@ -10,17 +11,17 @@ import { useModelUrl } from "@/context/ModelUrlContext";
 
 // More flexible type definition that doesn't assume a specific mesh name
 type GLTFResult = GLTF & {
-    nodes: Record<string, THREE.Mesh>;
-    materials: Record<string, THREE.Material>;
+    nodes: Record<string, Mesh>;
+    materials: Record<string, Material>;
 };
 
 export default function CADModel() {
     const { modelUrl } = useModelUrl();
-    const meshRef = useRef<THREE.Mesh>(null!);
+    const meshRef = useRef<Mesh>(null!);
     const { config } = useModelConfig();
     // const { nodes, materials } = useGLTF(url) as GLTFResult;
     const { nodes } = useGLTF(modelUrl) as GLTFResult;
-    const [mainMesh, setMainMesh] = useState<THREE.Mesh | null>(null);
+    const [mainMesh, setMainMesh] = useState<Mesh | null>(null);
 
     const [metalness, roughness] = useTexture([
         "/textures/metalness.jpg",
@@ -36,7 +37,7 @@ export default function CADModel() {
             );
             if (firstMeshKey) {
                 setMainMesh(nodes[firstMeshKey]);
-                console.log("Found mesh:", firstMeshKey);
+                // console.log("Found mesh:", firstMeshKey);
             } else {
                 console.error("No mesh found in the loaded model");
                 console.log("Available nodes:", Object.keys(nodes));
@@ -48,24 +49,21 @@ export default function CADModel() {
     useFrame(() => {
         if (meshRef.current) {
             // Smoothly interpolate to the target position
-            meshRef.current.position.lerp(
-                new THREE.Vector3(...config.position),
-                0.1
-            );
+            meshRef.current.position.lerp(new Vector3(...config.position), 0.1);
 
             // Smoothly interpolate to the target rotation
             meshRef.current.rotation.set(
-                THREE.MathUtils.lerp(
+                MathUtils.lerp(
                     meshRef.current.rotation.x,
                     config.rotation[0],
                     0.1
                 ),
-                THREE.MathUtils.lerp(
+                MathUtils.lerp(
                     meshRef.current.rotation.y,
                     config.rotation[1],
                     0.1
                 ),
-                THREE.MathUtils.lerp(
+                MathUtils.lerp(
                     meshRef.current.rotation.z,
                     config.rotation[2],
                     0.1

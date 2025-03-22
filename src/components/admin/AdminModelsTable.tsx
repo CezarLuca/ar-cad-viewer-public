@@ -218,7 +218,7 @@ export default function AdminModelsTable() {
                                 </td>
                                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-center whitespace-nowrap">
                                     <div
-                                        className="flex flex-col sm:flex-row sm:justify-end space-y-1 sm:space-y-0 sm:space-x-2"
+                                        className="flex flex-col sm:flex-row sm:justify-center space-y-1 sm:space-y-0 sm:space-x-2"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <Link

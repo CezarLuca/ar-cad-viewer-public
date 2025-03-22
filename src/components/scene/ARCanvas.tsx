@@ -7,10 +7,10 @@ import ARScene from "./ARScene";
 import ModelControls from "./ui/ModelControls";
 import OrbitControlsUI from "./ui/OrbitControlsUI";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
-import * as THREE from "three";
+// import * as THREE from "three";
+import { PerspectiveCamera } from "three";
 import Regular3DScene from "./Regular3DScene";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-// import { createPortal } from "react-dom";
 
 const store = createXRStore();
 
@@ -24,15 +24,6 @@ export default function ARCanvas() {
     const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
     const [isARPresenting, setIsARPresenting] = useState(false);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-    // const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    //     null
-    // );
-
-    // // Find the navbar to portal the AR button into it
-    // useEffect(() => {
-    //     const container = document.querySelector("header");
-    //     if (container) setPortalContainer(container);
-    // }, []);
 
     // Handle canvas resize
     useEffect(() => {
@@ -62,30 +53,8 @@ export default function ARCanvas() {
         };
     }, []);
 
-    // // AR session configuration - simplified
-    // const enterAR = () => {
-    //     store.enterAR();
-    // };
-
-    // // Create the AR button to be added to the navbar
-    // const arButton = (
-    //     <button
-    //         onClick={enterAR}
-    //         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
-    //     >
-    //         Enter AR
-    //     </button>
-    // );
-
     return (
         <ModelConfigProvider>
-            {/* Portal the AR button into the navbar */}
-            {/* {portalContainer &&
-                createPortal(
-                    <div className="ml-auto">{arButton}</div>,
-                    portalContainer
-                )} */}
-
             {/* Canvas Container - Fixed responsive classes */}
             <div
                 ref={containerRef}
@@ -104,7 +73,7 @@ export default function ARCanvas() {
                         if (canvasSize.width && canvasSize.height) {
                             gl.setSize(canvasSize.width, canvasSize.height);
 
-                            if (camera instanceof THREE.PerspectiveCamera) {
+                            if (camera instanceof PerspectiveCamera) {
                                 camera.aspect =
                                     canvasSize.width / canvasSize.height;
                                 camera.updateProjectionMatrix();

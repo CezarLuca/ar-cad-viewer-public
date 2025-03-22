@@ -3,7 +3,8 @@
 import { Environment, Grid, OrbitControls } from "@react-three/drei";
 import { useRef, useEffect, RefObject } from "react";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import * as THREE from "three";
+// import * as THREE from "three";
+import { DoubleSide } from "three";
 import CADModel from "./CADModel";
 
 interface Regular3DSceneProps {
@@ -49,7 +50,7 @@ export default function Regular3DScene({
                 sectionColor="#a59595"
                 fadeDistance={30}
                 fadeStrength={1.5}
-                side={THREE.DoubleSide}
+                side={DoubleSide}
             />
 
             {/* Orbit controls for camera */}
