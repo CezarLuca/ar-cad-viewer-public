@@ -20,12 +20,7 @@ export const enterAR = () => {
     const overlayElement = document.createElement("div");
     overlayElement.className = "ar-overlay";
     document.body.appendChild(overlayElement);
-
-    // Add the overlay element to the options
-    store.enterAR({
-        domOverlay: { root: overlayElement },
-        optionalFeatures: ["dom-overlay"],
-    });
+    store.enterAR();
 };
 
 export default function ARCanvas() {
