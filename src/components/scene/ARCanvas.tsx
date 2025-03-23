@@ -16,7 +16,16 @@ const store = createXRStore();
 
 // Export the enterAR function so the AR page can use it
 export const enterAR = () => {
-    store.enterAR();
+    // Create DOM overlay element
+    const overlayElement = document.createElement("div");
+    overlayElement.className = "ar-overlay";
+    document.body.appendChild(overlayElement);
+
+    // Add the overlay element to the options
+    store.enterAR({
+        domOverlay: { root: overlayElement },
+        optionalFeatures: ["dom-overlay"],
+    });
 };
 
 export default function ARCanvas() {
