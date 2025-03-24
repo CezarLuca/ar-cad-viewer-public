@@ -1,13 +1,14 @@
 "use client";
 
+import ReactDOM from "react-dom";
+import { Environment, useGLTF } from "@react-three/drei";
+import { Group } from "three";
 import { useXR } from "@react-three/xr";
 import { useEffect } from "react";
-import CADModel from "./CADModel";
-import { Environment, useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { Group } from "three";
 import { useRef } from "react";
 import { useModelUrl } from "@/context/ModelUrlContext";
+import CADModel from "./CADModel";
 
 interface ARSceneProps {
     setIsARPresenting: (isPresenting: boolean) => void;
@@ -15,6 +16,32 @@ interface ARSceneProps {
 
 const engineModel = "/models/engine.glb";
 useGLTF.preload(engineModel);
+
+const AROverlayContent = () => {
+    let textColorRed = false;
+    return (
+        <div
+            style={{
+                position: "absolute",
+                bottom: "20px",
+                left: "20px",
+                background: "rgba(255, 255, 255, 0.8)",
+                padding: "10px",
+                borderRadius: "5px",
+            }}
+        >
+            <p>AR Mode Active</p>
+            <button
+                onClick={() => {
+                    textColorRed = !textColorRed;
+                }}
+                className={textColorRed ? "text-red" : "text-green"}
+            >
+                Change my color
+            </button>
+        </div>
+    );
+};
 
 export default function ARScene({ setIsARPresenting }: ARSceneProps) {
     const { modelUrl } = useModelUrl();
@@ -63,19 +90,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
     // Add DOM overlay content
     useEffect(() => {
         if (domOverlayRoot) {
-            const overlayContent = document.createElement("div");
-            overlayContent.innerHTML = `
-                <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 5px;">
-                    <p>AR Mode Active</p>
-                    <button onclick="alert('Button clicked!')">Click Me</button>
-                </div>
-            `;
-            domOverlayRoot.appendChild(overlayContent);
-
-            // Cleanup on unmount
-            return () => {
-                domOverlayRoot.removeChild(overlayContent);
-            };
+            ReactDOM.createPortal(<AROverlayContent />, domOverlayRoot);
         }
     }, [domOverlayRoot]);
 
