@@ -4,7 +4,7 @@ import ReactDOM from "react-dom/client";
 import { Environment, useGLTF } from "@react-three/drei";
 import { Group } from "three";
 import { useXR } from "@react-three/xr";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import { useRef } from "react";
 import { useModelUrl } from "@/context/ModelUrlContext";
@@ -18,15 +18,14 @@ const engineModel = "/models/engine.glb";
 useGLTF.preload(engineModel);
 
 const AROverlayContent = () => {
-    let textColorRed = false;
+    const [textColorRed, setTextColorRed] = useState(false);
+
     return (
-        <div className="absolute top-0 left-0 p-4 bg-white bg-opacity-50">
+        <div className="absolute top-4 left-4 p-4 bg-white bg-opacity-40 pointer-events-auto z-50">
             <p>AR Mode Active</p>
             <button
-                onClick={() => {
-                    textColorRed = !textColorRed;
-                }}
-                className={textColorRed ? "text-red" : "text-green"}
+                onClick={() => setTextColorRed(!textColorRed)}
+                className={textColorRed ? "text-red-500" : "text-green-500"}
             >
                 Change my color
             </button>
