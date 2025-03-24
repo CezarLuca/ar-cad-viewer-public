@@ -1,9 +1,9 @@
 "use client";
 
 import { useXR } from "@react-three/xr";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import CADModel from "./CADModel";
-import { Environment, useGLTF, Html } from "@react-three/drei";
+import { Environment, useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { Group } from "three";
 import { useRef } from "react";
@@ -20,11 +20,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
     const { modelUrl } = useModelUrl();
     const modelRef = useRef<Group>(null);
     const { gl } = useThree();
-    const { session } = useXR();
-    const [viewportDimensions, setViewportDimensions] = useState({
-        width: 0,
-        height: 0,
-    });
+    const { session, domOverlayRoot } = useXR();
 
     // If it's not the default model, preload it once when the component mounts
     useEffect(() => {
@@ -33,13 +29,9 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
         }
     }, [modelUrl]);
 
-    // Update parent about AR session status and update viewport dimensions
+    // Update parent about AR session status
     useEffect(() => {
         if (session) {
-            // Calculate dimensions (e.g., 80% of screen width/height)
-            const width = window.innerWidth * 0.8;
-            const height = window.innerHeight * 0.8;
-            setViewportDimensions({ width, height });
             const isVisible = session.visibilityState === "visible";
             setIsARPresenting(isVisible);
         } else {
@@ -68,6 +60,25 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
         }
     }, [session, gl]);
 
+    // Add DOM overlay content
+    useEffect(() => {
+        if (domOverlayRoot) {
+            const overlayContent = document.createElement("div");
+            overlayContent.innerHTML = `
+                <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 5px;">
+                    <p>AR Mode Active</p>
+                    <button onclick="alert('Button clicked!')">Click Me</button>
+                </div>
+            `;
+            domOverlayRoot.appendChild(overlayContent);
+
+            // Cleanup on unmount
+            return () => {
+                domOverlayRoot.removeChild(overlayContent);
+            };
+        }
+    }, [domOverlayRoot]);
+
     return (
         <>
             {/* Lighting setup */}
@@ -85,29 +96,6 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             <group ref={modelRef}>
                 <CADModel />
             </group>
-
-            {/* Viewport overlay - added to create a "window" effect */}
-            {session && (
-                <Html fullscreen>
-                    <div
-                        className="fixed inset-0 pointer-events-none"
-                        style={{
-                            boxShadow: "0 0 0 100vmax rgba(0, 0, 0, 0.8)",
-                            width: `${viewportDimensions.width}px`,
-                            height: `${viewportDimensions.height}px`,
-                            left: `${
-                                (window.innerWidth - viewportDimensions.width) /
-                                2
-                            }px`,
-                            top: `${
-                                (window.innerHeight -
-                                    viewportDimensions.height) /
-                                2
-                            }px`,
-                        }}
-                    />
-                </Html>
-            )}
         </>
     );
 }

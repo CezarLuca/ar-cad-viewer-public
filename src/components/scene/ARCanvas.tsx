@@ -12,14 +12,12 @@ import { PerspectiveCamera } from "three";
 import Regular3DScene from "./Regular3DScene";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
-const store = createXRStore();
+const store = createXRStore({
+    domOverlay: true,
+});
 
 // Export the enterAR function so the AR page can use it
 export const enterAR = () => {
-    // Create DOM overlay element
-    const overlayElement = document.createElement("div");
-    overlayElement.className = "ar-overlay";
-    document.body.appendChild(overlayElement);
     store.enterAR();
 };
 
