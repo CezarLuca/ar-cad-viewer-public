@@ -1,4 +1,10 @@
-import { createContext, useContext, useState } from "react";
+import {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    useCallback,
+} from "react";
 // import { Vector3 } from "three";
 
 // Define the shape of your model configuration
@@ -13,6 +19,24 @@ const defaultConfig: ModelConfig = {
     position: [0, 0, 0], // Start at origin
     rotation: [0, 0, 0],
     scale: [0.01, 0.01, 0.01],
+};
+
+// Create a singleton store for model config that exists outside React
+// This allows sharing state between different React trees
+const globalModelConfig = {
+    config: { ...defaultConfig },
+    listeners: new Set<() => void>(),
+
+    updateConfig(updates: Partial<ModelConfig>) {
+        this.config = { ...this.config, ...updates };
+        // Notify all listeners about the update
+        this.listeners.forEach((listener) => listener());
+    },
+
+    subscribe(listener: () => void) {
+        this.listeners.add(listener);
+        return () => this.listeners.delete(listener);
+    },
 };
 
 // Context type
@@ -32,11 +56,22 @@ export function ModelConfigProvider({
 }: {
     children: React.ReactNode;
 }) {
-    const [config, setConfig] = useState<ModelConfig>(defaultConfig);
+    // Use local state that syncs with the global singleton
+    const [config, setConfig] = useState<ModelConfig>(globalModelConfig.config);
 
-    const updateConfig = (updates: Partial<ModelConfig>) => {
-        setConfig((prev) => ({ ...prev, ...updates }));
-    };
+    // Subscribe to changes
+    useEffect(() => {
+        const unsubscribe = globalModelConfig.subscribe(() => {
+            setConfig({ ...globalModelConfig.config });
+        });
+        return () => {
+            unsubscribe();
+        };
+    }, []);
+
+    const updateConfig = useCallback((updates: Partial<ModelConfig>) => {
+        globalModelConfig.updateConfig(updates);
+    }, []);
 
     return (
         <ModelConfigContext.Provider value={{ config, updateConfig }}>
