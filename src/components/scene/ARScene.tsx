@@ -1,6 +1,6 @@
 "use client";
 
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import { Environment, useGLTF } from "@react-three/drei";
 import { Group } from "three";
 import { useXR } from "@react-three/xr";
@@ -20,16 +20,7 @@ useGLTF.preload(engineModel);
 const AROverlayContent = () => {
     let textColorRed = false;
     return (
-        <div
-            style={{
-                position: "absolute",
-                bottom: "20px",
-                left: "20px",
-                background: "rgba(255, 255, 255, 0.8)",
-                padding: "10px",
-                borderRadius: "5px",
-            }}
-        >
+        <div className="absolute top-0 left-0 p-4 bg-white bg-opacity-50">
             <p>AR Mode Active</p>
             <button
                 onClick={() => {
@@ -87,10 +78,21 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
         }
     }, [session, gl]);
 
-    // Add DOM overlay content
+    // Render React components into the DOM overlay
     useEffect(() => {
         if (domOverlayRoot) {
-            ReactDOM.createPortal(<AROverlayContent />, domOverlayRoot);
+            console.log("domOverlayRoot is available:", domOverlayRoot);
+            const portalRoot = document.createElement("div");
+            domOverlayRoot.appendChild(portalRoot);
+
+            const root = ReactDOM.createRoot(portalRoot);
+            root.render(<AROverlayContent />);
+
+            // Cleanup on unmount
+            return () => {
+                root.unmount();
+                domOverlayRoot.removeChild(portalRoot);
+            };
         }
     }, [domOverlayRoot]);
 
