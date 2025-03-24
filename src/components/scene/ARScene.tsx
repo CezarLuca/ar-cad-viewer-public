@@ -4,11 +4,13 @@ import ReactDOM from "react-dom/client";
 import { Environment, useGLTF } from "@react-three/drei";
 import { Group } from "three";
 import { useXR } from "@react-three/xr";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 import { useRef } from "react";
 import { useModelUrl } from "@/context/ModelUrlContext";
 import CADModel from "./CADModel";
+import ModelControls from "./ui/ModelControls";
+import { ModelConfigProvider } from "@/context/ModelConfigContext";
 
 interface ARSceneProps {
     setIsARPresenting: (isPresenting: boolean) => void;
@@ -18,17 +20,9 @@ const engineModel = "/models/engine.glb";
 useGLTF.preload(engineModel);
 
 const AROverlayContent = () => {
-    const [textColorRed, setTextColorRed] = useState(false);
-
     return (
-        <div className="absolute top-4 left-4 p-4 bg-white bg-opacity-40 pointer-events-auto z-50">
-            <p>AR Mode Active</p>
-            <button
-                onClick={() => setTextColorRed(!textColorRed)}
-                className={textColorRed ? "text-red-500" : "text-green-500"}
-            >
-                Change my color
-            </button>
+        <div className="absolute top-12 left-0 right-0 bottom-0 z-20 pointer-events-none">
+            <ModelControls />
         </div>
     );
 };
@@ -85,7 +79,13 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             domOverlayRoot.appendChild(portalRoot);
 
             const root = ReactDOM.createRoot(portalRoot);
-            root.render(<AROverlayContent />);
+
+            // Wrap AROverlayContent with ModelConfigProvider to provide context
+            root.render(
+                <ModelConfigProvider>
+                    <AROverlayContent />
+                </ModelConfigProvider>
+            );
 
             // Cleanup on unmount
             return () => {
