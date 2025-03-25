@@ -20,7 +20,8 @@ export default function CADModel() {
     const meshRef = useRef<Mesh>(null!);
     const { config } = useModelConfig();
     // const { nodes, materials } = useGLTF(url) as GLTFResult;
-    const { nodes } = useGLTF(modelUrl) as GLTFResult;
+    // Convert useGLTF result to unknown then to GLTFResult
+    const { nodes } = useGLTF(modelUrl) as unknown as GLTFResult;
     const [mainMesh, setMainMesh] = useState<Mesh | null>(null);
 
     const [metalness, roughness] = useTexture([
