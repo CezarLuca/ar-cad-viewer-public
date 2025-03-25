@@ -3,7 +3,7 @@
 import ReactDOM from "react-dom/client";
 import { Environment, useGLTF } from "@react-three/drei";
 import { Group } from "three";
-import { useXR } from "@react-three/xr";
+import { useXR, useXRPlanes, useXRAnchor, XROrigin } from "@react-three/xr";
 import { useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 import { useRef } from "react";
@@ -32,6 +32,8 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
     const modelRef = useRef<Group>(null);
     const { gl } = useThree();
     const { session, domOverlayRoot } = useXR();
+    const detectedPlanes = useXRPlanes();
+    const [anchor, requestAnchor] = useXRAnchor();
 
     // If it's not the default model, preload it once when the component mounts
     useEffect(() => {
@@ -95,23 +97,45 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
         }
     }, [domOverlayRoot]);
 
+    // Handle plane detection for CAD model placement
+    useEffect(() => {
+        if (detectedPlanes.length > 0) {
+            console.log("Detected planes:", detectedPlanes);
+            const firstPlane = detectedPlanes[0];
+            if (firstPlane.planeSpace) {
+                // Request anchor relative to detected plane's space
+                requestAnchor({
+                    relativeTo: "space",
+                    space: firstPlane.planeSpace,
+                });
+            } else {
+                console.error("Plane does not have a valid planeSpace.");
+            }
+        }
+    }, [detectedPlanes, requestAnchor]);
+
     return (
         <>
-            {/* Lighting setup */}
-            <ambientLight intensity={1.5} color="#ffffff" />
-            <directionalLight
-                position={[5, 5, 5]}
-                intensity={2}
-                castShadow
-                shadow-mapSize-width={2048}
-                shadow-mapSize-height={2048}
-            />
-            <Environment preset="sunset" />
+            {/* Define XR Origin */}
+            <XROrigin scale={1} position={[0, 0, 0]}>
+                {/* Lighting setup */}
+                <ambientLight intensity={1.5} color="#ffffff" />
+                <directionalLight
+                    position={[5, 5, 5]}
+                    intensity={2}
+                    castShadow
+                    shadow-mapSize-width={2048}
+                    shadow-mapSize-height={2048}
+                />
+                <Environment preset="sunset" />
 
-            {/* Model with reference positioning */}
-            <group ref={modelRef}>
-                <CADModel />
-            </group>
+                {/* Model with reference positioning and anchor attachment */}
+                {anchor && (
+                    <group ref={modelRef}>
+                        <CADModel />
+                    </group>
+                )}
+            </XROrigin>
         </>
     );
 }
