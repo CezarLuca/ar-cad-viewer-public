@@ -1,15 +1,14 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
+import { Group, Matrix4, Vector3 } from "three";
+import { useXR, XRHitTest } from "@react-three/xr";
+import { useThree, useFrame } from "@react-three/fiber";
 import { Environment, useGLTF } from "@react-three/drei";
-import { Group } from "three";
-import { useXR } from "@react-three/xr";
-import { useEffect } from "react";
-import { useThree } from "@react-three/fiber";
-import { useRef } from "react";
-import { useModelUrl } from "@/context/ModelUrlContext";
 import CADModel from "./CADModel";
 import ModelControls from "./ui/ModelControls";
+import { useModelUrl } from "@/context/ModelUrlContext";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
 
 interface ARSceneProps {
@@ -32,6 +31,10 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
     const modelRef = useRef<Group>(null);
     const { gl } = useThree();
     const { session, domOverlayRoot } = useXR();
+
+    // Matrix helper for hit test position
+    const matrixHelper = useRef(new Matrix4());
+    const hitTestPosition = useRef(new Vector3());
 
     // If it's not the default model, preload it once when the component mounts
     useEffect(() => {
@@ -56,7 +59,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             (async () => {
                 try {
                     // Request local reference space for AR positioning
-                    await session.requestReferenceSpace("local");
+                    await session.requestReferenceSpace("bounded-floor");
 
                     // Enable alpha mode for transparent background (camera passthrough)
                     gl.setClearAlpha(0);
@@ -70,6 +73,13 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             })();
         }
     }, [session, gl]);
+
+    // Sync hit test position with the CAD model
+    useFrame(() => {
+        if (modelRef.current) {
+            modelRef.current.position.copy(hitTestPosition.current);
+        }
+    });
 
     // Render React components into the DOM overlay
     useEffect(() => {
@@ -97,6 +107,18 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
 
     return (
         <>
+            {/* Hit test for positioning the model */}
+            <XRHitTest
+                onResults={(results, getWorldMatrix) => {
+                    if (results.length > 0) {
+                        // Get the world position from the hit test result
+                        getWorldMatrix(matrixHelper.current, results[0]);
+                        hitTestPosition.current.setFromMatrixPosition(
+                            matrixHelper.current
+                        );
+                    }
+                }}
+            />
             {/* Lighting setup */}
             <ambientLight intensity={1.5} color="#ffffff" />
             <directionalLight
