@@ -66,7 +66,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
     const modelRef = useRef<Group>(null);
     const { gl } = useThree();
     const { session, domOverlayRoot } = useXR();
-    const detectedPlanes = useXRPlanes("desk");
+    const detectedPlanes = useXRPlanes("floor");
     const [anchor, requestAnchor] = useXRAnchor();
 
     // If it's not the default model, preload it once when the component mounts
