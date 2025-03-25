@@ -56,7 +56,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             (async () => {
                 try {
                     // Request local reference space for AR positioning
-                    await session.requestReferenceSpace("bounded-floor");
+                    await session.requestReferenceSpace("local");
 
                     // Enable alpha mode for transparent background (camera passthrough)
                     gl.setClearAlpha(0);
