@@ -92,7 +92,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             (async () => {
                 try {
                     // Request local reference space for AR positioning
-                    await session.requestReferenceSpace("local");
+                    await session.requestReferenceSpace("local-floor");
 
                     // Enable alpha mode for transparent background (camera passthrough)
                     gl.setClearAlpha(0);
@@ -126,6 +126,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
                 setIsModelPlaced(true);
                 console.log("Model placed at:", currentHitPosition);
             } else {
+                setIsModelPlaced(true); // Place the model without hit position
                 console.warn("No valid hit position available for placement");
             }
         };
