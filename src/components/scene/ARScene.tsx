@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Group, Matrix4, Vector3 } from "three";
 import { useXR, XRHitTest } from "@react-three/xr";
@@ -18,9 +18,25 @@ interface ARSceneProps {
 const engineModel = "/models/engine.glb";
 useGLTF.preload(engineModel);
 
-const AROverlayContent = () => {
+const AROverlayContent = ({
+    onPlaceModel,
+    isModelPlaced,
+}: {
+    onPlaceModel: () => void;
+    isModelPlaced: boolean;
+}) => {
     return (
         <div className="absolute top-12 left-0 right-0 bottom-0 z-20 pointer-events-none">
+            {!isModelPlaced && (
+                <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 pointer-events-auto">
+                    <button
+                        onClick={onPlaceModel}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg"
+                    >
+                        Place Model
+                    </button>
+                </div>
+            )}
             <ModelControls />
         </div>
     );
@@ -31,10 +47,13 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
     const modelRef = useRef<Group>(null);
     const { gl } = useThree();
     const { session, domOverlayRoot } = useXR();
-
-    // Matrix helper for hit test position
-    const matrixHelper = useRef(new Matrix4());
+    const matrixHelper = useRef(new Matrix4()); // Matrix helper for hit test position
     const hitTestPosition = useRef(new Vector3());
+
+    // Add state for tracking model placement
+    const [isModelPlaced, setIsModelPlaced] = useState(false);
+    const [currentHitPosition, setCurrentHitPosition] =
+        useState<Vector3 | null>(null);
 
     // If it's not the default model, preload it once when the component mounts
     useEffect(() => {
@@ -74,15 +93,23 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
         }
     }, [session, gl]);
 
-    // Sync hit test position with the CAD model
+    // Sync hit test position with the CAD model only when placed
     useFrame(() => {
-        if (modelRef.current) {
-            modelRef.current.position.copy(hitTestPosition.current);
+        if (modelRef.current && isModelPlaced && currentHitPosition) {
+            modelRef.current.position.copy(currentHitPosition);
         }
     });
 
     // Render React components into the DOM overlay
     useEffect(() => {
+        // Function to handle model placement
+        const handlePlaceModel = () => {
+            if (currentHitPosition) {
+                hitTestPosition.current.copy(currentHitPosition);
+                setIsModelPlaced(true);
+            }
+        };
+
         if (domOverlayRoot) {
             console.log("domOverlayRoot is available:", domOverlayRoot);
             const portalRoot = document.createElement("div");
@@ -93,7 +120,10 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             // Wrap AROverlayContent with ModelConfigProvider to provide context
             root.render(
                 <ModelConfigProvider>
-                    <AROverlayContent />
+                    <AROverlayContent
+                        onPlaceModel={handlePlaceModel}
+                        isModelPlaced={isModelPlaced}
+                    />
                 </ModelConfigProvider>
             );
 
@@ -103,7 +133,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
                 domOverlayRoot.removeChild(portalRoot);
             };
         }
-    }, [domOverlayRoot]);
+    }, [domOverlayRoot, isModelPlaced, currentHitPosition]);
 
     return (
         <>
@@ -113,12 +143,18 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
                     if (results.length > 0) {
                         // Get the world position from the hit test result
                         getWorldMatrix(matrixHelper.current, results[0]);
-                        hitTestPosition.current.setFromMatrixPosition(
+                        const position = new Vector3().setFromMatrixPosition(
                             matrixHelper.current
                         );
+
+                        // Only update the current hit position for preview
+                        if (!isModelPlaced) {
+                            setCurrentHitPosition(position);
+                        }
                     }
                 }}
             />
+
             {/* Lighting setup */}
             <ambientLight intensity={1.5} color="#ffffff" />
             <directionalLight
@@ -132,6 +168,20 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
 
             {/* Model with reference positioning */}
             <group ref={modelRef}>
+                {/* Add a visual indicator for placement when not placed */}
+                {!isModelPlaced && currentHitPosition && (
+                    <mesh
+                        position={[0, -0.01, 0]}
+                        rotation={[-Math.PI / 2, 0, 0]}
+                    >
+                        <circleGeometry args={[0.15, 32]} />
+                        <meshBasicMaterial
+                            color="#4285F4"
+                            opacity={0.5}
+                            transparent
+                        />
+                    </mesh>
+                )}
                 <CADModel />
             </group>
         </>
