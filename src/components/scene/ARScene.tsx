@@ -92,7 +92,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             (async () => {
                 try {
                     // Request local reference space for AR positioning
-                    await session.requestReferenceSpace("bounded-floor");
+                    await session.requestReferenceSpace("local");
 
                     // Enable alpha mode for transparent background (camera passthrough)
                     gl.setClearAlpha(0);
@@ -168,10 +168,17 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
                             matrixHelper.current
                         );
 
+                        // Log the raw hit test results for debugging
+                        console.log("Hit test results:", results);
+                        console.log("Hit position:", position);
+
                         // Only update the current hit position for preview
                         if (!isModelPlaced) {
                             setCurrentHitPosition(position);
                         }
+                    } else {
+                        console.log("No hit test results found.");
+                        setCurrentHitPosition(null); // Clear the hit position
                     }
                 }}
             />
