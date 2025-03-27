@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Group, Matrix4, Vector3 } from "three";
-import { useXR, XRHitTest } from "@react-three/xr";
+import { useXR, XRHitTest, useXRAnchor, XRSpace } from "@react-three/xr";
 import { useThree, useFrame } from "@react-three/fiber";
 import { Environment, useGLTF } from "@react-three/drei";
 import CADModel from "./CADModel";
@@ -30,28 +30,33 @@ const AROverlayContent = ({
     return (
         <div className="absolute top-12 left-0 right-0 bottom-0 z-20 pointer-events-none">
             {!isModelPlaced && (
-                <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
-                    <button
-                        onClick={onPlaceModel}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg pointer-events-auto"
-                    >
-                        Place Model
-                    </button>
-                </div>
+                <>
+                    <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
+                        <button
+                            onClick={onPlaceModel}
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg pointer-events-auto"
+                        >
+                            Place Model
+                        </button>
+                    </div>
+                    {/* Debug info */}
+                    <div className="absolute top-5 left-14 bg-black bg-opacity-50 text-white p-2 rounded pointer-events-none">
+                        {currentHitPosition
+                            ? `Hit: (${currentHitPosition.x.toFixed(
+                                  2
+                              )}, ${currentHitPosition.y.toFixed(
+                                  2
+                              )}, ${currentHitPosition.z.toFixed(2)})`
+                            : "No hit detected"}
+                        <br />
+                        Status:{" "}
+                        {isModelPlaced
+                            ? "Model Placed"
+                            : "Waiting for placement"}
+                    </div>
+                </>
             )}
-            {/* Debug info */}
-            <div className="absolute top-5 left-5 bg-black bg-opacity-50 text-white p-2 rounded pointer-events-none">
-                {currentHitPosition
-                    ? `Hit: (${currentHitPosition.x.toFixed(
-                          2
-                      )}, ${currentHitPosition.y.toFixed(
-                          2
-                      )}, ${currentHitPosition.z.toFixed(2)})`
-                    : "No hit detected"}
-                <br />
-                Status:{" "}
-                {isModelPlaced ? "Model Placed" : "Waiting for placement"}
-            </div>
+
             <ModelControls />
         </div>
     );
@@ -62,12 +67,13 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
     const { gl } = useThree();
     const { session, domOverlayRoot } = useXR();
     const matrixHelper = useRef(new Matrix4()); // Matrix helper for hit test position
-    const hitTestPosition = useRef(new Vector3());
-
-    // Add state for tracking model placement
+    // const hitTestPosition = useRef(new Vector3());
+    const hitTestResultRef = useRef<XRHitTestResult | null>(null);
     const [isModelPlaced, setIsModelPlaced] = useState(false);
     const [currentHitPosition, setCurrentHitPosition] =
         useState<Vector3 | null>(null);
+    // useXRAnchor hook gives us the current anchor and a function to request one
+    const [anchor, requestAnchor] = useXRAnchor();
 
     // If it's not the default model, preload it once when the component mounts
     useEffect(() => {
@@ -107,7 +113,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
         }
     }, [session, gl]);
 
-    // Sync hit test position with the CAD model only when placed
+    // If the model is already anchored and placed, sync the model position
     useFrame(() => {
         if (modelRef.current && isModelPlaced && currentHitPosition) {
             modelRef.current.position.copy(currentHitPosition);
@@ -116,18 +122,36 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
 
     // Render React components into the DOM overlay
     useEffect(() => {
-        // Function to handle model placement
-        const handlePlaceModel = () => {
+        const handlePlaceModel = async () => {
             console.log("Place model button clicked");
             console.log("Current hit position:", currentHitPosition);
 
-            if (currentHitPosition) {
-                hitTestPosition.current.copy(currentHitPosition);
+            if (hitTestResultRef.current && session) {
+                // Request an anchor relative to the hit test result
+                requestAnchor({
+                    relativeTo: "hit-test-result",
+                    hitTestResult: hitTestResultRef.current,
+                });
                 setIsModelPlaced(true);
-                console.log("Model placed at:", currentHitPosition);
-            } else {
-                setIsModelPlaced(true); // Place the model without hit position
-                console.warn("No valid hit position available for placement");
+                console.log(
+                    "Anchor requested at hit test result:",
+                    currentHitPosition
+                );
+            } else if (!hitTestResultRef.current && session) {
+                try {
+                    // Await the XRReferenceSpace before passing it to requestAnchor
+                    const referenceSpace = await session.requestReferenceSpace(
+                        "local-floor"
+                    );
+                    requestAnchor({
+                        relativeTo: "space",
+                        space: referenceSpace,
+                    });
+                    setIsModelPlaced(true);
+                    console.warn("No valid hit test available for anchoring");
+                } catch (error) {
+                    console.error("Failed to request reference space:", error);
+                }
             }
         };
 
@@ -135,7 +159,6 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             console.log("domOverlayRoot is available:", domOverlayRoot);
             const portalRoot = document.createElement("div");
             domOverlayRoot.appendChild(portalRoot);
-
             const root = ReactDOM.createRoot(portalRoot);
 
             // Wrap AROverlayContent with ModelConfigProvider to provide context
@@ -155,36 +178,38 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
                 domOverlayRoot.removeChild(portalRoot);
             };
         }
-    }, [domOverlayRoot, isModelPlaced, currentHitPosition]);
+    }, [
+        domOverlayRoot,
+        isModelPlaced,
+        currentHitPosition,
+        session,
+        requestAnchor,
+    ]);
 
     return (
         <>
-            {/* Hit test for positioning the model */}
             <XRHitTest
                 onResults={(results, getWorldMatrix) => {
                     if (results.length > 0) {
-                        // Get the world position from the hit test result
+                        // Save the hit test result for later anchoring
+                        hitTestResultRef.current = results[0];
                         getWorldMatrix(matrixHelper.current, results[0]);
                         const position = new Vector3().setFromMatrixPosition(
                             matrixHelper.current
                         );
-
-                        // Log the raw hit test results for debugging
                         console.log("Hit test results:", results);
                         console.log("Hit position:", position);
-
-                        // Only update the current hit position for preview
                         if (!isModelPlaced) {
                             setCurrentHitPosition(position);
                         }
                     } else {
                         console.log("No hit test results found.");
-                        setCurrentHitPosition(null); // Clear the hit position
+                        hitTestResultRef.current = null;
+                        setCurrentHitPosition(null);
                     }
                 }}
             />
 
-            {/* Lighting setup */}
             <ambientLight intensity={1.5} color="#ffffff" />
             <directionalLight
                 position={[5, 5, 5]}
@@ -195,24 +220,44 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             />
             <Environment preset="sunset" />
 
-            {/* Model with reference positioning */}
-            <group ref={modelRef}>
-                {/* Add a visual indicator for placement when not placed */}
-                {!isModelPlaced && currentHitPosition && (
-                    <mesh
-                        position={[0, -0.01, 0]}
-                        rotation={[-Math.PI / 2, 0, 0]}
-                    >
-                        <circleGeometry args={[0.15, 32]} />
-                        <meshBasicMaterial
-                            color="#4285F4"
-                            opacity={0.5}
-                            transparent
-                        />
-                    </mesh>
-                )}
-                <CADModel />
-            </group>
+            {/* If anchor exists, wrap the model group in XRSpace */}
+            {anchor ? (
+                <XRSpace space={anchor.anchorSpace}>
+                    <group ref={modelRef}>
+                        {!isModelPlaced && currentHitPosition && (
+                            <mesh
+                                position={[0, -0.01, 0]}
+                                rotation={[-Math.PI / 2, 0, 0]}
+                            >
+                                <circleGeometry args={[0.15, 32]} />
+                                <meshBasicMaterial
+                                    color="#4285F4"
+                                    opacity={0.5}
+                                    transparent
+                                />
+                            </mesh>
+                        )}
+                        <CADModel />
+                    </group>
+                </XRSpace>
+            ) : (
+                <group ref={modelRef}>
+                    {!isModelPlaced && currentHitPosition && (
+                        <mesh
+                            position={[0, -0.01, 0]}
+                            rotation={[-Math.PI / 2, 0, 0]}
+                        >
+                            <circleGeometry args={[0.15, 32]} />
+                            <meshBasicMaterial
+                                color="#4285F4"
+                                opacity={0.5}
+                                transparent
+                            />
+                        </mesh>
+                    )}
+                    <CADModel />
+                </group>
+            )}
         </>
     );
 }
