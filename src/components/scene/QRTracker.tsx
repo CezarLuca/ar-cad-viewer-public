@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
 import { useThree, useFrame } from "@react-three/fiber";
