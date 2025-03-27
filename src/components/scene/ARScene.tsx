@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { Group, Matrix4, Vector3 } from "three";
+import { Group, Matrix4, Vector3, Euler, Quaternion } from "three";
 import { useXR, XRHitTest, useXRAnchor, XRSpace } from "@react-three/xr";
 import { useThree, useFrame } from "@react-three/fiber";
 import { Environment, useGLTF } from "@react-three/drei";
 import CADModel from "./CADModel";
+import QRTracker from "./QRTracker";
 import ModelControls from "./ui/ModelControls";
 import { useModelUrl } from "@/context/ModelUrlContext";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
@@ -22,10 +23,14 @@ const AROverlayContent = ({
     onPlaceModel,
     isModelPlaced,
     currentHitPosition,
+    qrDetected,
+    qrContent,
 }: {
     onPlaceModel: () => void;
     isModelPlaced: boolean;
     currentHitPosition: Vector3 | null;
+    qrDetected: boolean;
+    qrContent: string;
 }) => {
     return (
         <div className="absolute top-12 left-0 right-0 bottom-0 z-20 pointer-events-none">
@@ -53,6 +58,11 @@ const AROverlayContent = ({
                         {isModelPlaced
                             ? "Model Placed"
                             : "Waiting for placement"}
+                        <br />
+                        QR:{" "}
+                        {qrDetected
+                            ? `Detected (${qrContent.substring(0, 15)}...)`
+                            : "None"}
                     </div>
                 </>
             )}
@@ -74,6 +84,28 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
         useState<Vector3 | null>(null);
     // useXRAnchor hook gives us the current anchor and a function to request one
     const [anchor, requestAnchor] = useXRAnchor();
+    const [qrDetected, setQrDetected] = useState(false);
+    const [qrPosition, setQrPosition] = useState<Vector3 | null>(null);
+    const [qrRotation, setQrRotation] = useState<Euler | null>(null);
+    const [qrContent, setQrContent] = useState<string>("");
+
+    // Handle QR code detection
+    const handleQRDetected = (
+        position: Vector3,
+        rotation: Euler,
+        content: string
+    ) => {
+        console.log("QR code detected in ARScene:", content);
+        setQrDetected(true);
+        setQrPosition(position);
+        setQrRotation(rotation);
+        setQrContent(content);
+
+        // Automatically place the model at QR code position if not already placed
+        if (!isModelPlaced) {
+            setCurrentHitPosition(position);
+        }
+    };
 
     // If it's not the default model, preload it once when the component mounts
     useEffect(() => {
@@ -124,9 +156,70 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
     useEffect(() => {
         const handlePlaceModel = async () => {
             console.log("Place model button clicked");
-            console.log("Current hit position:", currentHitPosition);
+            // console.log("Current hit position:", currentHitPosition);
 
-            if (hitTestResultRef.current && session) {
+            if (qrDetected && qrPosition && session) {
+                // If QR code detected, prioritize placing relative to QR code
+                console.log(
+                    "Placing model relative to QR code at:",
+                    qrPosition
+                );
+
+                try {
+                    // Check if the QR code contains a valid model URL
+                    if (
+                        qrContent &&
+                        qrContent.startsWith("http") &&
+                        qrContent.match(/\.(glb|gltf)$/i)
+                    ) {
+                        // Optionally load model from QR code URL
+                        console.log(
+                            "Loading model from QR code URL:",
+                            qrContent
+                        );
+                        // You would need to update your model context here
+                        // setModelUrl(qrContent);
+                    }
+
+                    // Create anchor at QR code position
+                    const referenceSpace = await session.requestReferenceSpace(
+                        "local-floor"
+                    );
+
+                    // Convert Euler rotation to a quaternion format that XRRigidTransform can use
+                    const quaternion = new Quaternion().setFromEuler(
+                        qrRotation!
+                    );
+
+                    // Create a transform at the QR position with the detected rotation
+                    const transform = new XRRigidTransform(
+                        { x: qrPosition.x, y: qrPosition.y, z: qrPosition.z },
+                        {
+                            x: quaternion.x,
+                            y: quaternion.y,
+                            z: quaternion.z,
+                            w: quaternion.w,
+                        }
+                    );
+
+                    // Create a new reference space that has the transform applied
+                    const transformedRefSpace =
+                        referenceSpace.getOffsetReferenceSpace(transform);
+
+                    // Request anchor using the transformed reference space
+                    requestAnchor({
+                        relativeTo: "space",
+                        space: transformedRefSpace,
+                    });
+
+                    setIsModelPlaced(true);
+                } catch (error) {
+                    console.error(
+                        "Failed to create anchor at QR position:",
+                        error
+                    );
+                }
+            } else if (hitTestResultRef.current && session) {
                 // Request an anchor relative to the hit test result
                 requestAnchor({
                     relativeTo: "hit-test-result",
@@ -168,6 +261,8 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
                         onPlaceModel={handlePlaceModel}
                         isModelPlaced={isModelPlaced}
                         currentHitPosition={currentHitPosition}
+                        qrDetected={qrDetected}
+                        qrContent={qrContent}
                     />
                 </ModelConfigProvider>
             );
@@ -184,10 +279,17 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
         currentHitPosition,
         session,
         requestAnchor,
+        qrDetected,
+        qrPosition,
+        qrRotation,
+        qrContent,
     ]);
 
     return (
         <>
+            {/* Add QRTracker component */}
+            <QRTracker onQRDetected={handleQRDetected} />
+
             <XRHitTest
                 onResults={(results, getWorldMatrix) => {
                     if (results.length > 0) {
