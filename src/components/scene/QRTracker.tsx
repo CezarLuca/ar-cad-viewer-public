@@ -19,6 +19,8 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isTracking, setIsTracking] = useState(false);
     const lastDetectionTime = useRef(0);
+    // New ref to throttle scanning regardless of detection success
+    const lastScanTime = useRef(0);
     const qrPositionRef = useRef<Vector3 | null>(null);
 
     useEffect(() => {
@@ -64,12 +66,13 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
         if (!isTracking || !videoRef.current || !canvasRef.current) return;
 
         const now = Date.now();
-        // Only scan for QR codes every 500ms
-        if (now - lastDetectionTime.current < 1000) return;
+        // Enforce scanning only once every second
+        if (now - lastScanTime.current < 1000) return;
+        lastScanTime.current = now;
 
         const video = videoRef.current;
         const canvas = canvasRef.current;
-        const context = canvas.getContext("2d", { willReadFrequently: true });
+        const context = canvas.getContext("2d");
 
         if (!context) return;
 
