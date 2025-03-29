@@ -112,7 +112,7 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
 
         // Detect QR code
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "attemptBoth",
+            inversionAttempts: "dontInvert",
         });
 
         if (code) {
