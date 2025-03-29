@@ -229,7 +229,17 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
             console.log("QR code detected:", code.data);
             console.log("QR position:", qrPosition);
             console.log("QR rotation:", qrRotation);
-            console.log("Estimated distance:", finalDistance, "meters");
+            console.log(
+                "Final distance:",
+                finalDistance,
+                "meters",
+                ", Estimated distance:",
+                estimatedDistance,
+                "meters",
+                ", Alternate estimated distance:",
+                alternateEstimatedDistance,
+                "meters"
+            );
         } else {
             // If no QR code is detected, reset the position to null
             qrPositionRef.current = null;
