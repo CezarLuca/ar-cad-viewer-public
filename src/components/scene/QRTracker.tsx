@@ -12,6 +12,7 @@ interface QRTrackerProps {
 
 const QR_SIZE_MM = 50; // Physical size of QR code in millimeters
 const QR_SIZE_M = QR_SIZE_MM / 500; // Convert to meters for THREE.js units
+const SCAN_INTERVAL = 500; // Interval for scanning in milliseconds
 
 const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
     // const { gl, camera, scene } = useThree();
@@ -24,6 +25,32 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
     // New ref to throttle scanning regardless of detection success
     const lastScanTime = useRef(0);
     const qrPositionRef = useRef<Vector3 | null>(null);
+
+    const preprocessImage = (
+        context: CanvasRenderingContext2D,
+        canvas: HTMLCanvasElement
+    ) => {
+        // Apply contrast enhancement and grayscale conversion
+        const imageData = context.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            const avg =
+                (imageData.data[i] +
+                    imageData.data[i + 1] +
+                    imageData.data[i + 2]) /
+                3;
+            imageData.data[i] =
+                imageData.data[i + 1] =
+                imageData.data[i + 2] =
+                    avg > 128 ? 255 : 0;
+        }
+        context.putImageData(imageData, 0, 0);
+        return context.getImageData(0, 0, canvas.width, canvas.height);
+    };
 
     useEffect(() => {
         if (!session) return;
@@ -65,12 +92,11 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
 
     // QR detection logic
     useFrame(() => {
-        if (!isTracking || !videoRef.current || !canvasRef.current) return;
-
         const now = Date.now();
         // Enforce scanning only once every second
-        if (now - lastScanTime.current < 1000) return;
+        if (now - lastScanTime.current < 2 * SCAN_INTERVAL) return;
         lastScanTime.current = now;
+        if (!isTracking || !videoRef.current || !canvasRef.current) return;
 
         const video = videoRef.current;
         const canvas = canvasRef.current;
@@ -80,16 +106,13 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
 
         // Draw video frame to canvas for processing
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = context.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
+
+        // Add image preprocessing for better detection
+        const imageData = preprocessImage(context, canvas);
 
         // Detect QR code
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "dontInvert",
+            inversionAttempts: "attemptBoth",
         });
 
         if (code) {
@@ -185,6 +208,11 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
                 rotationMatrix
             );
             const qrRotation = new Euler().setFromQuaternion(quaternion);
+
+            // Add spatial smoothing
+            if (qrPositionRef.current) {
+                qrPosition.lerp(qrPositionRef.current, 0.3);
+            }
 
             qrPositionRef.current = qrPosition;
             onQRDetected(qrPosition, qrRotation, code.data);

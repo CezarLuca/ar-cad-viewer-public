@@ -83,7 +83,7 @@ export default function UserModelsList() {
                                     )}`}
                                     className="bg-blue-600 hover:bg-blue-700 text-gray-200 px-3 py-1 rounded mr-2"
                                 >
-                                    View in AR
+                                    View in 3D
                                 </Link>
                             </div>
                         </div>

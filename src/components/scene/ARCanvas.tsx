@@ -7,7 +7,6 @@ import ARScene from "./ARScene";
 import ModelControls from "./ui/ModelControls";
 import OrbitControlsUI from "./ui/OrbitControlsUI";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
-// import * as THREE from "three";
 import { PerspectiveCamera } from "three";
 import Regular3DScene from "./Regular3DScene";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
