@@ -52,6 +52,10 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
         // Automatically place the model at QR code position if not already placed
         if (!isModelPlaced) {
             setCurrentHitPosition(position);
+            console.log(
+                "Setting current hit position to QR position:",
+                position
+            );
         }
     };
 
@@ -109,26 +113,13 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             if (qrDetected && qrPosition && session) {
                 // If QR code detected, prioritize placing relative to QR code
                 console.log(
-                    "Placing model relative to QR code at:",
-                    qrPosition
+                    "Placing model relative to QR code at: ",
+                    qrPosition,
+                    ", with rotation: ",
+                    qrRotation
                 );
 
                 try {
-                    // Check if the QR code contains a valid model URL
-                    if (
-                        qrContent &&
-                        qrContent.startsWith("http") &&
-                        qrContent.match(/\.(glb|gltf)$/i)
-                    ) {
-                        // Optionally load model from QR code URL
-                        console.log(
-                            "Loading model from QR code URL:",
-                            qrContent
-                        );
-                        // You would need to update your model context here
-                        // setModelUrl(qrContent);
-                    }
-
                     // Create anchor at QR code position
                     const referenceSpace = await session.requestReferenceSpace(
                         "local-floor"
@@ -161,6 +152,12 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
                     });
 
                     setIsModelPlaced(true);
+                    console.log(
+                        "Anchor created at QR position: ",
+                        qrPosition,
+                        ", in space: ",
+                        transformedRefSpace
+                    );
                 } catch (error) {
                     console.error(
                         "Failed to create anchor at QR position:",
@@ -175,7 +172,7 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
                 });
                 setIsModelPlaced(true);
                 console.log(
-                    "Anchor requested at hit test result:",
+                    "Anchor requested at hit test result: ",
                     currentHitPosition
                 );
             } else if (!hitTestResultRef.current && session) {

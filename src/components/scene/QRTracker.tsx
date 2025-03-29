@@ -76,6 +76,8 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
                 video.srcObject = stream;
                 video.play();
                 setIsTracking(true);
+                // // Temporarily append video to DOM for debugging
+                // document.body.appendChild(video);
             })
             .catch((err) => {
                 console.error("Error accessing camera: ", err);
@@ -87,6 +89,8 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
                 tracks.forEach((track) => track.stop());
             }
             setIsTracking(false);
+            // // Remove video from DOM
+            // document.body.removeChild(video);
         };
     }, [session]);
 
@@ -110,12 +114,16 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
         // Add image preprocessing for better detection
         const imageData = preprocessImage(context, canvas);
 
+        // Log camera properties
+        console.log("Camera properties:", camera);
+
         // Detect QR code
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
             inversionAttempts: "dontInvert",
         });
 
         if (code) {
+            console.log("QR code detected:", code.data);
             lastDetectionTime.current = now;
             // Extract QR code corners
             const topLeft = new Vector3(
@@ -222,6 +230,10 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
             console.log("QR position:", qrPosition);
             console.log("QR rotation:", qrRotation);
             console.log("Estimated distance:", finalDistance, "meters");
+        } else {
+            // If no QR code is detected, reset the position to null
+            qrPositionRef.current = null;
+            console.log("No QR code detected in the current frame.");
         }
     });
 
