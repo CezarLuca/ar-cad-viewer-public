@@ -11,8 +11,9 @@ interface QRTrackerProps {
 }
 
 const QR_SIZE_MM = 50; // Physical size of QR code in millimeters
-const QR_SIZE_M = QR_SIZE_MM / 500; // Convert to meters for THREE.js units
+const QR_SIZE_M = QR_SIZE_MM / 1000; // Convert to meters for THREE.js units
 const SCAN_INTERVAL = 500; // Interval for scanning in milliseconds
+const QR_CORRECTION = 0.1; // QR constant for correction based on testing
 
 const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
     // const { gl, camera, scene } = useThree();
@@ -178,7 +179,8 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
 
             // Calculate distance based on known physical size using 3D vectors
             // This gives us a distance in Three.js world units
-            const alternateEstimatedDistance = QR_SIZE_M / averageSize;
+            const alternateEstimatedDistance =
+                (QR_SIZE_M * QR_CORRECTION) / averageSize;
 
             // Calculate distance based on known physical size
             // Get the physical size of the QR code in the image
@@ -190,7 +192,8 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
             // Calculate distance based on apparent size in image vs real size
             const focalLength = canvas.width; // A rough approximation of focal length
             const estimatedDistance =
-                (QR_SIZE_M * focalLength) / (qrCodeInImageWidth / canvas.width);
+                (QR_SIZE_MM * focalLength) /
+                (qrCodeInImageWidth / canvas.width);
 
             const finalDistance =
                 (estimatedDistance + alternateEstimatedDistance) / 2;
