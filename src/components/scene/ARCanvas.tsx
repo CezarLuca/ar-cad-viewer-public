@@ -10,6 +10,7 @@ import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import { PerspectiveCamera } from "three";
 import Regular3DScene from "./Regular3DScene";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import ARQRScene from "./ARQRScene";
 
 const store = createXRStore({
     domOverlay: true,
@@ -25,6 +26,7 @@ export default function ARCanvas() {
     const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
     const [isARPresenting, setIsARPresenting] = useState(false);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+    const [viewMode, setViewMode] = useState<"3d" | "qr">("3d");
 
     // Handle canvas resize
     useEffect(() => {
@@ -83,7 +85,7 @@ export default function ARCanvas() {
                     }}
                 >
                     {/* Regular scene outside of XR context */}
-                    {!isARPresenting && (
+                    {!isARPresenting && viewMode === "3d" && (
                         <Suspense fallback={null}>
                             <Regular3DScene
                                 orbitControlsRef={orbitControlsRef}
@@ -99,9 +101,31 @@ export default function ARCanvas() {
                     </XR>
                 </Canvas>
 
+                {/* AR QR scene for QR code detection */}
+                {isARPresenting && viewMode === "qr" && (
+                    <Suspense fallback={null}>
+                        <ARQRScene />
+                    </Suspense>
+                )}
+
                 {/* Controls overlay - MOVED OUTSIDE THE CANVAS */}
                 {!isARPresenting && (
                     <>
+                        {/* Mode selector buttons */}
+                        <div className="absolute top-16 right-4 flex gap-2 z-50">
+                            <button
+                                className="cursor-pointer border border-gray-300 rounded px-4 py-2 bg-gray-500 text-gray-100 shadow-md shadow-gray-700 hover:bg-gray-600 hover:border-gray-500"
+                                onClick={() => setViewMode("3d")}
+                            >
+                                3D View
+                            </button>
+                            <button
+                                className="cursor-pointer border border-gray-300 rounded px-4 py-2 bg-gray-500 text-gray-100 shadow-md shadow-gray-700 hover:bg-gray-600 hover:border-gray-500"
+                                onClick={() => setViewMode("qr")}
+                            >
+                                AR View
+                            </button>
+                        </div>
                         <div className="absolute top-12 left-0 right-0 bottom-0 z-20 pointer-events-none">
                             <ModelControls />
                         </div>

@@ -11,6 +11,9 @@
         "old-db:setup": "ts-node -r tsconfig-paths/register src/db/setup.ts"
     },
     "dependencies": {
+        "@ar-js-org/ar.js": "^3.4.5",
+        "@ar-js-org/ar.js-threejs": "^0.3.2",
+        "@ar-js-org/artoolkit5-js": "^0.3.1",
         "@neondatabase/serverless": "^0.10.4",
         "@react-three/drei": "^10.0.2",
         "@react-three/fiber": "^9.0.4",

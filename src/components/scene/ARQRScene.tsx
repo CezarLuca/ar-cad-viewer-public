@@ -1,89 +1,127 @@
 "use client";
 
-import { useThree } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
-import * as THREE from "three";
+import { THREEx } from "@ar-js-org/ar.js-threejs";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useRef, useState, RefObject } from "react";
+import { Group, WebGLRenderer } from "three";
 import CADModel from "./CADModel";
 
-export default function ARQRScene() {
+interface ARContentProps {
+    arSceneRef: RefObject<THREEx.ArScene | null>;
+    markerGroupRef: RefObject<Group>;
+}
+
+// This component will handle the 3D rendering inside R3F
+function ARContent({ arSceneRef, markerGroupRef }: ARContentProps) {
+    // Get access to the R3F renderer
     const { gl } = useThree();
+
+    // Initialize AR.js within the R3F rendering context
+    useEffect(() => {
+        if (arSceneRef.current) {
+            arSceneRef.current.renderer = gl;
+        }
+    }, [gl, arSceneRef]);
+
+    // Add AR.js update to the R3F render loop
+    useFrame(() => {
+        if (arSceneRef.current) {
+            arSceneRef.current.process();
+            // Don't call arScene.render() here since R3F handles rendering
+        }
+    });
+
+    return (
+        <primitive object={markerGroupRef.current}>
+            <CADModel />
+        </primitive>
+    );
+}
+
+// Main component that sets up AR.js and contains the R3F Canvas
+export default function ARQRScene() {
     const [videoSize, setVideoSize] = useState({ width: 0, height: 0 });
     const videoRef = useRef<HTMLVideoElement>(null);
-    const markerGroupRef = useRef<THREE.Group>(new THREE.Group());
-    const arContextRef = useRef<any>(null);
+    const markerGroupRef = useRef<Group>(new Group());
+    const arSceneRef = useRef<THREEx.ArScene | null>(null);
 
     // AR.js initialization
     useEffect(() => {
-        let animationFrameId: number;
+        const videoElement = videoRef.current;
+        if (!videoElement) return;
 
         const initializeAR = async () => {
-            if (!videoRef.current) return;
+            try {
+                // Get camera stream
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                });
+                videoElement.srcObject = stream;
+                await videoElement.play();
 
-            // Get camera stream
-            const video = videoRef.current;
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" },
-            });
-            video.srcObject = stream;
-            await video.play();
+                // Set video dimensions
+                setVideoSize({
+                    width: videoElement.videoWidth,
+                    height: videoElement.videoHeight,
+                });
 
-            // Initialize AR.js
-            const arScene = new (window as any).THREEx.ArScene({
-                renderer: gl,
-                source: video,
-                cameraParametersUrl: "/data/camera_para.dat",
-                sourceWidth: video.videoWidth,
-                sourceHeight: video.videoHeight,
-                displayWidth: video.videoWidth,
-                displayHeight: video.videoHeight,
-            });
+                // Initialize AR.js
+                const renderer = new WebGLRenderer({
+                    antialias: true,
+                    alpha: true,
+                });
+                renderer.setSize(
+                    videoElement.videoWidth,
+                    videoElement.videoHeight
+                );
 
-            // Add marker detection
-            const markerControls = new (window as any).THREEx.ArMarkerControls(
-                arScene,
-                {
-                    type: "pattern",
-                    patternUrl: "/data/qr-code.patt",
-                    size: 1,
-                }
-            );
+                const arScene = new THREEx.ArScene({
+                    source: videoElement,
+                    cameraParametersUrl: "/data/camera_para.dat",
+                    sourceWidth: videoElement.videoWidth,
+                    sourceHeight: videoElement.videoHeight,
+                    displayWidth: videoElement.videoWidth,
+                    displayHeight: videoElement.videoHeight,
+                    renderer: renderer, // Add the renderer here
+                });
 
-            // Position model relative to marker
-            markerControls.addEventListener("markerFound", (event: any) => {
-                markerGroupRef.current.visible = true;
-                markerGroupRef.current.matrix.copy(event.data.matrix);
-            });
+                // Add marker detection
+                const markerControls = new THREEx.ArMarkerControls(
+                    arScene,
+                    markerGroupRef.current,
+                    {
+                        type: "pattern",
+                        patternUrl: "/data/qr-code.patt",
+                        size: 1,
+                    }
+                );
 
-            markerControls.addEventListener("markerLost", () => {
-                markerGroupRef.current.visible = false;
-            });
+                // Position model relative to marker
+                markerControls.addEventListener("markerFound", (event) => {
+                    markerGroupRef.current.visible = true;
+                    markerGroupRef.current.matrix.copy(event.data.matrix);
+                });
 
-            arContextRef.current = arScene;
-            setVideoSize({
-                width: video.videoWidth,
-                height: video.videoHeight,
-            });
+                markerControls.addEventListener("markerLost", () => {
+                    markerGroupRef.current.visible = false;
+                });
 
-            // Render loop
-            const animate = () => {
-                arScene.process();
-                arScene.render();
-                animationFrameId = requestAnimationFrame(animate);
-            };
-            animate();
+                arSceneRef.current = arScene;
+            } catch (error) {
+                console.error("Error initializing AR:", error);
+            }
         };
 
-        initializeAR().catch(console.error);
+        initializeAR();
 
         return () => {
-            cancelAnimationFrame(animationFrameId);
-            if (videoRef.current?.srcObject) {
-                (videoRef.current.srcObject as MediaStream)
+            if (videoElement?.srcObject) {
+                (videoElement.srcObject as MediaStream)
                     .getTracks()
                     .forEach((track) => track.stop());
             }
         };
-    }, [gl]);
+    }, []);
 
     return (
         <>
@@ -97,14 +135,21 @@ export default function ARQRScene() {
                     opacity: 0,
                     pointerEvents: "none",
                     zIndex: -1,
+                    width: videoSize.width,
+                    height: videoSize.height,
                 }}
                 playsInline
             />
 
-            {/* AR Content */}
-            <primitive object={markerGroupRef.current}>
-                <CADModel />
-            </primitive>
+            {/* R3F Canvas for 3D content */}
+            <Canvas
+                style={{ position: "absolute", top: 0, left: 0, zIndex: 1 }}
+            >
+                <ARContent
+                    arSceneRef={arSceneRef}
+                    markerGroupRef={markerGroupRef}
+                />
+            </Canvas>
         </>
     );
 }
