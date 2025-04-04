@@ -112,7 +112,7 @@ export default function ARCanvas() {
                 {!isARPresenting && (
                     <>
                         {/* Mode selector buttons */}
-                        <div className="absolute top-16 right-4 flex gap-2 z-50">
+                        <div className="absolute bottom-4 right-4 flex gap-2 z-50">
                             <button
                                 className="cursor-pointer border border-gray-300 rounded px-4 py-2 bg-gray-500 text-gray-100 shadow-md shadow-gray-700 hover:bg-gray-600 hover:border-gray-500"
                                 onClick={() => setViewMode("3d")}
