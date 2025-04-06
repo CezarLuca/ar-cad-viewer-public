@@ -5,14 +5,10 @@ export default function AROverlayContent({
     onPlaceModel,
     isModelPlaced,
     currentHitPosition,
-    qrDetected,
-    qrContent,
 }: {
     onPlaceModel: () => void;
     isModelPlaced: boolean;
     currentHitPosition: Vector3 | null;
-    qrDetected: boolean;
-    qrContent: string;
 }) {
     return (
         <div className="absolute top-12 left-0 right-0 bottom-0 z-20 pointer-events-none">
@@ -40,11 +36,6 @@ export default function AROverlayContent({
                         {isModelPlaced
                             ? "Model Placed"
                             : "Waiting for placement"}
-                        <br />
-                        QR:{" "}
-                        {qrDetected
-                            ? `Detected (${qrContent.substring(0, 15)}...)`
-                            : "None"}
                     </div>
                 </>
             )}
