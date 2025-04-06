@@ -70,12 +70,6 @@ const QRTracker: React.FC<QRTrackerProps> = ({ onQRDetected }) => {
         canvas.width = 480;
         canvas.height = 360;
 
-        // Wait for video to be ready before starting scanning
-        video.addEventListener("canplay", () => {
-            video.play();
-            setIsTracking(true);
-        });
-
         // Get user media
         navigator.mediaDevices
             .getUserMedia({ video: { facingMode: "environment" } })
