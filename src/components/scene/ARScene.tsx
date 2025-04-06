@@ -2,15 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { Group, Matrix4, Vector3, Euler, Quaternion } from "three";
+import { Group, Matrix4, Vector3 } from "three";
 import { useXR, XRHitTest, useXRAnchor, XRSpace } from "@react-three/xr";
-// import { useThree, useFrame } from "@react-three/fiber";
 import { useFrame } from "@react-three/fiber";
 import { Environment, useGLTF } from "@react-three/drei";
-import CADModel from "./CADModel";
 import AROverlayContent from "./ui/AROverlayContent";
 import { useModelUrl } from "@/context/ModelUrlContext";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
+import CADModel from "./CADModel";
+// import qrTracker from "markers/frame.png";
 
 interface ARSceneProps {
     setIsARPresenting: (isPresenting: boolean) => void;
