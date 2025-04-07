@@ -1,7 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useState, useRef } from "react";
-// import { XRSession, XRWebGLLayer } from "webxr-types"; // optional, for type hinting
+
+interface XRSessionInitExtended extends XRSessionInit {
+    trackedImages?: {
+        image: Promise<ImageBitmap>;
+        widthInMeters: number;
+    }[];
+}
 
 interface ARContextValue {
     isARPresenting: boolean;
@@ -16,6 +22,18 @@ const ARContext = createContext<ARContextValue>({
     enterAR: async () => {},
     exitAR: () => {},
 });
+
+// const image = new Image();
+// image.src = "/markers/qrTracker.png";
+// await image.decode();
+// const imageBitmapPromise = createImageBitmap(image);
+// imageBitmapPromise
+//     .then((bitmap) => {
+//         console.log("Image bitmap created:", bitmap);
+//     })
+//     .catch((error) => {
+//         console.error("Error creating image bitmap:", error);
+//     });
 
 export const ARProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
@@ -33,9 +51,19 @@ export const ARProvider: React.FC<{ children: React.ReactNode }> = ({
                     const session = await navigator.xr.requestSession(
                         "immersive-ar",
                         {
-                            requiredFeatures: ["local-floor", "dom-overlay"],
-                            domOverlay: { root: containerRef.current },
-                        }
+                            requiredFeatures: [
+                                "local-floor",
+                                "dom-overlay",
+                                "image-tracking",
+                            ],
+                            // domOverlay: { root: containerRef.current },
+                            // trackedImages: [
+                            //     {
+                            //         image: imageBitmapPromise,
+                            //         widthInMeters: 0.1, // Specify the real-world size
+                            //     },
+                            // ],
+                        } as XRSessionInitExtended
                     );
 
                     session.addEventListener("end", () => {

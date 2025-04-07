@@ -2,140 +2,167 @@
 
 import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { Group, Matrix4, Vector3 } from "three";
-import { useXR, XRHitTest, useXRAnchor, XRSpace } from "@react-three/xr";
-import { useFrame } from "@react-three/fiber";
+import { Group, Matrix4 } from "three";
 import { Environment, useGLTF } from "@react-three/drei";
+import CADModel from "./CADModel";
 import AROverlayContent from "./ui/AROverlayContent";
 import { useModelUrl } from "@/context/ModelUrlContext";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
-import CADModel from "./CADModel";
-// import qrTracker from "markers/frame.png";
+import { useAR } from "@/context/ARContext";
 
-// interface ARSceneProps {
-//     setIsARPresenting: (isPresenting: boolean) => void;
+// interface XRImageTrackingResult {
+//     imageSpace: XRReferenceSpace;
+//     trackingState: "tracked" | "emulated" | "not-tracked";
+// }
+
+// interface XRFrame {
+//     getImageTrackingResults(): XRImageTrackingResult[];
+//     getPose(
+//         space: XRReferenceSpace,
+//         baseSpace: XRReferenceSpace
+//     ): XRPose | null;
 // }
 
 const engineModel = "/models/engine.glb";
 useGLTF.preload(engineModel);
 
 export default function ARScene() {
+    const { isARPresenting, containerRef } = useAR(); // Access ARContext
     const { modelUrl } = useModelUrl();
-    const modelRef = useRef<Group>(null);
-    // const { gl } = useThree();
-    const { session, domOverlayRoot } = useXR();
-    const matrixHelper = useRef(new Matrix4()); // Matrix helper for hit test position
-    // const hitTestPosition = useRef(new Vector3());
-    const hitTestResultRef = useRef<XRHitTestResult | null>(null);
+    const modelRef = useRef<Group>(null); // Reference to the 3D model group
+    const [trackedImageMatrix, setTrackedImageMatrix] =
+        useState<Matrix4 | null>(null);
     const [isModelPlaced, setIsModelPlaced] = useState(false);
-    const [currentHitPosition, setCurrentHitPosition] =
-        useState<Vector3 | null>(null);
-    // useXRAnchor hook gives us the current anchor and a function to request one
-    const [anchor, requestAnchor] = useXRAnchor();
 
-    // If it's not the default model, preload it once when the component mounts
+    // Preload model if not the default engine model
     useEffect(() => {
         if (modelUrl !== engineModel) {
             useGLTF.preload(modelUrl);
         }
     }, [modelUrl]);
 
-    // If the model is already anchored and placed, sync the model position
-    useFrame(() => {
-        if (modelRef.current && isModelPlaced && currentHitPosition) {
-            modelRef.current.position.copy(currentHitPosition);
-        }
-    });
-
-    // Render React components into the DOM overlay
+    // Start WebXR session and set up image tracking
     useEffect(() => {
-        const handlePlaceModel = async () => {
-            console.log("Place model button clicked");
-            // console.log("Current hit position:", currentHitPosition);
-            if (hitTestResultRef.current && session) {
-                // Request an anchor relative to the hit test result
-                requestAnchor({
-                    relativeTo: "hit-test-result",
-                    hitTestResult: hitTestResultRef.current,
-                });
-                setIsModelPlaced(true);
-                console.log(
-                    "Anchor requested at hit test result: ",
-                    currentHitPosition
-                );
-            } else if (!hitTestResultRef.current && session) {
+        const startARSession = async () => {
+            if (navigator.xr && isARPresenting) {
                 try {
-                    // Await the XRReferenceSpace before passing it to requestAnchor
-                    const referenceSpace = await session.requestReferenceSpace(
-                        "local-floor"
+                    const session = await navigator.xr.requestSession(
+                        "immersive-ar",
+                        {
+                            requiredFeatures: [
+                                "image-tracking",
+                                "local-floor",
+                                "dom-overlay",
+                            ],
+                        }
                     );
-                    requestAnchor({
-                        relativeTo: "space",
-                        space: referenceSpace,
+
+                    // Load the image to be tracked
+                    const image = new Image();
+                    image.src = "/markers/qrTracker.png";
+                    await image.decode();
+
+                    const imageBitmap = await createImageBitmap(image);
+
+                    session.updateRenderState({
+                        domOverlay: { root: containerRef.current },
+                        trackedImages: [
+                            { image: imageBitmap, widthInMeters: 0.1 }, // Specify the real-world size
+                        ],
                     });
-                    setIsModelPlaced(true);
-                    console.warn("No valid hit test available for anchoring");
+
+                    session.addEventListener("end", () => {
+                        console.log("AR session ended.");
+                    });
+
+                    // Request the reference space once and await it.
+                    const referenceSpace = await session.requestReferenceSpace(
+                        "local"
+                    );
+
+                    // Handle image tracking results
+                    const onXRFrame = (
+                        time: DOMHighResTimeStamp,
+                        frame: XRFrame
+                    ) => {
+                        const imageTrackingResults =
+                            frame.getImageTrackingResults();
+
+                        imageTrackingResults.forEach((result) => {
+                            if (
+                                result.imageSpace &&
+                                result.trackingState === "tracked"
+                            ) {
+                                // We assume result.imageSpace is a XRReferenceSpace here.
+                                const pose = frame.getPose(
+                                    result.imageSpace as XRReferenceSpace,
+                                    referenceSpace
+                                );
+                                if (pose) {
+                                    const matrix = new Matrix4().fromArray(
+                                        pose.transform.matrix
+                                    );
+                                    setTrackedImageMatrix(matrix);
+                                }
+                            }
+                        });
+
+                        session.requestAnimationFrame(onXRFrame);
+                    };
+
+                    session.requestAnimationFrame(onXRFrame);
                 } catch (error) {
-                    console.error("Failed to request reference space:", error);
+                    console.error("Failed to start AR session:", error);
                 }
             }
         };
 
-        if (domOverlayRoot) {
-            console.log("domOverlayRoot is available:", domOverlayRoot);
-            const portalRoot = document.createElement("div");
-            domOverlayRoot.appendChild(portalRoot);
-            const root = ReactDOM.createRoot(portalRoot);
-
-            // Wrap AROverlayContent with ModelConfigProvider to provide context
-            root.render(
-                <ModelConfigProvider>
-                    <AROverlayContent
-                        onPlaceModel={handlePlaceModel}
-                        isModelPlaced={isModelPlaced}
-                        currentHitPosition={currentHitPosition}
-                    />
-                </ModelConfigProvider>
-            );
-
-            // Cleanup on unmount
-            return () => {
-                root.unmount();
-                domOverlayRoot.removeChild(portalRoot);
-            };
+        if (isARPresenting) {
+            startARSession();
         }
-    }, [
-        domOverlayRoot,
-        isModelPlaced,
-        currentHitPosition,
-        session,
-        requestAnchor,
-    ]);
+    }, [isARPresenting, containerRef]);
+
+    // Render overlay content
+    useEffect(() => {
+        // Capture the current container element
+        const currentContainer = containerRef.current;
+        const portalRoot = document.createElement("div");
+        if (currentContainer) {
+            currentContainer.appendChild(portalRoot);
+        }
+        const root = ReactDOM.createRoot(portalRoot);
+
+        root.render(
+            <ModelConfigProvider>
+                <AROverlayContent
+                    onPlaceModel={() => {
+                        if (trackedImageMatrix) {
+                            setIsModelPlaced(true);
+                            console.log(
+                                "Model placed at tracked image location."
+                            );
+                        } else {
+                            console.error(
+                                "No tracked image available for placement."
+                            );
+                        }
+                    }}
+                    isModelPlaced={isModelPlaced}
+                />
+            </ModelConfigProvider>
+        );
+
+        return () => {
+            root.unmount();
+            // Use the captured container element for cleanup
+            if (currentContainer) {
+                currentContainer.removeChild(portalRoot);
+            }
+        };
+    }, [containerRef, isModelPlaced, trackedImageMatrix]);
 
     return (
         <>
-            <XRHitTest
-                onResults={(results, getWorldMatrix) => {
-                    if (results.length > 0) {
-                        // Save the hit test result for later anchoring
-                        hitTestResultRef.current = results[0];
-                        getWorldMatrix(matrixHelper.current, results[0]);
-                        const position = new Vector3().setFromMatrixPosition(
-                            matrixHelper.current
-                        );
-                        console.log("Hit test results:", results);
-                        console.log("Hit position:", position);
-                        if (!isModelPlaced) {
-                            setCurrentHitPosition(position);
-                        }
-                    } else {
-                        console.log("No hit test results found.");
-                        hitTestResultRef.current = null;
-                        setCurrentHitPosition(null);
-                    }
-                }}
-            />
-
             <ambientLight intensity={1.5} color="#ffffff" />
             <directionalLight
                 position={[5, 5, 5]}
@@ -146,44 +173,14 @@ export default function ARScene() {
             />
             <Environment preset="sunset" />
 
-            {/* If anchor exists, wrap the model group in XRSpace */}
-            {anchor ? (
-                <XRSpace space={anchor.anchorSpace}>
-                    <group ref={modelRef}>
-                        {!isModelPlaced && currentHitPosition && (
-                            <mesh
-                                position={[0, -0.01, 0]}
-                                rotation={[-Math.PI / 2, 0, 0]}
-                            >
-                                <circleGeometry args={[0.15, 32]} />
-                                <meshBasicMaterial
-                                    color="#4285F4"
-                                    opacity={0.5}
-                                    transparent
-                                />
-                            </mesh>
-                        )}
+            {/* Render CADModel relative to the tracked image */}
+            <group ref={modelRef} matrixAutoUpdate={false}>
+                {trackedImageMatrix && (
+                    <mesh matrix={trackedImageMatrix.toArray()}>
                         <CADModel />
-                    </group>
-                </XRSpace>
-            ) : (
-                <group ref={modelRef}>
-                    {!isModelPlaced && currentHitPosition && (
-                        <mesh
-                            position={[0, -0.01, 0]}
-                            rotation={[-Math.PI / 2, 0, 0]}
-                        >
-                            <circleGeometry args={[0.15, 32]} />
-                            <meshBasicMaterial
-                                color="#4285F4"
-                                opacity={0.5}
-                                transparent
-                            />
-                        </mesh>
-                    )}
-                    <CADModel />
-                </group>
-            )}
+                    </mesh>
+                )}
+            </group>
         </>
     );
 }

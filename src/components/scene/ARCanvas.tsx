@@ -12,10 +12,8 @@ import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import { useAR } from "@/context/ARContext";
 
 export default function ARCanvas() {
-    // const containerRef = useRef<HTMLDivElement>(null);
     const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
     const { isARPresenting, containerRef } = useAR(); // Use ARContext
-    // const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
     const canvasSize = {
         width: containerRef.current?.clientWidth || 0,
         height: containerRef.current?.clientHeight || 0,
