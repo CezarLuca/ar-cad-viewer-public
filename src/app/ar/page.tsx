@@ -21,7 +21,7 @@ const DynamicARCanvas = dynamic(
 );
 
 // Also import the enterAR function
-import { enterAR } from "@/components/scene/ARCanvas";
+// import { enterAR } from "@/components/scene/ARCanvas";
 
 export default function ARPage() {
     const searchParams = useSearchParams();
@@ -29,7 +29,8 @@ export default function ARPage() {
 
     return (
         <ModelUrlProvider modelUrl={modelUrl}>
-            <Navbar onEnterAR={enterAR} />
+            {/* <Navbar onEnterAR={enterAR} /> */}
+            <Navbar />
             <main className="h-screen w-screen">
                 <Suspense fallback={<Loading />}>
                     <DynamicARCanvas />
