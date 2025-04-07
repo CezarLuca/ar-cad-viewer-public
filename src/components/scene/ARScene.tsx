@@ -12,14 +12,14 @@ import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import CADModel from "./CADModel";
 // import qrTracker from "markers/frame.png";
 
-interface ARSceneProps {
-    setIsARPresenting: (isPresenting: boolean) => void;
-}
+// interface ARSceneProps {
+//     setIsARPresenting: (isPresenting: boolean) => void;
+// }
 
 const engineModel = "/models/engine.glb";
 useGLTF.preload(engineModel);
 
-export default function ARScene({ setIsARPresenting }: ARSceneProps) {
+export default function ARScene() {
     const { modelUrl } = useModelUrl();
     const modelRef = useRef<Group>(null);
     // const { gl } = useThree();
@@ -39,16 +39,6 @@ export default function ARScene({ setIsARPresenting }: ARSceneProps) {
             useGLTF.preload(modelUrl);
         }
     }, [modelUrl]);
-
-    // Update parent about AR session status
-    useEffect(() => {
-        if (session) {
-            const isVisible = session.visibilityState === "visible";
-            setIsARPresenting(isVisible);
-        } else {
-            setIsARPresenting(false);
-        }
-    }, [session, setIsARPresenting]);
 
     // If the model is already anchored and placed, sync the model position
     useFrame(() => {

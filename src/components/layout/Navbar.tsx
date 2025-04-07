@@ -17,11 +17,8 @@ export default function Navbar({ rightContent }: NavbarProps) {
     const pathname = usePathname();
     const { isARPresenting, enterAR, exitAR } = useAR();
 
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-    };
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-    // Toggle AR session
     const toggleAR = () => {
         if (isARPresenting) {
             exitAR();
@@ -30,9 +27,7 @@ export default function Navbar({ rightContent }: NavbarProps) {
         }
     };
 
-    // Determine if we're on the dashboard page
     const isDashboard = pathname === "/dashboard";
-    // Determine if we're on the AR page
     const isARPage = pathname === "/ar";
 
     return (
@@ -54,7 +49,7 @@ export default function Navbar({ rightContent }: NavbarProps) {
                             )}
                             <button
                                 onClick={toggleMenu}
-                                className="block p-2 focus:outline-none focus:bg-gray-700 rounded"
+                                className="block p-2 focus:outline-none rounded"
                                 aria-label="Menu"
                             >
                                 <svg
@@ -77,8 +72,7 @@ export default function Navbar({ rightContent }: NavbarProps) {
                                 </svg>
                             </button>
                         </div>
-                    ) : // For non-authenticated users on the AR page, show the AR toggle button
-                    isARPage ? (
+                    ) : isARPage ? (
                         <button
                             onClick={toggleAR}
                             className="bg-blue-600 text-gray-200 px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -93,7 +87,7 @@ export default function Navbar({ rightContent }: NavbarProps) {
 
             {session && (
                 <div
-                    className={`fixed top-14 right-0 z-40 bg-gray-200 border-l border-b border-gray-300 shadow-lg rounded-bl-lg transition-all duration-300 overflow-hidden ${
+                    className={`fixed top-14 right-0 z-40 bg-gray-200 border-l border-b shadow-lg rounded-bl-lg transition-all duration-300 ${
                         isMenuOpen ? "w-56 max-h-80" : "w-0 max-h-0"
                     }`}
                 >

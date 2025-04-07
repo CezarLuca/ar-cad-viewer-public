@@ -1,45 +1,44 @@
 "use client";
 
+import { Suspense, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { PerspectiveCamera } from "three";
 import ARScene from "./ARScene";
+import Regular3DScene from "./Regular3DScene";
 import ModelControls from "./ui/ModelControls";
 import OrbitControlsUI from "./ui/OrbitControlsUI";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
-import { PerspectiveCamera } from "three";
-import Regular3DScene from "./Regular3DScene";
-import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { useAR } from "@/context/ARContext";
 
 export default function ARCanvas() {
-    const containerRef = useRef<HTMLDivElement>(null);
+    // const containerRef = useRef<HTMLDivElement>(null);
     const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
-    const [isARPresenting, setIsARPresenting] = useState(false);
-    const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+    const { isARPresenting, containerRef } = useAR(); // Use ARContext
+    // const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+    const canvasSize = {
+        width: containerRef.current?.clientWidth || 0,
+        height: containerRef.current?.clientHeight || 0,
+    };
 
     // Handle canvas resize
     useEffect(() => {
         const updateSize = () => {
             if (!containerRef.current) return;
-            setCanvasSize({
-                width: containerRef.current.clientWidth,
-                height: containerRef.current.clientHeight,
-            });
+            const width = containerRef.current.clientWidth;
+            const height = containerRef.current.clientHeight;
+            containerRef.current.style.width = `${width}px`;
+            containerRef.current.style.height = `${height}px`;
         };
 
         updateSize();
 
         window.addEventListener("resize", updateSize);
 
-        const resizeObserver = new ResizeObserver(updateSize);
-        if (containerRef.current) {
-            resizeObserver.observe(containerRef.current);
-        }
-
         return () => {
             window.removeEventListener("resize", updateSize);
-            resizeObserver.disconnect();
         };
-    }, []);
+    }, [containerRef]);
 
     return (
         <ModelConfigProvider>
@@ -81,7 +80,7 @@ export default function ARCanvas() {
                     {/* AR Scene */}
                     {isARPresenting && (
                         <Suspense fallback={null}>
-                            <ARScene setIsARPresenting={setIsARPresenting} />
+                            <ARScene />
                         </Suspense>
                     )}
                 </Canvas>
