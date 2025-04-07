@@ -41,42 +41,6 @@ export default function ARCanvas() {
         };
     }, []);
 
-    // Handle AR session setup
-    const enterAR = async () => {
-        if (navigator.xr) {
-            const isSupported = await navigator.xr.isSessionSupported(
-                "immersive-ar"
-            );
-            if (isSupported) {
-                const session = await navigator.xr.requestSession(
-                    "immersive-ar",
-                    {
-                        requiredFeatures: ["local-floor", "dom-overlay"],
-                        domOverlay: { root: containerRef.current! },
-                    }
-                );
-
-                session.addEventListener("end", () => {
-                    console.log("AR session ended.");
-                    setIsARPresenting(false);
-                });
-
-                // Create WebXRLayer for rendering
-                session.updateRenderState({
-                    baseLayer: new XRWebGLLayer(
-                        session,
-                        document.createElement("canvas").getContext("webgl")!
-                    ),
-                });
-
-                setIsARPresenting(true);
-                console.log("AR session started!");
-            } else {
-                console.error("AR not supported on this device.");
-            }
-        }
-    };
-
     return (
         <ModelConfigProvider>
             {/* Canvas Container */}
@@ -135,16 +99,6 @@ export default function ARCanvas() {
                         </div>
                     </>
                 )}
-            </div>
-
-            {/* AR Toggle Button */}
-            <div className="absolute top-4 left-4 z-10">
-                <button
-                    onClick={enterAR}
-                    className="px-4 py-2 bg-blue-500 text-white rounded shadow"
-                >
-                    {isARPresenting ? "Exit AR" : "Enter AR"}
-                </button>
             </div>
         </ModelConfigProvider>
     );

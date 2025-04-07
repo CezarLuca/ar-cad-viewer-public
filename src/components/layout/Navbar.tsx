@@ -5,19 +5,29 @@ import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAR } from "@/context/ARContext";
 
 interface NavbarProps {
     rightContent?: React.ReactNode;
-    onEnterAR?: () => void;
 }
 
-export default function Navbar({ rightContent, onEnterAR }: NavbarProps) {
+export default function Navbar({ rightContent }: NavbarProps) {
     const { data: session } = useSession();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const pathname = usePathname();
+    const { isARPresenting, enterAR, exitAR } = useAR();
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
+    };
+
+    // Toggle AR session
+    const toggleAR = () => {
+        if (isARPresenting) {
+            exitAR();
+        } else {
+            enterAR();
+        }
     };
 
     // Determine if we're on the dashboard page
@@ -37,7 +47,6 @@ export default function Navbar({ rightContent, onEnterAR }: NavbarProps) {
                 <div className="flex items-center">
                     {session ? (
                         <div className="flex items-center space-x-4">
-                            {/* Only show welcome message on dashboard */}
                             {isDashboard && (
                                 <span className="text-xl text-gray-200 hidden sm:inline">
                                     Welcome, {session.user?.name}
@@ -68,13 +77,13 @@ export default function Navbar({ rightContent, onEnterAR }: NavbarProps) {
                                 </svg>
                             </button>
                         </div>
-                    ) : // If on AR page and not logged in, show Enter AR button instead of login/register
-                    isARPage && onEnterAR ? (
+                    ) : // For non-authenticated users on the AR page, show the AR toggle button
+                    isARPage ? (
                         <button
-                            onClick={onEnterAR}
+                            onClick={toggleAR}
                             className="bg-blue-600 text-gray-200 px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                         >
-                            Enter AR
+                            {isARPresenting ? "Exit AR" : "Enter AR"}
                         </button>
                     ) : (
                         rightContent
@@ -82,7 +91,6 @@ export default function Navbar({ rightContent, onEnterAR }: NavbarProps) {
                 </div>
             </header>
 
-            {/* Vertical collapsible menu that appears below the navbar - only for authenticated users */}
             {session && (
                 <div
                     className={`fixed top-14 right-0 z-40 bg-gray-200 border-l border-b border-gray-300 shadow-lg rounded-bl-lg transition-all duration-300 overflow-hidden ${
@@ -90,17 +98,16 @@ export default function Navbar({ rightContent, onEnterAR }: NavbarProps) {
                     }`}
                 >
                     <div className="flex flex-col py-2">
-                        {/* Show Enter AR button only on AR page */}
-                        {isARPage && onEnterAR && (
+                        {isARPage && (
                             <>
                                 <button
                                     onClick={() => {
-                                        onEnterAR();
+                                        toggleAR();
                                         setIsMenuOpen(false);
                                     }}
                                     className="px-6 py-2 text-left hover:bg-blue-100 text-blue-700 font-semibold"
                                 >
-                                    Enter AR Mode
+                                    {isARPresenting ? "Exit AR" : "Enter AR"}
                                 </button>
                                 <div className="border-t border-gray-300 my-1"></div>
                             </>

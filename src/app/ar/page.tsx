@@ -1,41 +1,28 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Loading from "@/app/loading";
 import Navbar from "@/components/layout/Navbar";
 import { useSearchParams } from "next/navigation";
 import { ModelUrlProvider } from "@/context/ModelUrlContext";
 import { Suspense } from "react";
-
-// Import without SSR
-const DynamicARCanvas = dynamic(
-    () =>
-        import("@/components/scene/ARCanvas").then((mod) => {
-            // Store the enterAR function for later use
-            return { default: mod.default };
-        }),
-    {
-        ssr: false,
-        loading: () => <Loading />,
-    }
-);
-
-// Also import the enterAR function
-// import { enterAR } from "@/components/scene/ARCanvas";
+import ARCanvas from "@/components/scene/ARCanvas";
+import { ARProvider } from "@/context/ARContext";
 
 export default function ARPage() {
     const searchParams = useSearchParams();
     const modelUrl = searchParams.get("model") || "/models/engine.glb";
 
     return (
-        <ModelUrlProvider modelUrl={modelUrl}>
-            {/* <Navbar onEnterAR={enterAR} /> */}
-            <Navbar />
-            <main className="h-screen w-screen">
-                <Suspense fallback={<Loading />}>
-                    <DynamicARCanvas />
-                </Suspense>
-            </main>
-        </ModelUrlProvider>
+        <ARProvider>
+            <ModelUrlProvider modelUrl={modelUrl}>
+                {/* <Navbar onEnterAR={enterAR} /> */}
+                <Navbar />
+                <main className="h-screen w-screen">
+                    <Suspense fallback={<Loading />}>
+                        <ARCanvas />
+                    </Suspense>
+                </main>
+            </ModelUrlProvider>
+        </ARProvider>
     );
 }
