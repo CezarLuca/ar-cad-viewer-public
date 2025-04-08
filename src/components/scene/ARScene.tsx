@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import ReactDOM from "react-dom/client";
 import { Group, Matrix4 } from "three";
-import { Environment, useGLTF, useThree } from "@react-three/drei";
+import { Environment, useGLTF } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
 import CADModel from "./CADModel";
 import AROverlayContent from "./ui/AROverlayContent";
 import { useModelUrl } from "@/context/ModelUrlContext";
@@ -33,6 +34,17 @@ export default function ARScene() {
     const initializeAR = useCallback(async () => {
         if (navigator.xr && isARPresenting && containerRef.current) {
             try {
+                const img = new Image();
+                img.src = new URL(
+                    "/markers/qrTracker.png",
+                    window.location.origin
+                ).href;
+                await new Promise((resolve, reject) => {
+                    img.onload = () => resolve(null);
+                    img.onerror = () =>
+                        reject(new Error("Failed to load image"));
+                });
+
                 const session = await navigator.xr.requestSession(
                     "immersive-ar",
                     {
@@ -43,12 +55,7 @@ export default function ARScene() {
                         ],
                         trackedImages: [
                             {
-                                image: await createImageBitmap(
-                                    new URL(
-                                        "/markers/qrTracker.png",
-                                        window.location.origin
-                                    )
-                                ),
+                                image: await createImageBitmap(img),
                                 widthInMeters: 0.1,
                             },
                         ],
