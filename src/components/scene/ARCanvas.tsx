@@ -2,8 +2,12 @@
 
 import { Suspense, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
+import {
+    WebGLRenderer,
+    WebGLRendererParameters,
+    PerspectiveCamera,
+} from "three";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { PerspectiveCamera } from "three";
 import ARScene from "./ARScene";
 import Regular3DScene from "./Regular3DScene";
 import ModelControls from "./ui/ModelControls";
@@ -17,6 +21,18 @@ export default function ARCanvas() {
     const canvasSize = {
         width: containerRef.current?.clientWidth || 0,
         height: containerRef.current?.clientHeight || 0,
+    };
+
+    // Create an XR-compatible renderer
+    const createRenderer = async (props?: WebGLRendererParameters) => {
+        const renderer = new WebGLRenderer({
+            antialias: true, // Smooth edges
+            powerPreference: "high-performance", // Prioritize performance
+            alpha: true, // Transparency for AR use
+            ...props, // Include other props passed from Canvas if needed
+        });
+        await renderer.getContext().makeXRCompatible(); // Ensure XR compatibility
+        return renderer;
     };
 
     // Handle canvas resize
@@ -49,11 +65,7 @@ export default function ARCanvas() {
                     shadows
                     camera={{ position: [1, 1, 1], fov: 50 }}
                     className="w-full h-full"
-                    gl={{
-                        antialias: true,
-                        powerPreference: "high-performance",
-                        alpha: true,
-                    }}
+                    gl={createRenderer}
                     onCreated={async ({ gl, camera }) => {
                         // Make the WebGL context XR-compatible
                         await gl.makeXRCompatible();
