@@ -54,7 +54,10 @@ export default function ARCanvas() {
                         powerPreference: "high-performance",
                         alpha: true,
                     }}
-                    onCreated={({ gl, camera }) => {
+                    onCreated={async ({ gl, camera }) => {
+                        // Make the WebGL context XR-compatible
+                        await gl.makeXRCompatible();
+
                         if (canvasSize.width && canvasSize.height) {
                             gl.setSize(canvasSize.width, canvasSize.height);
 
