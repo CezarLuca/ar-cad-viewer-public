@@ -28,92 +28,70 @@ export default function ARScene() {
         }
     }, [modelUrl]);
 
-    // Start WebXR session and set up image tracking
+    // Handle tracked image results
     useEffect(() => {
-        const startARSession = async () => {
-            if (navigator.xr && isARPresenting) {
-                try {
+        const onXRFrame = (
+            session: XRSession,
+            frame: XRFrame,
+            referenceSpace: XRReferenceSpace
+        ) => {
+            const imageTrackingResults = frame.getImageTrackingResults();
+
+            imageTrackingResults.forEach((result) => {
+                if (result.imageSpace && result.trackingState === "tracked") {
+                    const pose = frame.getPose(
+                        result.imageSpace,
+                        referenceSpace
+                    );
+                    if (pose) {
+                        const matrix = new Matrix4().fromArray(
+                            pose.transform.matrix
+                        );
+                        setTrackedImageMatrix(matrix);
+                    }
+                }
+            });
+
+            session.requestAnimationFrame((time, frame) =>
+                onXRFrame(session, frame, referenceSpace)
+            );
+        };
+
+        if (isARPresenting) {
+            // Retrieve session and reference space from ARContext
+            const startTracking = async () => {
+                if (navigator.xr) {
                     const session = await navigator.xr.requestSession(
                         "immersive-ar",
                         {
-                            requiredFeatures: [
-                                "image-tracking",
-                                "local-floor",
-                                "dom-overlay",
+                            requiredFeatures: ["image-tracking"],
+                            trackedImages: [
+                                {
+                                    image: await createImageBitmap(new Image()),
+                                    widthInMeters: 0.1,
+                                },
                             ],
-                        }
+                        } as XRSessionInit
                     );
-
-                    // Load the image to be tracked
-                    const image = new Image();
-                    image.src = "/markers/qrTracker.png";
-                    await image.decode();
-
-                    const imageBitmap = await createImageBitmap(image);
-
-                    session.updateRenderState({
-                        domOverlay: { root: containerRef.current },
-                        trackedImages: [
-                            { image: imageBitmap, widthInMeters: 0.1 }, // Specify the real-world size
-                        ],
-                    });
-
-                    session.addEventListener("end", () => {
-                        console.log("AR session ended.");
-                    });
-
-                    // Request the reference space once and await it.
                     const referenceSpace = await session.requestReferenceSpace(
                         "local"
                     );
 
-                    // Handle image tracking results
-                    const onXRFrame = (
-                        time: DOMHighResTimeStamp,
-                        frame: XRFrame
-                    ) => {
-                        const imageTrackingResults =
-                            frame.getImageTrackingResults();
-
-                        imageTrackingResults.forEach((result) => {
-                            if (
-                                result.imageSpace &&
-                                result.trackingState === "tracked"
-                            ) {
-                                // We assume result.imageSpace is a XRReferenceSpace here.
-                                const pose = frame.getPose(
-                                    result.imageSpace as XRReferenceSpace,
-                                    referenceSpace
-                                );
-                                if (pose) {
-                                    const matrix = new Matrix4().fromArray(
-                                        pose.transform.matrix
-                                    );
-                                    setTrackedImageMatrix(matrix);
-                                }
-                            }
-                        });
-
-                        session.requestAnimationFrame(onXRFrame);
-                    };
-
-                    session.requestAnimationFrame(onXRFrame);
-                } catch (error) {
-                    console.error("Failed to start AR session:", error);
+                    session.requestAnimationFrame((time, frame) =>
+                        onXRFrame(session, frame, referenceSpace)
+                    );
                 }
-            }
-        };
+            };
 
-        if (isARPresenting) {
-            startARSession();
+            startTracking();
         }
-    }, [isARPresenting, containerRef]);
+    }, [isARPresenting]);
 
     // Render overlay content
     useEffect(() => {
-        // Capture the current container element
-        const currentContainer = containerRef.current;
         const portalRoot = document.createElement("div");
+        const currentContainer = containerRef.current;
+
         if (currentContainer) {
             currentContainer.appendChild(portalRoot);
         }
@@ -141,7 +119,6 @@ export default function ARScene() {
 
         return () => {
             root.unmount();
-            // Use the captured container element for cleanup
             if (currentContainer) {
                 currentContainer.removeChild(portalRoot);
             }
