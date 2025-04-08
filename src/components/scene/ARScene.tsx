@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import ReactDOM from "react-dom/client";
 import { Group, Matrix4 } from "three";
-import { Environment, useGLTF } from "@react-three/drei";
+import { Environment, useGLTF, useThree } from "@react-three/drei";
 import CADModel from "./CADModel";
 import AROverlayContent from "./ui/AROverlayContent";
 import { useModelUrl } from "@/context/ModelUrlContext";
@@ -20,6 +20,8 @@ export default function ARScene() {
     const [trackedImageMatrix, setTrackedImageMatrix] =
         useState<Matrix4 | null>(null);
     const [isModelPlaced, setIsModelPlaced] = useState(false);
+    const { gl, camera } = useThree();
+    const [xrSession, setXRSession] = useState<XRSession | null>(null);
 
     // Preload model if not the default engine model
     useEffect(() => {
@@ -28,64 +30,93 @@ export default function ARScene() {
         }
     }, [modelUrl]);
 
-    // Handle tracked image results
-    useEffect(() => {
-        const onXRFrame = (
-            session: XRSession,
-            frame: XRFrame,
-            referenceSpace: XRReferenceSpace
-        ) => {
-            const imageTrackingResults = frame.getImageTrackingResults();
-
-            imageTrackingResults.forEach((result) => {
-                if (result.imageSpace && result.trackingState === "tracked") {
-                    const pose = frame.getPose(
-                        result.imageSpace,
-                        referenceSpace
-                    );
-                    if (pose) {
-                        const matrix = new Matrix4().fromArray(
-                            pose.transform.matrix
-                        );
-                        setTrackedImageMatrix(matrix);
+    const initializeAR = useCallback(async () => {
+        if (navigator.xr && isARPresenting && containerRef.current) {
+            try {
+                const session = await navigator.xr.requestSession(
+                    "immersive-ar",
+                    {
+                        requiredFeatures: [
+                            "local-floor",
+                            "dom-overlay",
+                            "image-tracking",
+                        ],
+                        trackedImages: [
+                            {
+                                image: await createImageBitmap(
+                                    new URL(
+                                        "/markers/qrTracker.png",
+                                        window.location.origin
+                                    )
+                                ),
+                                widthInMeters: 0.1,
+                            },
+                        ],
+                        domOverlay: { root: containerRef.current },
                     }
-                }
-            });
+                );
 
-            session.requestAnimationFrame((time, frame) =>
-                onXRFrame(session, frame, referenceSpace)
-            );
-        };
+                session.addEventListener("end", () => {
+                    console.log("AR session ended.");
+                    setXRSession(null);
+                });
 
-        if (isARPresenting) {
-            // Retrieve session and reference space from ARContext
-            const startTracking = async () => {
-                if (navigator.xr) {
-                    const session = await navigator.xr.requestSession(
-                        "immersive-ar",
-                        {
-                            requiredFeatures: ["image-tracking"],
-                            trackedImages: [
-                                {
-                                    image: await createImageBitmap(new Image()),
-                                    widthInMeters: 0.1,
-                                },
-                            ],
-                        } as XRSessionInit
-                    );
-                    const referenceSpace = await session.requestReferenceSpace(
-                        "local"
-                    );
+                gl.makeXRCompatible().then(() => {
+                    session.updateRenderState({
+                        baseLayer: new XRWebGLLayer(session, gl.domElement),
+                    });
 
-                    session.requestAnimationFrame((time, frame) =>
-                        onXRFrame(session, frame, referenceSpace)
-                    );
-                }
-            };
+                    camera.matrixAutoUpdate = false;
+                    setXRSession(session);
 
-            startTracking();
+                    const referenceSpace = gl.xr.getReferenceSpace();
+
+                    const onXRFrame = (time: number, frame: XRFrame) => {
+                        if (!session) return;
+
+                        const imageTrackingResults =
+                            frame.getImageTrackingResults();
+
+                        imageTrackingResults.forEach((result) => {
+                            if (
+                                result.imageSpace &&
+                                result.trackingState === "tracked"
+                            ) {
+                                const pose = frame.getPose(
+                                    result.imageSpace,
+                                    referenceSpace!
+                                );
+                                if (pose) {
+                                    const matrix = new Matrix4().fromArray(
+                                        pose.transform.matrix
+                                    );
+                                    setTrackedImageMatrix(matrix);
+                                }
+                            }
+                        });
+
+                        session.requestAnimationFrame(onXRFrame);
+                    };
+
+                    session.requestAnimationFrame(onXRFrame);
+                });
+            } catch (error) {
+                console.error("Failed to start AR session:", error);
+            }
         }
-    }, [isARPresenting]);
+
+        return () => {
+            xrSession?.end();
+        };
+    }, [gl, camera, containerRef, isARPresenting, xrSession]);
+
+    useEffect(() => {
+        if (isARPresenting) {
+            initializeAR();
+        } else {
+            xrSession?.end();
+        }
+    }, [isARPresenting, initializeAR, xrSession]);
 
     // Render overlay content
     useEffect(() => {
