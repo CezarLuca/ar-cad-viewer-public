@@ -7,6 +7,7 @@ import { ModelUrlProvider } from "@/context/ModelUrlContext";
 import { Suspense } from "react";
 import ARCanvas from "@/components/scene/ARCanvas";
 import { ARProvider } from "@/context/ARContext";
+import "webxr-polyfill";
 
 export default function ARPage() {
     const searchParams = useSearchParams();

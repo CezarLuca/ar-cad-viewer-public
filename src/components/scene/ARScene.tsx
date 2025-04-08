@@ -10,6 +10,7 @@ import AROverlayContent from "./ui/AROverlayContent";
 import { useModelUrl } from "@/context/ModelUrlContext";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import { useAR } from "@/context/ARContext";
+// import "webxr-polyfill";
 
 const engineModel = "/models/engine.glb";
 useGLTF.preload(engineModel);
@@ -53,14 +54,16 @@ export default function ARScene() {
                             "dom-overlay",
                             "image-tracking",
                         ],
-                        trackedImages: [
-                            {
-                                image: await createImageBitmap(img),
-                                widthInMeters: 0.1,
-                            },
-                        ],
+                        ...(img && {
+                            trackedImages: [
+                                {
+                                    image: await createImageBitmap(img),
+                                    widthInMeters: 0.1,
+                                },
+                            ],
+                        }),
                         domOverlay: { root: containerRef.current },
-                    }
+                    } as XRSessionInit
                 );
 
                 session.addEventListener("end", () => {
@@ -70,7 +73,7 @@ export default function ARScene() {
 
                 gl.makeXRCompatible().then(() => {
                     session.updateRenderState({
-                        baseLayer: new XRWebGLLayer(session, gl.domElement),
+                        baseLayer: new XRWebGLLayer(session, gl.getContext()),
                     });
 
                     camera.matrixAutoUpdate = false;
