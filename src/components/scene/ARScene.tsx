@@ -10,19 +10,6 @@ import { useModelUrl } from "@/context/ModelUrlContext";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import { useAR } from "@/context/ARContext";
 
-// interface XRImageTrackingResult {
-//     imageSpace: XRReferenceSpace;
-//     trackingState: "tracked" | "emulated" | "not-tracked";
-// }
-
-// interface XRFrame {
-//     getImageTrackingResults(): XRImageTrackingResult[];
-//     getPose(
-//         space: XRReferenceSpace,
-//         baseSpace: XRReferenceSpace
-//     ): XRPose | null;
-// }
-
 const engineModel = "/models/engine.glb";
 useGLTF.preload(engineModel);
 
