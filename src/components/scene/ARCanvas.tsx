@@ -31,7 +31,6 @@ export default function ARCanvas() {
             alpha: true, // Transparency for AR use
             ...props, // Include other props passed from Canvas if needed
         });
-        await renderer.getContext().makeXRCompatible(); // Ensure XR compatibility
         return renderer;
     };
 
@@ -66,10 +65,7 @@ export default function ARCanvas() {
                     camera={{ position: [1, 1, 1], fov: 50 }}
                     className="w-full h-full"
                     gl={createRenderer}
-                    onCreated={async ({ gl, camera }) => {
-                        // Make the WebGL context XR-compatible
-                        await gl.makeXRCompatible();
-
+                    onCreated={({ gl, camera }) => {
                         if (canvasSize.width && canvasSize.height) {
                             gl.setSize(canvasSize.width, canvasSize.height);
 
