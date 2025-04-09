@@ -35,18 +35,15 @@ export default function ARScene() {
     const initializeAR = useCallback(async () => {
         if (navigator.xr && isARPresenting && containerRef.current) {
             try {
-                // Ensure gl is defined before proceeding
                 if (!gl) {
                     console.error("WebGL context not available.");
                     return;
                 }
 
-                // Conditionally call makeXRCompatible if available
+                // Remove or skip makeXRCompatible call since the context was created XR-compatible.
                 if (typeof gl.makeXRCompatible === "function") {
-                    await gl.makeXRCompatible();
-                } else {
-                    console.warn(
-                        "gl.makeXRCompatible is not available on this renderer."
+                    console.log(
+                        "Skipping gl.makeXRCompatible because context is already XR-compatible."
                     );
                 }
 
@@ -69,14 +66,12 @@ export default function ARScene() {
                             "dom-overlay",
                             "image-tracking",
                         ],
-                        ...(img && {
-                            trackedImages: [
-                                {
-                                    image: await createImageBitmap(img),
-                                    widthInMeters: 0.1,
-                                },
-                            ],
-                        }),
+                        trackedImages: [
+                            {
+                                image: await createImageBitmap(img),
+                                widthInMeters: 0.1,
+                            },
+                        ],
                         domOverlay: { root: containerRef.current },
                     } as XRSessionInit
                 );
@@ -97,10 +92,8 @@ export default function ARScene() {
 
                 const onXRFrame = (time: number, frame: XRFrame) => {
                     if (!session) return;
-
                     const imageTrackingResults =
                         frame.getImageTrackingResults();
-
                     imageTrackingResults.forEach((result) => {
                         if (
                             result.imageSpace &&
@@ -118,7 +111,6 @@ export default function ARScene() {
                             }
                         }
                     });
-
                     session.requestAnimationFrame(onXRFrame);
                 };
 
@@ -127,11 +119,7 @@ export default function ARScene() {
                 console.error("Failed to start AR session:", error);
             }
         }
-
-        return () => {
-            xrSession?.end();
-        };
-    }, [gl, camera, containerRef, isARPresenting, xrSession]);
+    }, [gl, camera, containerRef, isARPresenting]);
 
     useEffect(() => {
         if (isARPresenting) {
