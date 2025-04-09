@@ -14,7 +14,7 @@ import ModelControls from "./ui/ModelControls";
 import OrbitControlsUI from "./ui/OrbitControlsUI";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import { useAR } from "@/context/ARContext";
-import "webxr-polyfill";
+// import "webxr-polyfill";
 
 export default function ARCanvas() {
     const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
