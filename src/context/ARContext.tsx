@@ -16,17 +16,70 @@ const ARContext = createContext<ARContextValue>({
     exitAR: () => {},
 });
 
+// Helper function to load an image
+const loadImage = (src: string): Promise<HTMLImageElement> =>
+    new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+    });
+
 export const ARProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
     const [isARPresenting, setIsARPresenting] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [xrSession, setXRSession] = useState<XRSession | null>(null);
+
+    // startARSession is called on a user gesture (e.g., button click)
+    const startARSession = async () => {
+        if (!navigator.xr || !containerRef.current) return;
+        try {
+            const imageUrl = new URL(
+                "/markers/qrTracker.png",
+                window.location.origin
+            ).href;
+            // Load the image element
+            const img = await loadImage(imageUrl);
+            // Create an ImageBitmap from the loaded image
+            const bitmap = await createImageBitmap(img);
+
+            const session = await navigator.xr.requestSession("immersive-ar", {
+                requiredFeatures: [
+                    "local-floor",
+                    "dom-overlay",
+                    "image-tracking",
+                ],
+                trackedImages: [
+                    {
+                        image: bitmap,
+                        widthInMeters: 0.1,
+                    },
+                ],
+                domOverlay: { root: containerRef.current },
+            } as XRSessionInit);
+
+            session.addEventListener("end", () => {
+                setXRSession(null);
+                setIsARPresenting(false);
+            });
+            // ARCustomCanvas/ARScene takes care of updating render state, etc.
+            setXRSession(session);
+            setIsARPresenting(true);
+        } catch (error) {
+            console.error("Failed to start AR session:", error);
+        }
+    };
 
     const enterAR = async () => {
-        setIsARPresenting(true);
+        // Called on a direct user gesture
+        await startARSession();
     };
 
     const exitAR = () => {
+        xrSession?.end();
+        setXRSession(null);
         setIsARPresenting(false);
     };
 
