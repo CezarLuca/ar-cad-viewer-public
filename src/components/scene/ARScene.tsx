@@ -40,7 +40,7 @@ export default function ARScene() {
                     return;
                 }
 
-                // Remove or skip makeXRCompatible call since the context was created XR-compatible.
+                // Skip calling gl.makeXRCompatible since the context is already XR-compatible.
                 if (typeof gl.makeXRCompatible === "function") {
                     console.log(
                         "Skipping gl.makeXRCompatible because context is already XR-compatible."
@@ -88,7 +88,12 @@ export default function ARScene() {
                 camera.matrixAutoUpdate = false;
                 setXRSession(session);
 
-                const referenceSpace = gl.xr.getReferenceSpace();
+                // Request a valid reference space from the session.
+                const referenceSpace = await session.requestReferenceSpace(
+                    "local-floor"
+                );
+
+                // const referenceSpace = gl.xr.getReferenceSpace();
 
                 const onXRFrame = (time: number, frame: XRFrame) => {
                     if (!session) return;
