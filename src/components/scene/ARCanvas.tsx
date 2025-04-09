@@ -32,6 +32,7 @@ export default function ARCanvas() {
             alpha: true, // Transparency for AR use
             ...props, // Include other props passed from Canvas if needed
         });
+        renderer.xr.enabled = true; // Enable XR support
         return renderer;
     };
 
