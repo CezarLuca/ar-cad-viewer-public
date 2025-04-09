@@ -41,8 +41,14 @@ export default function ARScene() {
                     return;
                 }
 
-                // Make XR compatible before requesting session
-                await gl.makeXRCompatible();
+                // Conditionally call makeXRCompatible if available
+                if (typeof gl.makeXRCompatible === "function") {
+                    await gl.makeXRCompatible();
+                } else {
+                    console.warn(
+                        "gl.makeXRCompatible is not available on this renderer."
+                    );
+                }
 
                 const img = new Image();
                 img.src = new URL(
