@@ -35,6 +35,15 @@ export default function ARScene() {
     const initializeAR = useCallback(async () => {
         if (navigator.xr && isARPresenting && containerRef.current) {
             try {
+                // Ensure gl is defined before proceeding
+                if (!gl) {
+                    console.error("WebGL context not available.");
+                    return;
+                }
+
+                // Make XR compatible before requesting session
+                await gl.makeXRCompatible();
+
                 const img = new Image();
                 img.src = new URL(
                     "/markers/qrTracker.png",
@@ -71,45 +80,43 @@ export default function ARScene() {
                     setXRSession(null);
                 });
 
-                gl.makeXRCompatible().then(() => {
-                    session.updateRenderState({
-                        baseLayer: new XRWebGLLayer(session, gl.getContext()),
+                session.updateRenderState({
+                    baseLayer: new XRWebGLLayer(session, gl.getContext()),
+                });
+
+                camera.matrixAutoUpdate = false;
+                setXRSession(session);
+
+                const referenceSpace = gl.xr.getReferenceSpace();
+
+                const onXRFrame = (time: number, frame: XRFrame) => {
+                    if (!session) return;
+
+                    const imageTrackingResults =
+                        frame.getImageTrackingResults();
+
+                    imageTrackingResults.forEach((result) => {
+                        if (
+                            result.imageSpace &&
+                            result.trackingState === "tracked"
+                        ) {
+                            const pose = frame.getPose(
+                                result.imageSpace,
+                                referenceSpace!
+                            );
+                            if (pose) {
+                                const matrix = new Matrix4().fromArray(
+                                    pose.transform.matrix
+                                );
+                                setTrackedImageMatrix(matrix);
+                            }
+                        }
                     });
 
-                    camera.matrixAutoUpdate = false;
-                    setXRSession(session);
-
-                    const referenceSpace = gl.xr.getReferenceSpace();
-
-                    const onXRFrame = (time: number, frame: XRFrame) => {
-                        if (!session) return;
-
-                        const imageTrackingResults =
-                            frame.getImageTrackingResults();
-
-                        imageTrackingResults.forEach((result) => {
-                            if (
-                                result.imageSpace &&
-                                result.trackingState === "tracked"
-                            ) {
-                                const pose = frame.getPose(
-                                    result.imageSpace,
-                                    referenceSpace!
-                                );
-                                if (pose) {
-                                    const matrix = new Matrix4().fromArray(
-                                        pose.transform.matrix
-                                    );
-                                    setTrackedImageMatrix(matrix);
-                                }
-                            }
-                        });
-
-                        session.requestAnimationFrame(onXRFrame);
-                    };
-
                     session.requestAnimationFrame(onXRFrame);
-                });
+                };
+
+                session.requestAnimationFrame(onXRFrame);
             } catch (error) {
                 console.error("Failed to start AR session:", error);
             }
