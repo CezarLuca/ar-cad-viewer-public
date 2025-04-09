@@ -64,7 +64,7 @@ export const ARProvider: React.FC<{ children: React.ReactNode }> = ({
                 setXRSession(null);
                 setIsARPresenting(false);
             });
-            // ARCustomCanvas/ARScene takes care of updating render state, etc.
+            // The ARCustomCanvas / ARScene will use the session
             setXRSession(session);
             setIsARPresenting(true);
         } catch (error) {
@@ -73,7 +73,7 @@ export const ARProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     const enterAR = async () => {
-        // Called on a direct user gesture
+        // Must be triggered from a user gesture
         await startARSession();
     };
 

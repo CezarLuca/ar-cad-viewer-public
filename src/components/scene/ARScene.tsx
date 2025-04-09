@@ -10,7 +10,6 @@ import AROverlayContent from "./ui/AROverlayContent";
 import { useModelUrl } from "@/context/ModelUrlContext";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import { useAR } from "@/context/ARContext";
-// import "webxr-polyfill";
 
 const engineModel = "/models/engine.glb";
 useGLTF.preload(engineModel);
