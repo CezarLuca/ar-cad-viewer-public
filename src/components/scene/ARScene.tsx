@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import ReactDOM from "react-dom/client";
 import { Group, Matrix4 } from "three";
-import { Environment, useGLTF } from "@react-three/drei";
+import { Environment, useGLTF, Html } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import CADModel from "./CADModel";
 import AROverlayContent from "./ui/AROverlayContent";
@@ -123,15 +123,6 @@ export default function ARScene() {
         }
     }, [gl, camera, containerRef, isARPresenting]);
 
-    // Removed auto-initialization of AR session.
-    // useEffect(() => {
-    //     if (isARPresenting) {
-    //         initializeAR();
-    //     } else {
-    //         xrSession?.end();
-    //     }
-    // }, [isARPresenting, initializeAR, xrSession]);
-
     // Render overlay content
     useEffect(() => {
         const portalRoot = document.createElement("div");
@@ -172,19 +163,21 @@ export default function ARScene() {
 
     return (
         <>
-            {/* Start AR button */}
+            {/* Start AR button wrapped in <Html> so it renders as DOM */}
             {!xrSession && (
-                <button
-                    onClick={initializeAR}
-                    style={{
-                        position: "absolute",
-                        zIndex: 1000,
-                        padding: "8px 16px",
-                        margin: "16px",
-                    }}
-                >
-                    Start AR
-                </button>
+                <Html prepend>
+                    <button
+                        onClick={initializeAR}
+                        style={{
+                            position: "absolute",
+                            zIndex: 1000,
+                            padding: "8px 16px",
+                            margin: "16px",
+                        }}
+                    >
+                        Start AR
+                    </button>
+                </Html>
             )}
             <ambientLight intensity={1.5} color="#ffffff" />
             <directionalLight
