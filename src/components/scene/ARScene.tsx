@@ -92,8 +92,6 @@ export default function ARScene() {
                     "local-floor"
                 );
 
-                // const referenceSpace = gl.xr.getReferenceSpace();
-
                 const onXRFrame = (time: number, frame: XRFrame) => {
                     if (!session) return;
                     const imageTrackingResults =
@@ -105,7 +103,7 @@ export default function ARScene() {
                         ) {
                             const pose = frame.getPose(
                                 result.imageSpace,
-                                referenceSpace!
+                                referenceSpace
                             );
                             if (pose) {
                                 const matrix = new Matrix4().fromArray(
@@ -125,13 +123,14 @@ export default function ARScene() {
         }
     }, [gl, camera, containerRef, isARPresenting]);
 
-    useEffect(() => {
-        if (isARPresenting) {
-            initializeAR();
-        } else {
-            xrSession?.end();
-        }
-    }, [isARPresenting, initializeAR, xrSession]);
+    // Removed auto-initialization of AR session.
+    // useEffect(() => {
+    //     if (isARPresenting) {
+    //         initializeAR();
+    //     } else {
+    //         xrSession?.end();
+    //     }
+    // }, [isARPresenting, initializeAR, xrSession]);
 
     // Render overlay content
     useEffect(() => {
@@ -173,6 +172,20 @@ export default function ARScene() {
 
     return (
         <>
+            {/* Start AR button */}
+            {!xrSession && (
+                <button
+                    onClick={initializeAR}
+                    style={{
+                        position: "absolute",
+                        zIndex: 1000,
+                        padding: "8px 16px",
+                        margin: "16px",
+                    }}
+                >
+                    Start AR
+                </button>
+            )}
             <ambientLight intensity={1.5} color="#ffffff" />
             <directionalLight
                 position={[5, 5, 5]}
