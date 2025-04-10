@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAR } from "@/context/ARContext";
@@ -15,16 +14,13 @@ export default function Navbar({ rightContent }: NavbarProps) {
     const { data: session } = useSession();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const pathname = usePathname();
-    const { isARPresenting, enterAR, exitAR } = useAR();
+    const { isARPresenting, setIsARPresenting } = useAR();
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
+    // This toggle simply mounts or dismounts the AR scene.
     const toggleAR = () => {
-        if (isARPresenting) {
-            exitAR();
-        } else {
-            enterAR();
-        }
+        setIsARPresenting((prev) => !prev);
     };
 
     const isDashboard = pathname === "/dashboard";
