@@ -32,6 +32,10 @@ export default function ARScene() {
     }, [modelUrl]);
 
     const initializeAR = useCallback(async () => {
+        if (xrSession) {
+            console.warn("AR session is already active.");
+            return;
+        }
         if (navigator.xr && isARPresenting && containerRef.current) {
             try {
                 if (!gl) {
@@ -121,7 +125,7 @@ export default function ARScene() {
                 console.error("Failed to start AR session:", error);
             }
         }
-    }, [gl, camera, containerRef, isARPresenting]);
+    }, [gl, camera, containerRef, isARPresenting, xrSession]);
 
     // Render overlay content
     useEffect(() => {
@@ -168,12 +172,7 @@ export default function ARScene() {
                 <Html prepend>
                     <button
                         onClick={initializeAR}
-                        style={{
-                            position: "absolute",
-                            zIndex: 1000,
-                            padding: "8px 16px",
-                            margin: "16px",
-                        }}
+                        className="absolute top-14 right-4 z-10 bg-blue-600 text-gray-100 px-4 py-2 rounded-lg shadow-lg"
                     >
                         Start AR
                     </button>
