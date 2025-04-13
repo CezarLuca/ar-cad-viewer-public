@@ -347,7 +347,7 @@ const ARScene: React.FC = () => {
         <div className="absolute inset-0 w-full h-full">
             <img
                 ref={imgRef}
-                src="/markers/qrTracker.png"
+                src="/markers/Lego-Part.png"
                 alt="Tracking Marker"
                 className="hidden"
                 crossOrigin="anonymous"
