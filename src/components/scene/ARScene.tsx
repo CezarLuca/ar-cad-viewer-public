@@ -48,6 +48,7 @@ const ARScene: React.FC = () => {
         const geometry = new BoxGeometry(0.05, 0.05, 0.05);
         const material = new MeshStandardMaterial({ color: 0xff0000 });
         const cube = new Mesh(geometry, material);
+        cube.matrixAutoUpdate = false; // Disable auto-update for manual control
         cube.visible = false; // Initially hidden
         scene.add(cube);
         testBoxRef.current = cube;
@@ -129,6 +130,12 @@ const ARScene: React.FC = () => {
 
         // --- Render Loop ---
         function render() {
+            // Check if renderer is presenting XR session
+            if (rendererRef.current?.xr.isPresenting) {
+                // Let the XR session handle rendering via onXRFrame
+                return;
+            }
+            // Fallback for non-XR rendering (if needed)
             if (rendererRef.current && sceneRef.current && cameraRef.current) {
                 rendererRef.current.render(sceneRef.current, cameraRef.current);
             }
@@ -138,71 +145,116 @@ const ARScene: React.FC = () => {
         function onXRFrame(time: number, frame: XRFrame) {
             const session = frame.session;
             if (!session) return;
-            session.requestAnimationFrame(onXRFrame);
+            session.requestAnimationFrame(onXRFrame); // Request next frame
 
             const baseLayer = session.renderState.baseLayer;
-            if (!baseLayer || !xrRefSpace || !gl || !testBoxRef.current) {
+            const currentRenderer = rendererRef.current; // Get renderer reference
+            if (
+                !baseLayer ||
+                !xrRefSpace ||
+                !gl ||
+                !testBoxRef.current ||
+                !currentRenderer
+            ) {
                 // console.warn("Skipping frame: Missing essentials."); // Keep this less verbose if needed
                 return;
             }
 
+            // Bind GL context to the XR session's layer
+            gl.bindFramebuffer(gl.FRAMEBUFFER, baseLayer.framebuffer);
+
             const pose = frame.getViewerPose(xrRefSpace);
             if (pose) {
-                // --- Add Logging Here ---
-                let imageTracked = false;
+                let imageTrackedThisFrame = false; // Use a frame-specific flag
                 const results = frame.getImageTrackingResults();
 
-                // Log only if there are results to avoid flooding console
-                if (results.length > 0) {
-                    console.log("Image Tracking Results:", results); // Log the whole array
-
-                    for (const result of results) {
-                        // Log details for each potential marker
-                        console.log(
-                            `Image Index: ${result.index}, Tracking State: ${result.trackingState}}`
+                for (const result of results) {
+                    if (result.trackingState === "tracked") {
+                        imageTrackedThisFrame = true;
+                        const imagePose = frame.getPose(
+                            result.imageSpace,
+                            xrRefSpace
                         );
 
-                        // Check tracking state
-                        if (result.trackingState === "tracked") {
-                            console.log("!!! IMAGE TRACKED !!!"); // Confirmation log
-                            imageTracked = true; // Set flag
-                            const imagePose = frame.getPose(
-                                result.imageSpace,
-                                xrRefSpace
+                        if (
+                            imagePose &&
+                            testBoxRef.current &&
+                            isModelPlacedRef.current
+                        ) {
+                            // --- Apply Pose Matrix ---
+                            testBoxRef.current.matrix.fromArray(
+                                imagePose.transform.matrix
                             );
-                            console.log("Tracked Image Pose:", imagePose); // Log the pose object
 
-                            // Position the test box if the image is tracked AND the model is placed
-                            if (
-                                imagePose &&
-                                testBoxRef.current &&
-                                isModelPlacedRef.current
-                            ) {
+                            // --- Ensure Visibility ---
+                            if (!testBoxRef.current.visible) {
+                                console.log("Setting testBox visible");
                                 testBoxRef.current.visible = true;
-                                testBoxRef.current.matrix.fromArray(
-                                    imagePose.transform.matrix
-                                );
-                                testBoxRef.current.matrixWorldNeedsUpdate =
-                                    true;
                             }
-                            break; // Only use the first tracked image
-                        } else if (result.trackingState === "emulated") {
-                            console.log("Image tracking state is 'emulated'.");
                         }
+                        break; // Use first tracked image
                     }
                 }
 
-                // Hide objects if the image is lost (and it was placed)
-                if (!imageTracked && isModelPlacedRef.current) {
-                    if (testBoxRef.current) testBoxRef.current.visible = false;
+                // Update visibility based on tracking status for this frame
+                if (testBoxRef.current && isModelPlacedRef.current) {
+                    if (!imageTrackedThisFrame && testBoxRef.current.visible) {
+                        console.log(
+                            "Setting testBox invisible (tracking lost)"
+                        );
+                        testBoxRef.current.visible = false;
+                    }
+                }
+
+                // --- Render the Scene for the XR Frame ---
+                // Update camera projection matrix for each view
+                for (const view of pose.views) {
+                    const viewport = baseLayer.getViewport(view);
+                    if (!viewport) continue;
+
+                    currentRenderer.setSize(
+                        viewport.width,
+                        viewport.height,
+                        false
+                    ); // Update size without style change
+                    // Use the view's projection and view matrices
+                    cameraRef.current?.projectionMatrix.fromArray(
+                        view.projectionMatrix
+                    );
+                    cameraRef.current?.matrixWorldInverse.fromArray(
+                        view.transform.inverse.matrix
+                    );
+                    cameraRef.current?.matrixWorld.fromArray(
+                        view.transform.matrix
+                    ); // Update camera world matrix too
+                    cameraRef.current?.matrixWorld.decompose(
+                        cameraRef.current.position,
+                        cameraRef.current.quaternion,
+                        cameraRef.current.scale
+                    );
+
+                    currentRenderer.setViewport(
+                        viewport.x,
+                        viewport.y,
+                        viewport.width,
+                        viewport.height
+                    );
+                    currentRenderer.render(
+                        sceneRef.current!,
+                        cameraRef.current!
+                    );
                 }
             } else {
-                // Hide objects if the viewer pose is lost (and it was placed)
-                if (isModelPlacedRef.current) {
-                    if (testBoxRef.current) testBoxRef.current.visible = false;
+                // Hide if viewer pose is lost
+                if (
+                    testBoxRef.current &&
+                    isModelPlacedRef.current &&
+                    testBoxRef.current.visible
+                ) {
+                    console.log("Setting testBox invisible (viewer pose lost)");
+                    testBoxRef.current.visible = false;
                 }
             }
-            render(); // Render the scene
         }
 
         // --- Session Callbacks (onSessionStarted, onSessionEnded) ---
@@ -215,6 +267,8 @@ const ARScene: React.FC = () => {
                 .setSession(session)
                 .then(() => {
                     console.log("XR session set.");
+                    // --- IMPORTANT: Set animation loop on the renderer ---
+                    currentRenderer.setAnimationLoop(onXRFrame); // Use renderer's loop
                     session
                         .requestReferenceSpace("local-floor")
                         .then((refSpace) => {
@@ -227,8 +281,6 @@ const ARScene: React.FC = () => {
                             console.log(
                                 "Model placement initiated automatically."
                             );
-                            // --- Start render loop ---
-                            session.requestAnimationFrame(onXRFrame);
                         })
                         .catch((err) => console.error("Ref space error:", err));
                 })
@@ -237,13 +289,13 @@ const ARScene: React.FC = () => {
             if (buttonRef.current) buttonRef.current.textContent = "EXIT AR";
             currentSessionRef.current = session;
             setIsARPresenting(true);
-            if (testBoxRef.current) testBoxRef.current.visible = false; // Ensure box is hidden
-            // if (modelGroupRef.current) modelGroupRef.current.visible = false; // Ensure model is hidden
+            if (testBoxRef.current) testBoxRef.current.visible = false;
         }
 
         function onSessionEnded() {
             const currentRenderer = rendererRef.current;
             if (currentRenderer) {
+                currentRenderer.setAnimationLoop(null);
                 currentRenderer.xr
                     .setSession(null)
                     .catch((err) => console.error("Clear session error:", err));
