@@ -141,65 +141,65 @@ const ARScene: React.FC = () => {
             session.requestAnimationFrame(onXRFrame);
 
             const baseLayer = session.renderState.baseLayer;
-            // Check if testBoxRef.current exists along with other essentials
-            if (
-                !baseLayer ||
-                !xrRefSpace ||
-                !gl ||
-                !testBoxRef.current /*|| !modelGroupRef.current*/
-            ) {
-                // console.warn("Skipping frame: Missing essentials."); // Less verbose logging
+            if (!baseLayer || !xrRefSpace || !gl || !testBoxRef.current) {
+                // console.warn("Skipping frame: Missing essentials."); // Keep this less verbose if needed
                 return;
             }
 
             const pose = frame.getViewerPose(xrRefSpace);
             if (pose) {
-                const results = frame.getImageTrackingResults();
+                // --- Add Logging Here ---
                 let imageTracked = false;
-                for (const result of results) {
-                    // Check tracking state
-                    if (result.trackingState === "tracked") {
-                        imageTracked = true;
-                        const imagePose = frame.getPose(
-                            result.imageSpace,
-                            xrRefSpace
+                const results = frame.getImageTrackingResults();
+
+                // Log only if there are results to avoid flooding console
+                if (results.length > 0) {
+                    console.log("Image Tracking Results:", results); // Log the whole array
+
+                    for (const result of results) {
+                        // Log details for each potential marker
+                        console.log(
+                            `Image Index: ${result.index}, Tracking State: ${result.trackingState}}`
                         );
 
-                        // Position the test box if the image is tracked AND the model is placed
-                        if (
-                            imagePose &&
-                            testBoxRef.current &&
-                            isModelPlacedRef.current
-                        ) {
-                            testBoxRef.current.visible = true;
-                            testBoxRef.current.matrix.fromArray(
-                                imagePose.transform.matrix
+                        // Check tracking state
+                        if (result.trackingState === "tracked") {
+                            console.log("!!! IMAGE TRACKED !!!"); // Confirmation log
+                            imageTracked = true; // Set flag
+                            const imagePose = frame.getPose(
+                                result.imageSpace,
+                                xrRefSpace
                             );
-                            testBoxRef.current.matrixWorldNeedsUpdate = true;
+                            console.log("Tracked Image Pose:", imagePose); // Log the pose object
 
-                            // --- Position CAD Model (if loaded) ---
-                            // if (modelGroupRef.current) {
-                            //     modelGroupRef.current.visible = true;
-                            //     modelGroupRef.current.matrix.fromArray(imagePose.transform.matrix);
-                            //     // Apply any necessary offsets relative to the marker here
-                            //     // e.g., modelGroupRef.current.position.y = 0.05;
-                            //     modelGroupRef.current.matrixWorldNeedsUpdate = true;
-                            // }
+                            // Position the test box if the image is tracked AND the model is placed
+                            if (
+                                imagePose &&
+                                testBoxRef.current &&
+                                isModelPlacedRef.current
+                            ) {
+                                testBoxRef.current.visible = true;
+                                testBoxRef.current.matrix.fromArray(
+                                    imagePose.transform.matrix
+                                );
+                                testBoxRef.current.matrixWorldNeedsUpdate =
+                                    true;
+                            }
+                            break; // Only use the first tracked image
+                        } else if (result.trackingState === "emulated") {
+                            console.log("Image tracking state is 'emulated'.");
                         }
-                        break; // Only use the first tracked image
                     }
                 }
 
                 // Hide objects if the image is lost (and it was placed)
                 if (!imageTracked && isModelPlacedRef.current) {
                     if (testBoxRef.current) testBoxRef.current.visible = false;
-                    // if (modelGroupRef.current) modelGroupRef.current.visible = false;
                 }
             } else {
                 // Hide objects if the viewer pose is lost (and it was placed)
                 if (isModelPlacedRef.current) {
                     if (testBoxRef.current) testBoxRef.current.visible = false;
-                    // if (modelGroupRef.current) modelGroupRef.current.visible = false;
                 }
             }
             render(); // Render the scene
@@ -277,7 +277,7 @@ const ARScene: React.FC = () => {
                         "image-tracking",
                         "dom-overlay",
                     ],
-                    trackedImages: [{ image: imgBitmap, widthInMeters: 0.1 }],
+                    trackedImages: [{ image: imgBitmap!, widthInMeters: 0.1 }],
                     domOverlay: { root: container },
                 };
                 navigator.xr
