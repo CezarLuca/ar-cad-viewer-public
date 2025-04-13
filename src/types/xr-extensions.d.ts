@@ -1,7 +1,7 @@
-interface XRImageTrackingResult {
-    imageSpace: XRSpace;
-    trackingState: "tracked" | "emulated" | "not-tracked";
-}
+// interface XRImageTrackingResult {
+//     imageSpace: XRSpace;
+//     trackingState: "tracked" | "emulated" | "not-tracked";
+// }
 
 declare global {
     interface XRFrame {
@@ -15,6 +15,15 @@ declare global {
             image: ImageBitmap;
             widthInMeters: number;
         }[];
+    }
+
+    interface XRSessionInit {
+        trackedImages?: XRTrackedImageInit[];
+    }
+    interface XRImageTrackingResult {
+        readonly index: number;
+        readonly trackingState: "tracked" | "emulated";
+        readonly imageSpace: XRSpace;
     }
 }
 

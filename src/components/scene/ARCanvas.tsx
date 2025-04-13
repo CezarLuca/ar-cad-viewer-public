@@ -3,12 +3,12 @@
 import { Suspense, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import Regular3DScene from "./Regular3DScene";
-import ARCustomCanvas from "./ARCustomCanvas";
 import ModelControls from "./ui/ModelControls";
 import OrbitControlsUI from "./ui/OrbitControlsUI";
 import { useAR } from "@/context/ARContext";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
+import ARScene from "./ARScene";
 
 export default function ARCanvas() {
     const { isARPresenting, containerRef } = useAR();
@@ -21,7 +21,7 @@ export default function ARCanvas() {
                 className="relative w-full h-[90vh] md:h-[80vh] mx-auto pt-14"
             >
                 {isARPresenting ? (
-                    <ARCustomCanvas />
+                    <ARScene />
                 ) : (
                     <Canvas
                         shadows
