@@ -1,29 +1,31 @@
 "use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import {
     AmbientLight,
+    BoxGeometry,
     DirectionalLight,
+    Mesh,
+    MeshStandardMaterial,
     PerspectiveCamera,
     Scene,
     WebGLRenderer,
     Group,
-    LoadingManager,
-    Mesh,
 } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { useAR } from "@/context/ARContext";
-import { useModelUrl } from "@/context/ModelUrlContext";
-import AROverlayContent from "./ui/AROverlayContent";
-import { ModelConfigProvider } from "@/context/ModelConfigContext";
+// import AROverlayContent from "./ui/AROverlayContent";
+// import { ModelConfigProvider } from "@/context/ModelConfigContext";
 
 const ARScene: React.FC = () => {
     const { setIsARPresenting, containerRef: arContainerRef } = useAR();
-    const { modelUrl } = useModelUrl();
     const buttonRef = useRef<HTMLButtonElement>(null);
     const imgRef = useRef<HTMLImageElement>(null);
     const rendererRef = useRef<WebGLRenderer | null>(null);
     const sceneRef = useRef<Scene | null>(null);
     const cameraRef = useRef<PerspectiveCamera | null>(null);
+    // Ref for the simple test box
+    const testBoxRef = useRef<Mesh | null>(null);
+    // Ref for a potential future complex model group
     const modelGroupRef = useRef<Group | null>(null);
     const arFuncRef = useRef<() => void>(() => {});
     const currentSessionRef = useRef<XRSession | null>(null);
@@ -37,31 +39,39 @@ const ARScene: React.FC = () => {
         let xrRefSpace: XRReferenceSpace | undefined;
         let gl: WebGLRenderingContext | WebGL2RenderingContext | null = null;
 
-        // --- Scene, Model, Lighting, Camera, Renderer Setup ---
+        // --- Scene Setup ---
         const scene = new Scene();
         sceneRef.current = scene;
-        const loadingManager = new LoadingManager();
-        const loader = new GLTFLoader(loadingManager);
-        loader.load(
-            modelUrl,
-            (gltf) => {
-                console.log("Model loaded successfully:", modelUrl);
-                modelGroupRef.current = gltf.scene;
-                modelGroupRef.current.scale.set(0.1, 0.1, 0.1);
-                modelGroupRef.current.visible = false;
-                scene.add(modelGroupRef.current);
-                render();
-            },
-            undefined,
-            (error) => {
-                console.error("Error loading GLTF model:", error);
-            }
-        );
+
+        // --- Create Test Box ---
+        const geometry = new BoxGeometry(0.05, 0.05, 0.05);
+        const material = new MeshStandardMaterial({ color: 0xff0000 });
+        const cube = new Mesh(geometry, material);
+        cube.visible = false; // Initially hidden
+        scene.add(cube);
+        testBoxRef.current = cube;
+
+        // --- Placeholder for future complex model ---
+        // modelGroupRef.current = new Group();
+        // modelGroupRef.current.visible = false;
+        // scene.add(modelGroupRef.current);
+        // // If you were loading a model:
+        // const loader = new GLTFLoader();
+        // loader.load(modelUrl, (gltf) => {
+        //     // Add gltf.scene children to modelGroupRef.current
+        //     // modelGroupRef.current.add(gltf.scene);
+        //     // Apply necessary scaling/positioning to the group
+        //     render();
+        // }, undefined, (error) => console.error("Error loading model:", error));
+
+        // --- Lighting ---
         const ambient = new AmbientLight(0xdddddd);
         scene.add(ambient);
         const directionalLight = new DirectionalLight(0xffffff, 1.5);
         directionalLight.position.set(1, 1, 1).normalize();
         scene.add(directionalLight);
+
+        // --- Camera ---
         const camera = new PerspectiveCamera(
             70,
             container.clientWidth / container.clientHeight,
@@ -69,6 +79,8 @@ const ARScene: React.FC = () => {
             1000
         );
         cameraRef.current = camera;
+
+        // --- Renderer ---
         const renderer = new WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(container.clientWidth, container.clientHeight);
@@ -83,22 +95,17 @@ const ARScene: React.FC = () => {
             if (currentImgRef) {
                 createImageBitmap(currentImgRef)
                     .then((bitmap) => {
-                        imgBitmap = bitmap; // Assign the created bitmap
-                        console.log("ImageBitmap created successfully.");
-                        // Optionally, trigger a re-render or update state if needed elsewhere
+                        imgBitmap = bitmap;
+                        console.log("ImageBitmap created.");
                     })
                     .catch((err) =>
-                        // This is where the error occurs if the image isn't ready
                         console.error("Error creating ImageBitmap:", err)
                     );
             }
         };
-
-        // Check if the image is already loaded (e.g., cached)
         if (currentImgRef?.complete && currentImgRef.naturalHeight !== 0) {
             handleImageLoad();
         } else if (currentImgRef) {
-            // Add event listener if not loaded yet
             currentImgRef.addEventListener("load", handleImageLoad);
         } else {
             console.warn("imgRef not set initially.");
@@ -133,8 +140,14 @@ const ARScene: React.FC = () => {
             session.requestAnimationFrame(onXRFrame);
 
             const baseLayer = session.renderState.baseLayer;
-            if (!baseLayer || !xrRefSpace || !gl || !modelGroupRef.current) {
-                console.warn("Skipping frame: Missing essentials.");
+            // Check if testBoxRef.current exists along with other essentials
+            if (
+                !baseLayer ||
+                !xrRefSpace ||
+                !gl ||
+                !testBoxRef.current /*|| !modelGroupRef.current*/
+            ) {
+                // console.warn("Skipping frame: Missing essentials."); // Less verbose logging
                 return;
             }
 
@@ -143,109 +156,109 @@ const ARScene: React.FC = () => {
                 const results = frame.getImageTrackingResults();
                 let imageTracked = false;
                 for (const result of results) {
+                    // Check tracking state
                     if (result.trackingState === "tracked") {
                         imageTracked = true;
                         const imagePose = frame.getPose(
                             result.imageSpace,
                             xrRefSpace
                         );
-                        if (
-                            imagePose &&
-                            modelGroupRef.current &&
-                            isModelPlaced
-                        ) {
-                            modelGroupRef.current.visible = true;
-                            modelGroupRef.current.matrix.fromArray(
+
+                        // Position the test box if the image is tracked AND the model is placed
+                        if (imagePose && testBoxRef.current && isModelPlaced) {
+                            testBoxRef.current.visible = true;
+                            testBoxRef.current.matrix.fromArray(
                                 imagePose.transform.matrix
                             );
-                            modelGroupRef.current.matrixWorldNeedsUpdate = true;
+                            testBoxRef.current.matrixWorldNeedsUpdate = true;
+
+                            // --- Position CAD Model (if loaded) ---
+                            // if (modelGroupRef.current) {
+                            //     modelGroupRef.current.visible = true;
+                            //     modelGroupRef.current.matrix.fromArray(imagePose.transform.matrix);
+                            //     // Apply any necessary offsets relative to the marker here
+                            //     // e.g., modelGroupRef.current.position.y = 0.05;
+                            //     modelGroupRef.current.matrixWorldNeedsUpdate = true;
+                            // }
                         }
-                        break;
+                        break; // Only use the first tracked image
                     }
                 }
-                if (!imageTracked && isModelPlaced && modelGroupRef.current) {
-                    modelGroupRef.current.visible = false;
+
+                // Hide objects if the image is lost (and it was placed)
+                if (!imageTracked && isModelPlaced) {
+                    if (testBoxRef.current) testBoxRef.current.visible = false;
+                    // if (modelGroupRef.current) modelGroupRef.current.visible = false;
                 }
             } else {
-                if (isModelPlaced && modelGroupRef.current) {
-                    modelGroupRef.current.visible = false;
+                // Hide objects if the viewer pose is lost (and it was placed)
+                if (isModelPlaced) {
+                    if (testBoxRef.current) testBoxRef.current.visible = false;
+                    // if (modelGroupRef.current) modelGroupRef.current.visible = false;
                 }
             }
-            render();
+            render(); // Render the scene
         }
 
-        // --- Define Session Callbacks in useEffect Scope ---
+        // --- Session Callbacks (onSessionStarted, onSessionEnded) ---
         function onSessionStarted(session: XRSession) {
             const currentRenderer = rendererRef.current;
             if (!currentRenderer) return;
 
-            session.addEventListener("end", onSessionEnded); // Use outer scope function
+            session.addEventListener("end", onSessionEnded);
             currentRenderer.xr
                 .setSession(session)
                 .then(() => {
-                    console.log("XR session set on renderer.");
+                    console.log("XR session set.");
                     session
                         .requestReferenceSpace("local-floor")
                         .then((refSpace) => {
-                            xrRefSpace = refSpace; // Assign to outer scope variable
+                            xrRefSpace = refSpace;
+                            console.log("Ref space obtained:", xrRefSpace);
+                            // --- Auto-place model here ---
+                            setIsModelPlaced(true); // Set placement flag automatically
                             console.log(
-                                "Reference space obtained:",
-                                xrRefSpace
+                                "Model placement initiated automatically."
                             );
+                            // --- Start render loop ---
                             session.requestAnimationFrame(onXRFrame);
                         })
-                        .catch((err) =>
-                            console.error("Failed to get reference space:", err)
-                        );
+                        .catch((err) => console.error("Ref space error:", err));
                 })
-                .catch((err) =>
-                    console.error("Failed to set XR session:", err)
-                );
+                .catch((err) => console.error("Set session error:", err));
 
-            if (buttonRef.current) {
-                buttonRef.current.textContent = "EXIT AR";
-            }
+            if (buttonRef.current) buttonRef.current.textContent = "EXIT AR";
             currentSessionRef.current = session;
-            setIsARPresenting(true); // Set presenting state
-            setIsModelPlaced(false);
-            if (modelGroupRef.current) modelGroupRef.current.visible = false;
+            setIsARPresenting(true);
+            if (testBoxRef.current) testBoxRef.current.visible = false; // Ensure box is hidden
+            // if (modelGroupRef.current) modelGroupRef.current.visible = false; // Ensure model is hidden
         }
 
-        function onSessionEnded(/*event: XRSessionEvent*/) {
+        function onSessionEnded() {
             const currentRenderer = rendererRef.current;
-            // const session = currentSessionRef.current;
-            // No need to remove listener here if done in cleanup
-
             if (currentRenderer) {
                 currentRenderer.xr
                     .setSession(null)
-                    .catch((err) =>
-                        console.error("Error clearing XR session:", err)
-                    );
+                    .catch((err) => console.error("Clear session error:", err));
             }
-
-            if (buttonRef.current) {
-                buttonRef.current.textContent = "ENTER AR";
-            }
+            if (buttonRef.current) buttonRef.current.textContent = "ENTER AR";
             currentSessionRef.current = null;
-            xrRefSpace = undefined; // Clear outer scope variable
+            xrRefSpace = undefined;
             setIsARPresenting(false);
-            setIsModelPlaced(false);
-            if (modelGroupRef.current) modelGroupRef.current.visible = false;
+            setIsModelPlaced(false); // Reset placement state on session end
+            if (testBoxRef.current) testBoxRef.current.visible = false; // Ensure box is hidden
+            // if (modelGroupRef.current) modelGroupRef.current.visible = false; // Ensure model is hidden
             console.log("AR session ended.");
         }
 
-        // --- WebXR Session Management Function ---
+        // --- WebXR Session Management Function (AR) ---
         function AR() {
             if (!rendererRef.current) return;
-            // onSessionStarted and onSessionEnded are now defined outside this function
 
             if (currentSessionRef.current === null) {
                 if (!imgBitmap) {
-                    console.error("Image Bitmap not ready for AR session.");
-                    alert(
-                        "Tracking image not loaded or processed yet. Please wait a moment."
-                    );
+                    console.error("Image Bitmap not ready.");
+                    alert("Tracking image not loaded yet. Please wait.");
                     return;
                 }
                 const sessionInit: XRSessionInit = {
@@ -254,24 +267,18 @@ const ARScene: React.FC = () => {
                         "image-tracking",
                         "dom-overlay",
                     ],
-                    trackedImages: [
-                        {
-                            image: imgBitmap,
-                            widthInMeters: 0.1,
-                        },
-                    ],
+                    trackedImages: [{ image: imgBitmap, widthInMeters: 0.1 }],
                     domOverlay: { root: container },
                 };
-
                 navigator.xr
                     ?.requestSession("immersive-ar", sessionInit)
-                    .then(onSessionStarted) // Call the outer scope function
+                    .then(onSessionStarted)
                     .catch((err) => {
-                        console.error("Failed to request AR session:", err);
-                        alert(`Failed to start AR session: ${err.message}`);
+                        console.error("Request session error:", err);
+                        alert(`Failed to start AR: ${err.message}`);
                     });
             } else {
-                currentSessionRef.current.end(); // Triggers the 'end' event -> onSessionEnded
+                currentSessionRef.current.end();
             }
         }
 
@@ -285,8 +292,6 @@ const ARScene: React.FC = () => {
             console.log("Cleaning up ARScene...");
             window.removeEventListener("resize", onWindowResize);
             if (currentSessionRef.current) {
-                console.log("Ending active AR session on cleanup.");
-                // Now correctly references the onSessionEnded in the useEffect scope
                 currentSessionRef.current.removeEventListener(
                     "end",
                     onSessionEnded
@@ -294,53 +299,40 @@ const ARScene: React.FC = () => {
                 currentSessionRef.current
                     .end()
                     .catch((err) =>
-                        console.error("Error ending session on cleanup:", err)
+                        console.error("End session cleanup error:", err)
                     );
                 currentSessionRef.current = null;
             }
             if (rendererRef.current) {
-                console.log("Disposing renderer.");
-                rendererRef.current.setAnimationLoop(null);
+                rendererRef.current.setAnimationLoop(null); // Important to stop the XR loop if set
                 rendererRef.current.dispose();
                 if (rendererRef.current.domElement.parentNode === container) {
-                    console.log("Removing renderer DOM element.");
                     container.removeChild(rendererRef.current.domElement);
                 }
                 rendererRef.current = null;
             }
             if (sceneRef.current) {
-                sceneRef.current.traverse((object) => {
-                    if (object instanceof Mesh) {
-                        object.geometry?.dispose();
-                        if (Array.isArray(object.material)) {
-                            object.material.forEach((material) =>
-                                material.dispose()
-                            );
-                        } else if (object.material) {
-                            object.material.dispose();
-                        }
-                    }
-                });
+                // Dispose geometry and material of the test box
+                testBoxRef.current?.geometry.dispose();
+                if (
+                    testBoxRef.current?.material instanceof MeshStandardMaterial
+                ) {
+                    testBoxRef.current.material.dispose();
+                }
+                // Dispose any other scene objects if necessary
                 sceneRef.current = null;
             }
             if (currentImgRef) {
                 currentImgRef.removeEventListener("load", handleImageLoad);
             }
-            modelGroupRef.current = null;
+            testBoxRef.current = null; // Clear the ref
+            modelGroupRef.current = null; // Clear the ref
             console.log("Cleanup complete.");
         };
-    }, [modelUrl, setIsARPresenting, arContainerRef, isModelPlaced]);
-
-    const handlePlaceModel = () => {
-        if (!modelGroupRef.current) {
-            console.error("Model not loaded, cannot place.");
-            return;
-        }
-        setIsModelPlaced(true);
-        console.log("Model placement requested.");
-    };
+    }, [setIsARPresenting, arContainerRef, isModelPlaced]); // Removed modelUrl if not directly used for setup
 
     // --- JSX Return ---
+    // Keep the JSX the same, it provides the container, image, and UI
     return (
         <div className="absolute inset-0 w-full h-full">
             <img
@@ -350,14 +342,16 @@ const ARScene: React.FC = () => {
                 className="hidden"
                 crossOrigin="anonymous"
             />
-            {currentSessionRef.current && (
+            {/* Overlay content is shown when session is active */}
+            {/* {currentSessionRef.current && (
                 <ModelConfigProvider>
                     <AROverlayContent
                         onPlaceModel={handlePlaceModel}
                         isModelPlaced={isModelPlaced}
                     />
                 </ModelConfigProvider>
-            )}
+            )} */}
+            {/* Enter AR button shown when session is not active */}
             {!currentSessionRef.current && (
                 <button
                     ref={buttonRef}
