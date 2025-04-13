@@ -13,8 +13,8 @@ import {
     Group,
 } from "three";
 import { useAR } from "@/context/ARContext";
-// import AROverlayContent from "./ui/AROverlayContent";
-// import { ModelConfigProvider } from "@/context/ModelConfigContext";
+import AROverlayContent from "./ui/AROverlayContent";
+import { ModelConfigProvider } from "@/context/ModelConfigContext";
 
 const ARScene: React.FC = () => {
     const { setIsARPresenting, containerRef: arContainerRef } = useAR();
@@ -29,7 +29,8 @@ const ARScene: React.FC = () => {
     const modelGroupRef = useRef<Group | null>(null);
     const arFuncRef = useRef<() => void>(() => {});
     const currentSessionRef = useRef<XRSession | null>(null);
-    const [isModelPlaced, setIsModelPlaced] = useState(false);
+    const isModelPlacedRef = useRef(false);
+    const [uiIsModelPlaced, setUiIsModelPlaced] = useState(false);
 
     useEffect(() => {
         if (typeof window === "undefined" || !arContainerRef?.current) return;
@@ -165,7 +166,11 @@ const ARScene: React.FC = () => {
                         );
 
                         // Position the test box if the image is tracked AND the model is placed
-                        if (imagePose && testBoxRef.current && isModelPlaced) {
+                        if (
+                            imagePose &&
+                            testBoxRef.current &&
+                            isModelPlacedRef.current
+                        ) {
                             testBoxRef.current.visible = true;
                             testBoxRef.current.matrix.fromArray(
                                 imagePose.transform.matrix
@@ -186,13 +191,13 @@ const ARScene: React.FC = () => {
                 }
 
                 // Hide objects if the image is lost (and it was placed)
-                if (!imageTracked && isModelPlaced) {
+                if (!imageTracked && isModelPlacedRef.current) {
                     if (testBoxRef.current) testBoxRef.current.visible = false;
                     // if (modelGroupRef.current) modelGroupRef.current.visible = false;
                 }
             } else {
                 // Hide objects if the viewer pose is lost (and it was placed)
-                if (isModelPlaced) {
+                if (isModelPlacedRef.current) {
                     if (testBoxRef.current) testBoxRef.current.visible = false;
                     // if (modelGroupRef.current) modelGroupRef.current.visible = false;
                 }
@@ -215,8 +220,10 @@ const ARScene: React.FC = () => {
                         .then((refSpace) => {
                             xrRefSpace = refSpace;
                             console.log("Ref space obtained:", xrRefSpace);
-                            // --- Auto-place model here ---
-                            setIsModelPlaced(true); // Set placement flag automatically
+                            // --- Update the ref and Auto place model ---
+                            isModelPlacedRef.current = true;
+                            // --- Update state for UI ---
+                            setUiIsModelPlaced(true);
                             console.log(
                                 "Model placement initiated automatically."
                             );
@@ -245,7 +252,10 @@ const ARScene: React.FC = () => {
             currentSessionRef.current = null;
             xrRefSpace = undefined;
             setIsARPresenting(false);
-            setIsModelPlaced(false); // Reset placement state on session end
+            // --- Update the ref ---
+            isModelPlacedRef.current = false;
+            // --- Update state for UI ---
+            setUiIsModelPlaced(false);
             if (testBoxRef.current) testBoxRef.current.visible = false; // Ensure box is hidden
             // if (modelGroupRef.current) modelGroupRef.current.visible = false; // Ensure model is hidden
             console.log("AR session ended.");
@@ -329,7 +339,7 @@ const ARScene: React.FC = () => {
             modelGroupRef.current = null; // Clear the ref
             console.log("Cleanup complete.");
         };
-    }, [setIsARPresenting, arContainerRef, isModelPlaced]); // Removed modelUrl if not directly used for setup
+    }, [setIsARPresenting, arContainerRef]); // Removed modelUrl if not directly used for setup
 
     // --- JSX Return ---
     // Keep the JSX the same, it provides the container, image, and UI
@@ -343,14 +353,11 @@ const ARScene: React.FC = () => {
                 crossOrigin="anonymous"
             />
             {/* Overlay content is shown when session is active */}
-            {/* {currentSessionRef.current && (
+            {currentSessionRef.current && (
                 <ModelConfigProvider>
-                    <AROverlayContent
-                        onPlaceModel={handlePlaceModel}
-                        isModelPlaced={isModelPlaced}
-                    />
+                    <AROverlayContent isModelPlaced={uiIsModelPlaced} />
                 </ModelConfigProvider>
-            )} */}
+            )}
             {/* Enter AR button shown when session is not active */}
             {!currentSessionRef.current && (
                 <button
