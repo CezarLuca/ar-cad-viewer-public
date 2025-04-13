@@ -115,16 +115,26 @@ const ARScene: React.FC = () => {
 
         // --- Resize Handling ---
         function onWindowResize() {
+            // --- Add check for XR presenting ---
+            if (rendererRef.current?.xr.isPresenting) {
+                console.log("Skipping resize during XR session.");
+                return; // Don't resize canvas while XR is active
+            }
+            // --- End Add check ---
+
             if (!cameraRef.current || !rendererRef.current || !container)
                 return;
-            cameraRef.current.aspect =
-                container.clientWidth / container.clientHeight;
+
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            cameraRef.current.aspect = width / height;
             cameraRef.current.updateProjectionMatrix();
-            rendererRef.current.setSize(
-                container.clientWidth,
-                container.clientHeight
-            );
-            render();
+
+            // This call is now safe because we return early if XR is presenting
+            rendererRef.current.setSize(width, height);
+
+            render(); // Call fallback render only if not in XR
         }
         window.addEventListener("resize", onWindowResize, false);
 
