@@ -53,19 +53,6 @@ const ARScene: React.FC = () => {
         scene.add(cube);
         testBoxRef.current = cube;
 
-        // --- Placeholder for future complex model ---
-        // modelGroupRef.current = new Group();
-        // modelGroupRef.current.visible = false;
-        // scene.add(modelGroupRef.current);
-        // // If you were loading a model:
-        // const loader = new GLTFLoader();
-        // loader.load(modelUrl, (gltf) => {
-        //     // Add gltf.scene children to modelGroupRef.current
-        //     // modelGroupRef.current.add(gltf.scene);
-        //     // Apply necessary scaling/positioning to the group
-        //     render();
-        // }, undefined, (error) => console.error("Error loading model:", error));
-
         // --- Lighting ---
         const ambient = new AmbientLight(0xdddddd);
         scene.add(ambient);
