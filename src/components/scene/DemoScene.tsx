@@ -147,7 +147,7 @@ const DemoScene: React.FC = () => {
                 createImageBitmap(currentImgRef)
                     .then((bitmap) => {
                         setImgBitmap(bitmap);
-                        console.log("ImageBitmap created for DemoScene.");
+                        // console.log("ImageBitmap created for DemoScene.");
                     })
                     .catch((err) =>
                         console.error(
@@ -352,7 +352,7 @@ const DemoScene: React.FC = () => {
 
         // Cleanup for this effect
         return () => {
-            console.log("Cleaning up AR logic / image listener...");
+            // console.log("Cleaning up AR logic / image listener...");
             // Remove image load listener
             if (currentImgRef) {
                 currentImgRef.removeEventListener("load", handleImageLoad);
@@ -369,7 +369,7 @@ const DemoScene: React.FC = () => {
 
     // --- JSX Return ---
     return (
-        <div className="relative h-screen w-screen bg-black">
+        <div className="relative h-full w-full bg-black">
             {/* Hidden image element required for createImageBitmap */}
             <img
                 id="bitmap"
