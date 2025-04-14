@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     AmbientLight,
     BoxGeometry,
@@ -17,17 +17,36 @@ const ARComponent: React.FC = () => {
     const imgRef = useRef<HTMLImageElement>(null);
     // Store the AR function so it can be invoked from the button
     const arFuncRef = useRef<() => void>(() => {});
+    const [imgBitmap, setImgBitmap] = useState<ImageBitmap | null>(null);
 
     useEffect(() => {
         // Ensure code only runs in the browser (Next.js SSR safeguard)
         if (typeof window === "undefined") return;
 
         // Prepare an image bitmap that will be used for image-tracking.
-        let imgBitmap: ImageBitmap | null = null;
-        if (imgRef.current) {
-            createImageBitmap(imgRef.current).then((bitmap) => {
-                imgBitmap = bitmap;
-            });
+        const currentImgRef = imgRef.current;
+        const handleImageLoad = () => {
+            if (currentImgRef) {
+                createImageBitmap(currentImgRef)
+                    .then((bitmap) => {
+                        setImgBitmap(bitmap); // Update state when bitmap is ready
+                        console.log("ImageBitmap created for DemoScene.");
+                    })
+                    .catch((err) =>
+                        console.error(
+                            "Error creating ImageBitmap in DemoScene:",
+                            err
+                        )
+                    );
+            }
+        };
+
+        if (currentImgRef?.complete && currentImgRef.naturalHeight !== 0) {
+            // Image already loaded
+            handleImageLoad();
+        } else if (currentImgRef) {
+            // Add event listener if not loaded
+            currentImgRef.addEventListener("load", handleImageLoad);
         }
 
         let xrRefSpace: XRReferenceSpace;
@@ -200,12 +219,18 @@ const ARComponent: React.FC = () => {
                 currentSession = null;
             }
             if (currentSession === null) {
+                // Check if imgBitmap is ready before starting session
+                if (!imgBitmap) {
+                    console.error("Image Bitmap not ready for AR session.");
+                    alert("Tracking image not loaded yet. Please wait.");
+                    return;
+                }
                 // Build session options – here we add the dom-overlay and image-tracking features.
                 const options = {
                     requiredFeatures: ["dom-overlay", "image-tracking"],
                     trackedImages: [
                         {
-                            image: imgBitmap!,
+                            image: imgBitmap,
                             widthInMeters: 0.2,
                         },
                     ],
@@ -249,6 +274,10 @@ const ARComponent: React.FC = () => {
         const localContainer = containerRef.current;
         return () => {
             window.removeEventListener("resize", onWindowResize);
+            // Remove image load listener
+            if (currentImgRef) {
+                currentImgRef.removeEventListener("load", handleImageLoad);
+            }
             if (localContainer && renderer) {
                 localContainer.removeChild(renderer.domElement);
             }
@@ -256,7 +285,7 @@ const ARComponent: React.FC = () => {
                 currentSession.end();
             }
         };
-    }, []);
+    }, [imgBitmap]);
 
     return (
         <div className="relative h-screen w-screen bg-black">

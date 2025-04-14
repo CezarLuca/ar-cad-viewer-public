@@ -22,7 +22,9 @@ export default function ARCanvas() {
                 className="relative w-full h-[90vh] md:h-[80vh] mx-auto pt-14"
             >
                 {isARPresenting ? (
-                    <DemoScene />
+                    <Suspense fallback={null}>
+                        <DemoScene />
+                    </Suspense>
                 ) : (
                     <Canvas
                         shadows
