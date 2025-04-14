@@ -9,56 +9,39 @@ import {
     PerspectiveCamera,
     Scene,
     WebGLRenderer,
+    Event,
 } from "three";
 
-const ARComponent: React.FC = () => {
+const DemoScene: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const imgRef = useRef<HTMLImageElement>(null);
-    // Store the AR function so it can be invoked from the button
     const arFuncRef = useRef<() => void>(() => {});
     const [imgBitmap, setImgBitmap] = useState<ImageBitmap | null>(null);
 
+    // Refs for Three.js objects to persist across renders
+    const rendererRef = useRef<WebGLRenderer | null>(null);
+    const sceneRef = useRef<Scene | null>(null);
+    const cameraRef = useRef<PerspectiveCamera | null>(null);
+    const earthCubeRef = useRef<Mesh | null>(null); // Ref for the cube
+    const xrRefSpaceRef = useRef<XRReferenceSpace | null>(null);
+    const currentSessionRef = useRef<XRSession | null>(null);
+
+    // Effect for one-time setup of Three.js scene, camera, renderer
     useEffect(() => {
-        // Ensure code only runs in the browser (Next.js SSR safeguard)
-        if (typeof window === "undefined") return;
+        if (typeof window === "undefined" || !containerRef.current) return;
 
-        // Prepare an image bitmap that will be used for image-tracking.
-        const currentImgRef = imgRef.current;
-        const handleImageLoad = () => {
-            if (currentImgRef) {
-                createImageBitmap(currentImgRef)
-                    .then((bitmap) => {
-                        setImgBitmap(bitmap); // Update state when bitmap is ready
-                        console.log("ImageBitmap created for DemoScene.");
-                    })
-                    .catch((err) =>
-                        console.error(
-                            "Error creating ImageBitmap in DemoScene:",
-                            err
-                        )
-                    );
-            }
-        };
-
-        if (currentImgRef?.complete && currentImgRef.naturalHeight !== 0) {
-            // Image already loaded
-            handleImageLoad();
-        } else if (currentImgRef) {
-            // Add event listener if not loaded
-            currentImgRef.addEventListener("load", handleImageLoad);
-        }
-
-        let xrRefSpace: XRReferenceSpace;
-        let gl: WebGLRenderingContext | null = null;
+        console.log("Setting up Three.js scene...");
 
         // Create the scene and add objects/lights.
         const scene = new Scene();
+        sceneRef.current = scene;
 
         // Earth cube
         const geometry1 = new BoxGeometry(0.1, 0.1, 0.1);
         const material1 = new MeshStandardMaterial({ color: 0xcc6600 });
         const earthCube = new Mesh(geometry1, material1);
+        earthCubeRef.current = earthCube; // Store cube in ref
         scene.add(earthCube);
 
         // Lighting
@@ -78,42 +61,128 @@ const ARComponent: React.FC = () => {
             0.1,
             20000
         );
+        cameraRef.current = camera;
+
         const renderer = new WebGLRenderer({
             antialias: true,
             alpha: true,
         });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        camera.aspect = window.innerWidth / window.innerHeight;
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.updateProjectionMatrix();
+        rendererRef.current = renderer;
 
-        // Append renderer to the container div.
-        if (containerRef.current) {
-            containerRef.current.appendChild(renderer.domElement);
-        }
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.xr.enabled = true;
 
+        // Append renderer to the container div.
+        containerRef.current.appendChild(renderer.domElement);
+
         // Adjust the canvas on window resize.
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
+        const onWindowResize = () => {
+            if (cameraRef.current && rendererRef.current) {
+                cameraRef.current.aspect =
+                    window.innerWidth / window.innerHeight;
+                cameraRef.current.updateProjectionMatrix();
+                rendererRef.current.setSize(
+                    window.innerWidth,
+                    window.innerHeight
+                );
+            }
+        };
         window.addEventListener("resize", onWindowResize, false);
 
-        // Render the scene.
-        function render() {
-            renderer.render(scene, camera);
+        // Initial render
+        const render = () => {
+            if (rendererRef.current && sceneRef.current && cameraRef.current) {
+                rendererRef.current.render(sceneRef.current, cameraRef.current);
+            }
+        };
+        render(); // Perform an initial render
+
+        // Cleanup function for this effect
+        const localContainer = containerRef.current; // Capture containerRef.current
+        return () => {
+            console.log("Cleaning up Three.js scene...");
+            window.removeEventListener("resize", onWindowResize);
+            if (localContainer && rendererRef.current?.domElement) {
+                try {
+                    localContainer.removeChild(rendererRef.current.domElement);
+                } catch (e) {
+                    console.warn("Failed to remove renderer DOM element:", e);
+                }
+            }
+            // Dispose of renderer and its context
+            rendererRef.current?.dispose();
+            rendererRef.current = null;
+            sceneRef.current = null;
+            cameraRef.current = null;
+            earthCubeRef.current = null; // Clear cube ref
+            // Ensure any active XR session is ended
+            if (currentSessionRef.current) {
+                console.log("Ending XR session from cleanup...");
+                currentSessionRef.current
+                    .end()
+                    .catch((err) =>
+                        console.warn("Error ending session on cleanup:", err)
+                    );
+                currentSessionRef.current = null;
+            }
+        };
+    }, []); // Empty dependency array ensures this runs only once on mount
+
+    // Effect for handling image loading and AR logic
+    useEffect(() => {
+        if (
+            typeof window === "undefined" ||
+            !rendererRef.current ||
+            !sceneRef.current ||
+            !cameraRef.current ||
+            !earthCubeRef.current
+        )
+            return;
+
+        // --- Image Loading ---
+        const currentImgRef = imgRef.current;
+        const handleImageLoad = () => {
+            if (currentImgRef) {
+                createImageBitmap(currentImgRef)
+                    .then((bitmap) => {
+                        setImgBitmap(bitmap);
+                        console.log("ImageBitmap created for DemoScene.");
+                    })
+                    .catch((err) =>
+                        console.error(
+                            "Error creating ImageBitmap in DemoScene:",
+                            err
+                        )
+                    );
+            }
+        };
+
+        if (currentImgRef?.complete && currentImgRef.naturalHeight !== 0) {
+            handleImageLoad();
+        } else if (currentImgRef) {
+            currentImgRef.addEventListener("load", handleImageLoad);
         }
 
-        // Compute appropriate session initialization options.
-        function getXRSessionInit(
+        // --- AR Logic ---
+        const renderer = rendererRef.current; // Get objects from refs
+        const scene = sceneRef.current;
+        const camera = cameraRef.current;
+        const earthCube = earthCubeRef.current;
+        let gl = renderer.getContext(); // Get context here
+
+        const render = () => {
+            renderer.render(scene, camera);
+        };
+
+        const getXRSessionInit = (
             mode: string,
             options: {
                 referenceSpaceType?: XRReferenceSpaceType;
                 sessionInit?: XRSessionInit;
             }
-        ): XRSessionInit {
+        ): XRSessionInit => {
+            // ... (getXRSessionInit function remains the same)
             if (options && options.referenceSpaceType) {
                 renderer.xr.setReferenceSpaceType(options.referenceSpaceType);
             }
@@ -143,22 +212,25 @@ const ARComponent: React.FC = () => {
                 );
             }
             return newInit;
-        }
+        };
 
-        // AR functionality.
-        let currentSession: XRSession | null = null;
-
-        function onXRFrame(t: number, frame: XRFrame) {
+        const onXRFrame = (t: number, frame: XRFrame) => {
             const session = frame.session;
-            session.requestAnimationFrame(onXRFrame);
+            session.requestAnimationFrame(onXRFrame); // Request next frame
+
+            if (!xrRefSpaceRef.current) return; // Ensure ref space is available
+
             const baseLayer = session.renderState.baseLayer;
-            const pose = frame.getViewerPose(xrRefSpace);
-            render();
+            const pose = frame.getViewerPose(xrRefSpaceRef.current);
+
+            render(); // Render the scene first
+
             if (pose) {
                 for (const view of pose.views) {
                     const viewport = baseLayer?.getViewport(view);
-                    if (viewport) {
-                        gl?.viewport(
+                    if (viewport && gl) {
+                        // Check gl context
+                        gl.viewport(
                             viewport.x,
                             viewport.y,
                             viewport.width,
@@ -171,7 +243,7 @@ const ARComponent: React.FC = () => {
                     for (const result of results) {
                         const pose1 = frame.getPose(
                             result.imageSpace,
-                            xrRefSpace
+                            xrRefSpaceRef.current // Use ref space from ref
                         );
                         if (pose1) {
                             const pos = pose1.transform.position;
@@ -183,49 +255,52 @@ const ARComponent: React.FC = () => {
                                 quat.z,
                                 quat.w
                             );
-                            // Here you can also handle result.trackingState ("tracked" or "emulated")
                         }
                     }
                 }
             }
-        }
+        };
 
-        function AR() {
-            // Called when the AR session starts.
-            function onSessionStarted(session: XRSession) {
+        const AR = () => {
+            const onSessionStarted = (session: XRSession) => {
                 session.addEventListener("end", onSessionEnded);
                 renderer.xr.setSession(session);
-                gl = renderer.getContext();
+                gl = renderer.getContext(); // Re-get context in case it was lost
                 if (buttonRef.current) {
                     buttonRef.current.style.display = "none";
                     buttonRef.current.textContent = "EXIT AR";
                 }
-                currentSession = session;
+                currentSessionRef.current = session; // Store session in ref
                 session.requestReferenceSpace("local").then((refSpace) => {
-                    xrRefSpace = refSpace;
+                    xrRefSpaceRef.current = refSpace; // Store ref space in ref
                     session.requestAnimationFrame(onXRFrame);
                 });
-            }
-            // Called when the AR session ends.
-            function onSessionEnded() {
-                if (currentSession) {
-                    currentSession.removeEventListener("end", onSessionEnded);
+            };
+
+            const onSessionEnded = () => {
+                if (currentSessionRef.current) {
+                    currentSessionRef.current.removeEventListener(
+                        "end",
+                        onSessionEnded
+                    );
                 }
                 renderer.xr.setSession(null);
                 if (buttonRef.current) {
                     buttonRef.current.textContent = "ENTER AR";
                     buttonRef.current.style.display = "";
                 }
-                currentSession = null;
-            }
-            if (currentSession === null) {
-                // Check if imgBitmap is ready before starting session
+                currentSessionRef.current = null;
+                xrRefSpaceRef.current = null; // Clear ref space
+                // Stop requesting frames if session ends unexpectedly
+                // (requestAnimationFrame is usually stopped automatically, but good practice)
+            };
+
+            if (currentSessionRef.current === null) {
                 if (!imgBitmap) {
                     console.error("Image Bitmap not ready for AR session.");
                     alert("Tracking image not loaded yet. Please wait.");
                     return;
                 }
-                // Build session options – here we add the dom-overlay and image-tracking features.
                 const options = {
                     requiredFeatures: ["dom-overlay", "image-tracking"],
                     trackedImages: [
@@ -244,49 +319,55 @@ const ARComponent: React.FC = () => {
                     navigator.xr
                         .requestSession("immersive-ar", sessionInit)
                         .then(onSessionStarted)
-                        .catch((err) => console.error(err));
+                        .catch((err) => {
+                            console.error("Failed to request AR session:", err);
+                            onSessionEnded(); // Ensure UI resets if request fails
+                        });
                 } else {
                     console.error("WebXR not supported by your browser.");
+                    alert("WebXR is not supported on this device/browser.");
                 }
             } else {
-                currentSession.end();
+                currentSessionRef.current.end();
             }
-            // Optional: add additional listeners to manage the UI when sessions start/end.
-            renderer.xr.addEventListener("sessionstart", (ev) => {
-                console.log("sessionstart", ev);
-                document.body.style.backgroundColor = "rgba(0, 0, 0, 0)";
-                renderer.domElement.style.display = "none";
-            });
-            renderer.xr.addEventListener("sessionend", (ev) => {
-                console.log("sessionend", ev);
-                document.body.style.backgroundColor = "";
-                renderer.domElement.style.display = "";
-            });
-        }
+        };
 
-        // Save the AR function to our ref so it can be invoked from the button.
+        // Assign AR function to ref
         arFuncRef.current = AR;
 
-        // Kick off the initial render.
-        render();
+        // Add session event listeners (consider moving to one-time setup if they don't depend on state/props)
+        const handleSessionStart = (ev: Event) => {
+            console.log("sessionstart", ev);
+            document.body.style.backgroundColor = "rgba(0, 0, 0, 0)";
+            renderer.domElement.style.display = "none";
+        };
+        const handleSessionEnd = (ev: Event) => {
+            console.log("sessionend", ev);
+            document.body.style.backgroundColor = "";
+            renderer.domElement.style.display = "";
+        };
 
-        // Cleanup on component unmount.
-        const localContainer = containerRef.current;
+        renderer.xr.addEventListener("sessionstart", handleSessionStart);
+        renderer.xr.addEventListener("sessionend", handleSessionEnd);
+
+        // Cleanup for this effect
         return () => {
-            window.removeEventListener("resize", onWindowResize);
+            console.log("Cleaning up AR logic / image listener...");
             // Remove image load listener
             if (currentImgRef) {
                 currentImgRef.removeEventListener("load", handleImageLoad);
             }
-            if (localContainer && renderer) {
-                localContainer.removeChild(renderer.domElement);
-            }
-            if (currentSession) {
-                currentSession.end();
-            }
+            // Remove XR session listeners
+            renderer?.xr?.removeEventListener(
+                "sessionstart",
+                handleSessionStart
+            );
+            renderer?.xr?.removeEventListener("sessionend", handleSessionEnd);
+            // Note: Session end is handled by the main cleanup, but removing listeners here is good practice.
         };
-    }, [imgBitmap]);
+    }, [imgBitmap]); // Dependency array includes imgBitmap
 
+    // --- JSX Return ---
     return (
         <div className="relative h-screen w-screen bg-black">
             {/* Hidden image element required for createImageBitmap */}
@@ -296,6 +377,7 @@ const ARComponent: React.FC = () => {
                 src="/markers/Lego-Part.png"
                 alt="tracking"
                 className="hidden"
+                crossOrigin="anonymous"
             />
             {/* Container in which the Three.js renderer will be attached */}
             <div ref={containerRef} className="absolute inset-0" />
@@ -303,7 +385,7 @@ const ARComponent: React.FC = () => {
             <button
                 ref={buttonRef}
                 onClick={() => arFuncRef.current()}
-                className="absolute bottom-8 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-blue-600 text-white rounded"
+                className="absolute bottom-8 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-blue-600 text-white rounded z-10" // Added z-index
             >
                 ENTER AR
             </button>
@@ -311,4 +393,4 @@ const ARComponent: React.FC = () => {
     );
 };
 
-export default ARComponent;
+export default DemoScene;
