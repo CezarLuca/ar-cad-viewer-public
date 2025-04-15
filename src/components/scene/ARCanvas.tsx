@@ -8,8 +8,8 @@ import OrbitControlsUI from "./ui/OrbitControlsUI";
 import { useAR } from "@/context/ARContext";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
-// import ARScene from "./ARScene";
-import DemoScene from "./DemoScene";
+import ARScene from "./ARScene";
+// import DemoScene from "./DemoScene";
 
 export default function ARCanvas() {
     const { isARPresenting, containerRef } = useAR();
@@ -23,7 +23,7 @@ export default function ARCanvas() {
             >
                 {isARPresenting ? (
                     <Suspense fallback={null}>
-                        <DemoScene />
+                        <ARScene />
                     </Suspense>
                 ) : (
                     <Canvas
