@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useARThreeScene } from "@/hooks/useARTreeScene";
 import { useARSession } from "@/hooks/useARSession";
-import ARButton from "./ui/ARButton";
 
 const ARScene: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -42,6 +41,24 @@ const ARScene: React.FC = () => {
         return () => imgEl.removeEventListener("load", handleLoad);
     }, []);
 
+    // Automatically start AR session when image is ready
+    useEffect(() => {
+        if (imgBitmap) {
+            startAR();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [imgBitmap]);
+
+    // Cleanup AR session on unmount ("Exit AR")
+    useEffect(() => {
+        const session = currentSessionRef.current;
+        return () => {
+            if (session) {
+                session.end();
+            }
+        };
+    }, [currentSessionRef]);
+
     return (
         <div className="relative h-full w-full bg-black">
             <img
@@ -53,10 +70,6 @@ const ARScene: React.FC = () => {
                 crossOrigin="anonymous"
             />
             <div ref={containerRef} className="absolute inset-0" />
-            <ARButton
-                onClick={startAR}
-                currentSession={currentSessionRef.current}
-            />
         </div>
     );
 };
