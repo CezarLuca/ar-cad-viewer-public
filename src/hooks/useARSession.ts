@@ -1,29 +1,21 @@
 import { useRef } from "react";
-import {
-    WebGLRenderer,
-    Scene,
-    PerspectiveCamera,
-    Euler,
-    Quaternion,
-} from "three";
-import { useModelConfig } from "@/context/ModelConfigContext";
+import { WebGLRenderer, Scene, PerspectiveCamera, Mesh } from "three";
 
 export const useARSession = ({
     rendererRef,
     sceneRef,
     cameraRef,
+    earthCubeRef,
     containerRef,
     imgBitmap,
 }: {
     rendererRef: React.RefObject<WebGLRenderer | null>;
     sceneRef: React.RefObject<Scene | null>;
     cameraRef: React.RefObject<PerspectiveCamera | null>;
+    earthCubeRef: React.RefObject<Mesh | null>;
     containerRef: React.RefObject<HTMLDivElement | null>;
     imgBitmap: ImageBitmap | null;
 }) => {
-    // Get model config context
-    const { updateConfig } = useModelConfig();
-
     // Internal mutable references.
     const xrRefSpaceRef = useRef<XRReferenceSpace | null>(null);
     const currentSessionRef = useRef<XRSession | null>(null);
@@ -82,27 +74,19 @@ export const useARSession = ({
                 result.imageSpace,
                 xrRefSpaceRef.current
             );
-            if (poseResult) {
+            if (poseResult && earthCubeRef.current) {
                 const { position, orientation } = poseResult.transform;
-
-                // Update position through ModelConfigContext
-                updateConfig({
-                    position: [position.x, position.y, position.z],
-                });
-
-                // Convert quaternion to Euler angles for rotation
-                const quaternion = new Quaternion(
+                earthCubeRef.current.position.set(
+                    position.x,
+                    position.y,
+                    position.z
+                );
+                earthCubeRef.current.quaternion.set(
                     orientation.x,
                     orientation.y,
                     orientation.z,
                     orientation.w
                 );
-                const euler = new Euler().setFromQuaternion(quaternion);
-
-                // Update rotation through ModelConfigContext
-                updateConfig({
-                    rotation: [euler.x, euler.y, euler.z],
-                });
             }
         }
     };

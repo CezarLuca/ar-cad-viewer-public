@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import {
     AmbientLight,
+    BoxGeometry,
     DirectionalLight,
+    Mesh,
+    MeshStandardMaterial,
     PerspectiveCamera,
     Scene,
     WebGLRenderer,
@@ -13,6 +16,7 @@ export const useARThreeScene = (
     const rendererRef = useRef<WebGLRenderer | null>(null);
     const sceneRef = useRef<Scene | null>(null);
     const cameraRef = useRef<PerspectiveCamera | null>(null);
+    const earthCubeRef = useRef<Mesh | null>(null);
 
     useEffect(() => {
         if (typeof window === "undefined" || !containerRef.current) return;
@@ -20,6 +24,13 @@ export const useARThreeScene = (
         // Setup scene
         const scene = new Scene();
         sceneRef.current = scene;
+
+        // Create cube (Earth)
+        const geometry = new BoxGeometry(0.1, 0.1, 0.1);
+        const material = new MeshStandardMaterial({ color: 0xcc6600 });
+        const cube = new Mesh(geometry, material);
+        earthCubeRef.current = cube;
+        scene.add(cube);
 
         // Add lighting
         scene.add(new AmbientLight(0x222222));
@@ -77,8 +88,9 @@ export const useARThreeScene = (
             rendererRef.current = null;
             sceneRef.current = null;
             cameraRef.current = null;
+            earthCubeRef.current = null;
         };
     }, [containerRef]);
 
-    return { rendererRef, sceneRef, cameraRef };
+    return { rendererRef, sceneRef, cameraRef, earthCubeRef };
 };
