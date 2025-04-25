@@ -69,6 +69,9 @@ export default function CADModel() {
                     0.1
                 )
             );
+
+            // Smoothly interpolate scale if needed (optional, based on your needs)
+            // meshRef.current.scale.lerp(new Vector3(...config.scale), 0.5);
         }
     });
 
@@ -80,8 +83,8 @@ export default function CADModel() {
                 ref={meshRef}
                 geometry={mainMesh.geometry}
                 scale={config.scale}
-                position={config.position}
-                rotation={config.rotation}
+                // position={config.position}
+                // rotation={config.rotation}
                 castShadow
                 receiveShadow
             >

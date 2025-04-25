@@ -1,10 +1,11 @@
 import * as dotenv from "dotenv";
-// Load environment variables from .env.local
+// load your .env.local into process.env
 dotenv.config({ path: ".env.local" });
 
-import { createTablesIfNotExist } from "./schema/schema";
-
 async function setup() {
+    // only now do we import the schema (and `db.ts` underneath it)
+    const { createTablesIfNotExist } = await import("./schema/schema");
+
     try {
         await createTablesIfNotExist();
         console.log("Database setup complete");

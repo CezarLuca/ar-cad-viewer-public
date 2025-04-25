@@ -2,15 +2,50 @@
 
 import React, { useState } from "react";
 
-export default function FileUpload() {
+export default function FileUpload({
+    onUploadSuccess,
+}: {
+    onUploadSuccess?: () => void;
+}) {
     const [file, setFile] = useState<File | null>(null);
     const [name, setName] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [message, setMessage] = useState<string>("");
+    const [error, setError] = useState<string>("");
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0]);
+            const selectedFile = e.target.files[0];
+
+            // More thorough client-side validation
+            if (!selectedFile.name.endsWith(".glb")) {
+                setError("Only .glb files are supported");
+                return;
+            }
+
+            // Check MIME type if available
+            if (
+                selectedFile.type &&
+                selectedFile.type !== "model/gltf-binary"
+            ) {
+                setError("The file doesn't appear to be a valid GLB file");
+                return;
+            }
+
+            // Validate file size client-side
+            if (selectedFile.size > 10 * 1024 * 1024) {
+                setError("File size exceeds the 10MB limit");
+                return;
+            }
+
+            // Check if file has content
+            if (selectedFile.size === 0) {
+                setError("File is empty");
+                return;
+            }
+
+            setError("");
+            setFile(selectedFile);
         }
     };
 
@@ -20,6 +55,7 @@ export default function FileUpload() {
 
         setLoading(true);
         setMessage("");
+        setError("");
 
         try {
             const formData = new FormData();
@@ -37,15 +73,18 @@ export default function FileUpload() {
                 throw new Error(data.error || "Upload failed");
             }
 
-            setMessage("Model uploaded successful");
+            setMessage("Model uploaded successfully");
             setFile(null);
             setName("");
+
+            // Call the callback if provided
+            if (onUploadSuccess) {
+                onUploadSuccess();
+            }
         } catch (error) {
-            setMessage(
-                `Error: ${
-                    error instanceof Error ? error.message : "Unknown error"
-                }`
-            );
+            const errorMessage =
+                error instanceof Error ? error.message : "Unknown error";
+            setError(`Error: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -53,6 +92,12 @@ export default function FileUpload() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+                <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {error}
+                </div>
+            )}
+
             <div>
                 <label className="block text-sm font-medium text-gray-700">
                     Model Name
@@ -100,15 +145,7 @@ export default function FileUpload() {
             </button>
 
             {message && (
-                <div
-                    className={`mt-3 text-sm ${
-                        message.includes("Error")
-                            ? "text-red-500"
-                            : "text-green-500"
-                    }`}
-                >
-                    {message}
-                </div>
+                <div className="mt-3 text-sm text-green-500">{message}</div>
             )}
         </form>
     );

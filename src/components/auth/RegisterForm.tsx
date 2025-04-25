@@ -1,58 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+// import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
-    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const router = useRouter();
+    const [emailSent, setEmailSent] = useState(false);
+    // const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError("");
 
-        if (!name || !email || !password) {
-            setError("Please fill in all fields.");
+        if (!email) {
+            setError("Please enter your email address.");
             setLoading(false);
             return;
         }
 
         try {
-            const response = await fetch("/api/register", {
+            const response = await fetch("/api/auth/magic-link", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ name, email, password }),
+                body: JSON.stringify({ email }),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.error || "Registration failed.");
+                setError(data.error || "Failed to send verification email.");
             } else {
-                // Automatically sign in after successful registration
-                const signInResult = await signIn("credentials", {
-                    email,
-                    password,
-                    redirect: false,
-                });
-
-                if (signInResult?.error) {
-                    setError("Failed to sign in after registration.");
-                } else {
-                    router.push("/dashboard");
-                }
+                setEmailSent(true);
             }
         } catch (err) {
             setError(
-                `An error occurred during registration: ${
+                `An error occurred: ${
                     err instanceof Error ? err.message : "Unknown error"
                 }`
             );
@@ -61,6 +48,22 @@ export default function RegisterForm() {
         }
     };
 
+    if (emailSent) {
+        return (
+            <div className="text-center text-gray-700 bg-gray-100">
+                <h3 className="text-xl font-bold mb-4">Check your inbox!</h3>
+                <p className="mb-4">
+                    We&apos; sent a verification link to{" "}
+                    <strong>{email}</strong>.
+                </p>
+                <p>
+                    Click the link in the email to complete your registration.
+                    The link will expire in 1 hour.
+                </p>
+            </div>
+        );
+    }
+
     return (
         <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
             {error && (
@@ -68,23 +71,7 @@ export default function RegisterForm() {
                     {error}
                 </div>
             )}
-            <div className="mb-4">
-                <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="name"
-                >
-                    Name
-                </label>
-                <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="name"
-                    type="text"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
-            </div>
-            <div className="mb-4">
+            <div className="mb-6">
                 <label
                     className="block text-gray-700 text-sm font-bold mb-2"
                     htmlFor="email"
@@ -95,25 +82,9 @@ export default function RegisterForm() {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     id="email"
                     type="email"
-                    placeholder="Email"
+                    placeholder="Your email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                />
-            </div>
-            <div className="mb-6">
-                <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="password"
-                >
-                    Password
-                </label>
-                <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="password"
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                 />
             </div>
             <div className="flex items-center justify-between">
@@ -122,7 +93,7 @@ export default function RegisterForm() {
                     type="submit"
                     disabled={loading}
                 >
-                    {loading ? "Loading..." : "Register"}
+                    {loading ? "Sending..." : "Send Verification Link"}
                 </button>
                 <a
                     className="inline-block align-baseline font-bold py-2 px-4 rounded border-1 hover:bg-gray-200 border-blue-600 hover:border-blue-700 text-blue-600 hover:text-blue-700"

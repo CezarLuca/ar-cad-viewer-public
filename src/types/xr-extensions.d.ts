@@ -24,6 +24,7 @@ declare global {
         readonly index: number;
         readonly trackingState: "tracked" | "emulated";
         readonly imageSpace: XRSpace;
+        readonly measuredWidthInMeters: number;
     }
 }
 

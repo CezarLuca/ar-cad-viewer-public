@@ -1,8 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import FileUpload from "@/components/FileUpload";
-import UserModelsList from "@/components/UserModelsList";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import DashboardContent from "@/components/user-dashboard/DashboardContent";
 
 export default async function Dashboard() {
     const session = await getServerSession();
@@ -18,21 +17,7 @@ export default async function Dashboard() {
                     Personal Dashboard
                 </h1>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-gray-300 p-6 rounded-lg shadow-md">
-                        <h2 className="text-xl font-bold text-gray-700 mb-4">
-                            Upload a New 3D Model
-                        </h2>
-                        <FileUpload />
-                    </div>
-
-                    <div className="bg-gray-300 p-6 rounded-lg shadow-md">
-                        <h2 className="text-xl font-bold text-gray-700 mb-4">
-                            Your Models
-                        </h2>
-                        <UserModelsList />
-                    </div>
-                </div>
+                <DashboardContent />
             </div>
         </DashboardLayout>
     );

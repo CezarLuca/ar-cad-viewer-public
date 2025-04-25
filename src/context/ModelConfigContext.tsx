@@ -4,6 +4,7 @@ import {
     useState,
     useEffect,
     useCallback,
+    useRef,
 } from "react";
 // import { Vector3 } from "three";
 
@@ -53,11 +54,24 @@ const ModelConfigContext = createContext<ModelConfigContextType | undefined>(
 // Provider component
 export function ModelConfigProvider({
     children,
+    initialConfig,
 }: {
     children: React.ReactNode;
+    initialConfig?: Partial<ModelConfig>;
 }) {
+    // Use useRef to track if we've initialized with props
+    const initializedRef = useRef(false);
+
     // Use local state that syncs with the global singleton
     const [config, setConfig] = useState<ModelConfig>(globalModelConfig.config);
+
+    // Only initialize once on mount if initialConfig is provided
+    useEffect(() => {
+        if (initialConfig && !initializedRef.current) {
+            globalModelConfig.updateConfig(initialConfig);
+            initializedRef.current = true;
+        }
+    }, [initialConfig]);
 
     // Subscribe to changes
     useEffect(() => {

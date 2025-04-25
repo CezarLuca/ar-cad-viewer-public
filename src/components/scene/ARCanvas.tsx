@@ -9,6 +9,7 @@ import { useAR } from "@/context/ARContext";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import ARScene from "./ARScene";
+import { TrackingProvider } from "@/context/TrackingContext";
 // import DemoScene from "./DemoScene";
 
 export default function ARCanvas() {
@@ -22,9 +23,11 @@ export default function ARCanvas() {
                 className="relative w-full h-[90vh] md:h-[80vh] mx-auto pt-14"
             >
                 {isARPresenting ? (
-                    <Suspense fallback={null}>
-                        <ARScene />
-                    </Suspense>
+                    <TrackingProvider>
+                        <Suspense fallback={null}>
+                            <ARScene />
+                        </Suspense>
+                    </TrackingProvider>
                 ) : (
                     <Canvas
                         shadows

@@ -14,15 +14,6 @@ const ARContext = createContext<ARContextValue>({
     containerRef: { current: null },
 });
 
-// (Keep your helper loadImage as is)
-// const loadImage = (src: string): Promise<HTMLImageElement> =>
-//     new Promise((resolve, reject) => {
-//         const img = new Image();
-//         img.onload = () => resolve(img);
-//         img.onerror = reject;
-//         img.src = src;
-//     });
-
 export const ARProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
