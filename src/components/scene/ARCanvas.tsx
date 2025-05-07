@@ -20,7 +20,7 @@ export default function ARCanvas() {
         <ModelConfigProvider>
             <div
                 ref={containerRef}
-                className="relative w-full h-[90vh] md:h-[80vh] mx-auto pt-14"
+                className="relative w-full h-[95vh] md:w-[96%] mx-auto pt-14"
             >
                 {isARPresenting ? (
                     <TrackingProvider>

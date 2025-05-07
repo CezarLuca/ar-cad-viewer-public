@@ -144,7 +144,7 @@ const ARScene: React.FC = () => {
             <img
                 id="bitmap"
                 ref={imgRef}
-                src="/markers/Lego-Part.png"
+                src="/markers/tracker3.png"
                 alt="tracking"
                 className="hidden"
                 crossOrigin="anonymous"

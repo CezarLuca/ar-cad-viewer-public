@@ -11,6 +11,17 @@ export default {
             colors: {
                 background: "var(--background)",
                 foreground: "var(--foreground)",
+                "white-50": "#d9ecff",
+                "black-50": "#1c1c21",
+                "black-100": "#0e0e10",
+                "black-200": "#282732",
+                "blue-50": "#839cb5",
+                "blue-100": "#2d2d38",
+            },
+            fontFamily: {
+                sans: ["Mona Sans", "sans-serif"],
+                serif: ["var(--font-serif)", "serif"],
+                mono: ["var(--font-mono)", "monospace"],
             },
             transitionProperty: {
                 slider: "all 0.1s cubic-bezier(0.4, 0, 0.2, 1)",

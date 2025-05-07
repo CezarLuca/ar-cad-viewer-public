@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const EditableValue = ({
     value,
@@ -24,8 +24,17 @@ const EditableValue = ({
     const [editingField, setEditingField] = useState<string | null>(null);
     const isEditing = editingField === fieldId;
     const [inputValue, setInputValue] = useState(value.toFixed());
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isEditing && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    }, [isEditing]);
 
     const handleClick = () => {
+        if (disabled) return;
         setInputValue(value.toFixed(toFixed));
         setEditingField(fieldId);
     };
@@ -46,7 +55,6 @@ const EditableValue = ({
         if (e.key === "Enter") {
             handleBlur();
         } else if (e.key === "Escape") {
-            // setInputValue(value.toFixed(toFixed));
             setEditingField(null);
         }
     };
@@ -54,6 +62,7 @@ const EditableValue = ({
     if (isEditing) {
         return (
             <input
+                ref={inputRef}
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -69,7 +78,9 @@ const EditableValue = ({
     return (
         <span
             onClick={handleClick}
-            className="cursor-pointer hover:text-blue-600 hover:underline"
+            className={`cursor-pointer hover:text-blue-600 hover:underline ${
+                disabled ? "opacity-50 pointer-events-none" : ""
+            }`}
             aria-disabled={disabled}
         >
             {value.toFixed(toFixed)}
