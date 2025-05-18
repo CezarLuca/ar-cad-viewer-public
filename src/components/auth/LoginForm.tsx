@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 export default function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -54,13 +55,13 @@ export default function LoginForm() {
             )}
             <div className="mb-4">
                 <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
+                    className="block text-gray-800 text-sm font-bold mb-2"
                     htmlFor="email"
                 >
                     Email
                 </label>
                 <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 bg-gray-50 leading-tight focus:outline-none focus:shadow-outline"
                     id="email"
                     type="email"
                     placeholder="Email"
@@ -70,30 +71,39 @@ export default function LoginForm() {
             </div>
             <div className="mb-6">
                 <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
+                    className="block text-gray-800 text-sm font-bold mb-2"
                     htmlFor="password"
                 >
                     Password
                 </label>
-                <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="password"
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                    <input
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 bg-gray-50 leading-tight focus:outline-none focus:shadow-outline"
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute text-gray-700 hover:cursor-pointer inset-y-0 right-0 px-3 flex items-center text-sm leading-5"
+                    >
+                        {showPassword ? "Hide" : "Show"}
+                    </button>
+                </div>
             </div>
             <div className="flex items-center justify-between">
                 <button
-                    className="bg-blue-600 hover:bg-blue-700 text-gray-100 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className="bg-gray-700 hover:bg-gray-800 text-gray-100 hover:text-gray-50 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="submit"
                     disabled={loading}
                 >
                     {loading ? "Loading..." : "Sign In"}
                 </button>
                 <a
-                    className="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-700 border-1 bg-gray-100 hover:bg-gray-200 py-2 px-4 rounded border-blue-600 hover:border-blue-700"
+                    className="inline-block align-baseline font-bold text-sm text-gray-700 hover:text-gray-900 border-1 bg-gray-50 hover:bg-gray-300 py-2 px-4 rounded border-gray-700 hover:border-gray-900 transition-colors"
                     href="/auth/register"
                 >
                     Register

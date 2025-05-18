@@ -17,6 +17,22 @@ export async function POST(request: Request) {
             );
         }
 
+        // Validate email length
+        if (email.length < 5 || email.length > 100) {
+            return NextResponse.json(
+                { error: "Email must be between 5 and 100 characters long" },
+                { status: 400 }
+            );
+        }
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return NextResponse.json(
+                { error: "Invalid email format" },
+                { status: 400 }
+            );
+        }
+
         // Check if the email is already registered
         const existingUsers = await sql`
             SELECT * FROM users WHERE email = ${email}

@@ -3,7 +3,6 @@
 import { Environment, Grid, OrbitControls } from "@react-three/drei";
 import { useRef, useEffect, RefObject } from "react";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-// import * as THREE from "three";
 import { DoubleSide } from "three";
 import CADModel from "./CADModel";
 
@@ -24,7 +23,7 @@ export default function Regular3DScene({
                 orbitControlsRef as { current: OrbitControlsImpl | null }
             ).current = localControlsRef.current;
         }
-    }, [orbitControlsRef]); // Removed localControlsRef.current from dependencies
+    }, [orbitControlsRef]);
 
     return (
         <>

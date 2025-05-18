@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import QrCodeModal from "@/components/user-dashboard/QRCodeModal";
 
 interface Model {
     id: number;
@@ -12,6 +13,28 @@ interface Model {
     user_id: number;
     created_at: string;
 }
+interface QrModalData {
+    url: string;
+    modelName: string;
+    fileName: string;
+}
+
+const BurgerIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+    >
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4 6h16M4 12h16m-7 6h7"
+        />
+    </svg>
+);
 
 export default function UserModelsList() {
     const [models, setModels] = useState<Model[]>([]);
@@ -20,6 +43,11 @@ export default function UserModelsList() {
     const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
     const [deleteError, setDeleteError] = useState<string>("");
     const { data: session } = useSession();
+    const [qrModalData, setQrModalData] = useState<QrModalData | null>(null);
+    const [openActionMenuModelId, setOpenActionMenuModelId] = useState<
+        number | null
+    >(null);
+    const menuRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         async function fetchModels() {
@@ -49,8 +77,25 @@ export default function UserModelsList() {
         fetchModels();
     }, [session]);
 
+    useEffect(() => {
+        // Close menu when clicking outside
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(event.target as Node)
+            ) {
+                setOpenActionMenuModelId(null);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [menuRef]);
+
     async function handleDeleteModel(id: number) {
         if (!confirm("Are you sure you want to delete this model?")) {
+            setOpenActionMenuModelId(null);
             return;
         }
 
@@ -77,15 +122,40 @@ export default function UserModelsList() {
             console.error("Delete error:", err);
         } finally {
             setDeleteLoading(null);
+            setOpenActionMenuModelId(null);
         }
     }
 
+    const handleShowQrCode = (model: Model) => {
+        const origin =
+            typeof window !== "undefined" ? window.location.origin : "";
+        const modelViewUrl = `${origin}/ar?model=${encodeURIComponent(
+            model.blob_url
+        )}`;
+        setQrModalData({
+            url: modelViewUrl,
+            modelName: model.name,
+            fileName: `${model.name.replace(/\s+/g, "_")}_QR_Code.png`,
+        });
+        setOpenActionMenuModelId(null);
+    };
+
+    const handleCloseQrModal = () => {
+        setQrModalData(null);
+    };
+
+    const toggleActionMenu = (modelId: number) => {
+        setOpenActionMenuModelId(
+            openActionMenuModelId === modelId ? null : modelId
+        );
+    };
+
     if (loading)
-        return <div className="text-gray-500">Loading your models...</div>;
+        return <div className="text-gray-800">Loading your models...</div>;
     if (error) return <div className="text-red-500">{error}</div>;
     if (models.length === 0)
         return (
-            <div className="text-gray-500">
+            <div className="text-gray-800">
                 You haven&apos;t uploaded any models yet.
             </div>
         );
@@ -102,42 +172,84 @@ export default function UserModelsList() {
                 {models.map((model) => (
                     <li
                         key={model.id}
-                        className="border p-4 rounded bg-gray-100 shadow-sm"
+                        className="border p-4 rounded bg-gray-200 shadow-sm"
                     >
                         <div className="flex justify-between items-center">
                             <div>
-                                <h3 className="font-semibold text-gray-500">
+                                <h3 className="font-semibold text-gray-700">
                                     {model.name}
                                 </h3>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-gray-700">
                                     {new Date(
                                         model.created_at
                                     ).toLocaleString()}
                                 </p>
                             </div>
-                            <div className="flex space-x-2">
-                                <Link
-                                    href={`/ar?model=${encodeURIComponent(
-                                        model.blob_url
-                                    )}`}
-                                    className="bg-blue-600 hover:bg-blue-700 text-gray-200 px-3 py-1 rounded"
-                                >
-                                    View in 3D
-                                </Link>
+                            <div
+                                className="relative"
+                                ref={
+                                    openActionMenuModelId === model.id
+                                        ? menuRef
+                                        : null
+                                }
+                            >
                                 <button
-                                    onClick={() => handleDeleteModel(model.id)}
-                                    disabled={deleteLoading === model.id}
-                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded disabled:bg-gray-400"
+                                    onClick={() => toggleActionMenu(model.id)}
+                                    className="p-2 rounded-md text-gray-900 bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                    aria-label="Model actions"
                                 >
-                                    {deleteLoading === model.id
-                                        ? "Deleting..."
-                                        : "Delete"}
+                                    <BurgerIcon />
                                 </button>
+                                {openActionMenuModelId === model.id && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 border border-gray-300">
+                                        <Link
+                                            href={`/ar?model=${encodeURIComponent(
+                                                model.blob_url
+                                            )}`}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left border-b border-gray-300 hover:cursor-pointer"
+                                            onClick={() =>
+                                                setOpenActionMenuModelId(null)
+                                            }
+                                        >
+                                            View in 3D
+                                        </Link>
+                                        <button
+                                            onClick={() =>
+                                                handleShowQrCode(model)
+                                            }
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left border-b border-gray-300 hover:cursor-pointer"
+                                        >
+                                            Show QR Code
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                handleDeleteModel(model.id)
+                                            }
+                                            disabled={
+                                                deleteLoading === model.id
+                                            }
+                                            className="block px-4 py-2 text-sm text-red-600 hover:bg-red-200 w-full text-left disabled:text-gray-400 hover:cursor-pointer"
+                                        >
+                                            {deleteLoading === model.id
+                                                ? "Deleting..."
+                                                : "Delete"}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </li>
                 ))}
             </ul>
+
+            {qrModalData && (
+                <QrCodeModal
+                    url={qrModalData.url}
+                    modelName={qrModalData.modelName}
+                    fileName={qrModalData.fileName}
+                    onClose={handleCloseQrModal}
+                />
+            )}
         </div>
     );
 }

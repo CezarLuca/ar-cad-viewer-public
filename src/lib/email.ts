@@ -31,23 +31,47 @@ export async function sendMagicLinkEmail(
         const info = await transporter.sendMail({
             from: process.env.EMAIL_FROM,
             to: email,
-            subject: "Complete your registration",
-            text: `Click this link to complete your registration: ${magicLink}`,
+            subject: "Complete your registration - AR CAD Viewer",
+            text: `Welcome to AR CAD Viewer! Click this link to complete your registration: ${magicLink}\n\nThis link will expire in 1 hour.`,
             html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Complete Your Registration</h2>
-            <p>Click the button below to verify your email and complete your registration:</p>
-            <p style="text-align: center; margin: 30px 0;">
-            <a href="${magicLink}" 
-                style="background-color: #3b82f6; color: white; padding: 12px 24px; 
-                    text-decoration: none; border-radius: 4px; display: inline-block;">
-                Complete Registration
-            </a>
-            </p>
-            <p>Or copy and paste this link into your browser:</p>
-            <p style="word-break: break-all;">${magicLink}</p>
-            <p>This link will expire in 1 hour.</p>
+<div style="margin: 0; padding: 0; width: 100%; background-color: #111827; font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #D1D5DB;">
+    <div style="max-width: 580px; margin: 20px auto; background-color: #1F2937; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+        <!-- Header -->
+        <div style="background-color: #374151; padding: 24px; text-align: center;">
+            <h1 style="margin: 0; color: #F9FAFB; font-size: 28px; font-weight: bold;">AR CAD Viewer</h1>
         </div>
+        <!-- Content Body -->
+        <div style="padding: 30px;">
+            <h2 style="margin: 0 0 20px 0; color: #E5E7EB; font-size: 22px; font-weight: bold;">Complete Your Registration</h2>
+            <p style="margin: 0 0 16px 0; font-size: 16px; color: #D1D5DB;">
+                Welcome! To finish setting up your AR CAD Viewer account, please verify your email address by clicking the button below.
+            </p>
+            <!-- Button -->
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${magicLink}" target="_blank"
+                   style="background-color: #4B5563; color: #F9FAFB; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-size: 17px; font-weight: bold; border: 1px solid #6B7280;">
+                    Verify Email &amp; Register
+                </a>
+            </div>
+            <p style="margin: 0 0 16px 0; font-size: 16px; color: #D1D5DB;">
+                If the button above doesn't work, you can copy and paste the following link into your browser's address bar:
+            </p>
+            <p style="margin: 0 0 24px 0; font-size: 14px; word-break: break-all; background-color: #374151; padding: 12px; border-radius: 4px; text-align: center;">
+                <a href="${magicLink}" target="_blank" style="color: #60A5FA; text-decoration: underline;">${magicLink}</a>
+            </p>
+            <p style="margin: 0; font-size: 14px; color: #9CA3AF; text-align: center;">
+                This link will expire in 1 hour. If you didn't request this email, please ignore it.
+            </p>
+        </div>
+        <!-- Footer -->
+        <div style="background-color: #374151; padding: 20px; text-align: center; font-size: 12px; color: #9CA3AF;">
+            &copy; ${new Date().getFullYear()} AR CAD Viewer. All rights reserved.
+        </div>
+    </div>
+    <div style="text-align: center; font-size: 12px; color: #6B7280; padding: 10px 0;">
+        AR CAD Viewer Project
+    </div>
+</div>
         `,
         });
 
