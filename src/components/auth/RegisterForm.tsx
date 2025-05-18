@@ -21,20 +21,6 @@ export default function RegisterForm() {
             return;
         }
 
-        // Validate email length
-        if (email.length < 5 || email.length > 100) {
-            setError("Email must be between 5 and 100 characters long.");
-            setLoading(false);
-            return;
-        }
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            setError("Invalid email format.");
-            setLoading(false);
-            return;
-        }
-
         try {
             const response = await fetch("/api/auth/magic-link", {
                 method: "POST",
@@ -64,15 +50,13 @@ export default function RegisterForm() {
 
     if (emailSent) {
         return (
-            <div className="text-center text-gray-800 bg-gray-200">
-                <h3 className="text-xl pt-4 text-gray-800 font-bold mb-4">
-                    Check your inbox!
-                </h3>
-                <p className="mb-4 px-6 text-gray-800">
+            <div className="text-center text-gray-700 bg-gray-100">
+                <h3 className="text-xl font-bold mb-4">Check your inbox!</h3>
+                <p className="mb-4">
                     We&apos; sent a verification link to{" "}
                     <strong>{email}</strong>.
                 </p>
-                <p className="pb-4 px-6 text-gray-800">
+                <p>
                     Click the link in the email to complete your registration.
                     The link will expire in 1 hour.
                 </p>
@@ -89,13 +73,13 @@ export default function RegisterForm() {
             )}
             <div className="mb-6">
                 <label
-                    className="block text-gray-800 text-sm font-bold mb-2"
+                    className="block text-gray-700 text-sm font-bold mb-2"
                     htmlFor="email"
                 >
                     Email
                 </label>
                 <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-50 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     id="email"
                     type="email"
                     placeholder="Your email address"
@@ -105,14 +89,14 @@ export default function RegisterForm() {
             </div>
             <div className="flex items-center justify-between">
                 <button
-                    className="bg-gray-700 hover:bg-gray-900 text-gray-100 hover:text-gray-50 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="submit"
                     disabled={loading}
                 >
                     {loading ? "Sending..." : "Send Verification Link"}
                 </button>
                 <a
-                    className="inline-block align-baseline font-bold py-2 px-4 rounded border-1 bg-gray-50 hover:bg-gray-300 border-gray-700 hover:border-gray-900 text-gray-700 hover:text-gray-900"
+                    className="inline-block align-baseline font-bold py-2 px-4 rounded border-1 hover:bg-gray-200 border-blue-600 hover:border-blue-700 text-blue-600 hover:text-blue-700"
                     href="/auth/login"
                 >
                     Login

@@ -248,7 +248,7 @@ export const useARSession = ({
                     trackedImages: [
                         {
                             image: imgBitmap,
-                            widthInMeters: 0.05,
+                            widthInMeters: 0.2,
                         },
                     ],
                     domOverlay: { root: containerRef.current || document.body },

@@ -5,10 +5,10 @@ import ReactDOM from "react-dom/client";
 import { useARThreeScene } from "@/hooks/useARTreeScene";
 import { useARSession } from "@/hooks/useARSession";
 import { useModelUrl } from "@/context/ModelUrlContext";
-import AROverlayContent from "./ui/AROverlayContent";
-import { TrackedObject } from "./TrackedObject";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
 import { useTracking } from "@/context/TrackingContext";
+import AROverlayContent from "./ui/AROverlayContent";
+import { TrackedObject } from "./TrackedObject";
 
 const ARScene: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -144,7 +144,7 @@ const ARScene: React.FC = () => {
             <img
                 id="bitmap"
                 ref={imgRef}
-                src="/markers/tracker3.png"
+                src="/markers/Lego-Part.png"
                 alt="tracking"
                 className="hidden"
                 crossOrigin="anonymous"

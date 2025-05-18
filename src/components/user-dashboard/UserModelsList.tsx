@@ -81,11 +81,11 @@ export default function UserModelsList() {
     }
 
     if (loading)
-        return <div className="text-gray-800">Loading your models...</div>;
+        return <div className="text-gray-500">Loading your models...</div>;
     if (error) return <div className="text-red-500">{error}</div>;
     if (models.length === 0)
         return (
-            <div className="text-gray-800">
+            <div className="text-gray-500">
                 You haven&apos;t uploaded any models yet.
             </div>
         );
@@ -102,14 +102,14 @@ export default function UserModelsList() {
                 {models.map((model) => (
                     <li
                         key={model.id}
-                        className="border p-4 rounded bg-gray-200 shadow-sm"
+                        className="border p-4 rounded bg-gray-100 shadow-sm"
                     >
                         <div className="flex justify-between items-center">
                             <div>
-                                <h3 className="font-semibold text-gray-700">
+                                <h3 className="font-semibold text-gray-500">
                                     {model.name}
                                 </h3>
-                                <p className="text-sm text-gray-700">
+                                <p className="text-sm text-gray-500">
                                     {new Date(
                                         model.created_at
                                     ).toLocaleString()}
@@ -120,14 +120,14 @@ export default function UserModelsList() {
                                     href={`/ar?model=${encodeURIComponent(
                                         model.blob_url
                                     )}`}
-                                    className="bg-blue-600 hover:bg-blue-700 text-gray-50 px-3 py-1 rounded"
+                                    className="bg-blue-600 hover:bg-blue-700 text-gray-200 px-3 py-1 rounded"
                                 >
                                     View in 3D
                                 </Link>
                                 <button
                                     onClick={() => handleDeleteModel(model.id)}
                                     disabled={deleteLoading === model.id}
-                                    className="bg-red-600 hover:bg-red-700 text-gray-50 px-3 py-1 rounded disabled:bg-gray-400"
+                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded disabled:bg-gray-400"
                                 >
                                     {deleteLoading === model.id
                                         ? "Deleting..."

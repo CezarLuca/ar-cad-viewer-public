@@ -2,15 +2,14 @@
 
 import { Suspense, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
-import Regular3DScene from "./Regular3DScene";
-import ModelControls from "./ui/ModelControls";
-import OrbitControlsUI from "./ui/OrbitControlsUI";
-import { useAR } from "@/context/ARContext";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { ModelConfigProvider } from "@/context/ModelConfigContext";
-import ARScene from "./ARScene";
+import { useAR } from "@/context/ARContext";
 import { TrackingProvider } from "@/context/TrackingContext";
-// import DemoScene from "./DemoScene";
+import Regular3DScene from "./Regular3DScene";
+import ARScene from "./ARScene";
+import ModelControls from "./ui/ModelControls";
+import OrbitControlsUI from "./ui/OrbitControlsUI";
 
 export default function ARCanvas() {
     const { isARPresenting, containerRef } = useAR();
@@ -20,7 +19,7 @@ export default function ARCanvas() {
         <ModelConfigProvider>
             <div
                 ref={containerRef}
-                className="relative w-full h-[95vh] md:w-[96%] mx-auto pt-14"
+                className="relative w-full h-[90vh] md:h-[80vh] mx-auto pt-14"
             >
                 {isARPresenting ? (
                     <TrackingProvider>

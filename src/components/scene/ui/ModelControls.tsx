@@ -2,34 +2,10 @@
 
 import { useModelConfig } from "@/context/ModelConfigContext";
 import { useState } from "react";
-import {
-    FiChevronDown,
-    FiChevronRight,
-    FiSliders,
-    FiRotateCcw,
-    FiRefreshCw,
-} from "react-icons/fi";
+import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 import EditableValue from "./EditableValue";
 
 const CADSCALE = 0.01;
-
-const DEFAULT_POSITION_RANGE = { min: -3, max: 3, step: 0.1 };
-const EXPANDED_POSITION_RANGE = { min: -9, max: 9, step: 0.1 };
-
-const DEFAULT_SCALE_RANGE = { min: 0.1, max: 3, step: 0.05 };
-const EXPANDED_SCALE_RANGE = { min: 0.03, max: 9, step: 0.05 };
-
-// Custom x3 icon component for better semantic representation
-const X3Icon = ({ expanded }: { expanded: boolean }) => (
-    <div className="flex items-center justify-center">
-        {expanded ? (
-            <FiRotateCcw className="h-3 w-3" />
-        ) : (
-            <FiSliders className="h-3 w-3" />
-        )}
-        <span className="text-xs font-bold ml-0.5">x3</span>
-    </div>
-);
 
 export default function ModelControls() {
     const { config, updateConfig } = useModelConfig();
@@ -40,31 +16,6 @@ export default function ModelControls() {
     });
     const [asymmetricScale, setAsymmetricScale] = useState(false);
     const [useRadians, setUseRadians] = useState(false);
-    const [expandedRange, setExpandedRange] = useState({
-        position: false,
-        scale: false,
-    });
-
-    // Get the current range values based on expanded state
-    const getPositionRange = () => {
-        return expandedRange.position
-            ? EXPANDED_POSITION_RANGE
-            : DEFAULT_POSITION_RANGE;
-    };
-
-    const getScaleRange = () => {
-        return expandedRange.scale ? EXPANDED_SCALE_RANGE : DEFAULT_SCALE_RANGE;
-    };
-
-    // Toggle expanded range for a specific control
-    const toggleExpandedRange = (control: "position" | "scale") => {
-        resetPosition();
-        resetScale();
-        setExpandedRange((prev) => ({
-            ...prev,
-            [control]: !prev[control],
-        }));
-    };
 
     const toggleSection = (section: "position" | "rotation" | "scale") => {
         setExpandedSections((prev) => ({
@@ -140,10 +91,6 @@ export default function ModelControls() {
         expandedSections.rotation ||
         expandedSections.scale;
 
-    // Get current ranges
-    const positionRange = getPositionRange();
-    const scaleRange = getScaleRange();
-
     return (
         <div className="w-full flex justify-start">
             <div
@@ -168,36 +115,13 @@ export default function ModelControls() {
                             </button>
 
                             {expandedSections.position && (
-                                <div className="flex items-center space-x-2">
-                                    <button
-                                        onClick={() =>
-                                            toggleExpandedRange("position")
-                                        }
-                                        className={`text-xs px-2 py-1 ${
-                                            expandedRange.position
-                                                ? "bg-blue-500 text-white"
-                                                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-                                        } rounded transition-colors flex items-center`}
-                                        title={
-                                            expandedRange.position
-                                                ? "Use normal range"
-                                                : "Use 3x expanded range"
-                                        }
-                                    >
-                                        <X3Icon
-                                            expanded={expandedRange.position}
-                                        />
-                                        <span className="ml-1">Range</span>
-                                    </button>
-                                    <button
-                                        onClick={resetPosition}
-                                        className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors flex items-center"
-                                        title="Reset position to initial values"
-                                    >
-                                        <FiRefreshCw className="h-3 w-3 mr-1" />
-                                        <span>Reset</span>
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={resetPosition}
+                                    className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors"
+                                    title="Reset position to initial values"
+                                >
+                                    Reset Position
+                                </button>
                             )}
                         </div>
 
@@ -223,17 +147,17 @@ export default function ModelControls() {
                                                     });
                                                 }}
                                                 fieldId={`position-${axis}`}
-                                                min={positionRange.min}
-                                                max={positionRange.max}
-                                                step={positionRange.step}
+                                                min={-3}
+                                                max={3}
+                                                step={0.1}
                                                 toFixed={2}
                                             />
                                         </div>
                                         <input
                                             type="range"
-                                            min={positionRange.min}
-                                            max={positionRange.max}
-                                            step={positionRange.step}
+                                            min="-3"
+                                            max="3"
+                                            step="0.1"
                                             value={config.position[index]}
                                             onChange={(e) => {
                                                 const newPosition = [
@@ -272,11 +196,10 @@ export default function ModelControls() {
                             {expandedSections.rotation && (
                                 <button
                                     onClick={resetRotation}
-                                    className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors flex items-center"
-                                    title="Reset scale to initial values"
+                                    className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors"
+                                    title="Reset rotation to initial values"
                                 >
-                                    <FiRefreshCw className="h-3 w-3 mr-1" />
-                                    <span>Reset</span>
+                                    Reset Rotation
                                 </button>
                             )}
                         </div>
@@ -388,36 +311,13 @@ export default function ModelControls() {
                             </button>
 
                             {expandedSections.scale && (
-                                <div className="flex items-center space-x-2">
-                                    <button
-                                        onClick={() =>
-                                            toggleExpandedRange("scale")
-                                        }
-                                        className={`text-xs px-2 py-1 ${
-                                            expandedRange.scale
-                                                ? "bg-blue-500 text-white"
-                                                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-                                        } rounded transition-colors flex items-center`}
-                                        title={
-                                            expandedRange.scale
-                                                ? "Use normal range"
-                                                : "Use expanded range"
-                                        }
-                                    >
-                                        <X3Icon
-                                            expanded={expandedRange.scale}
-                                        />
-                                        <span className="ml-1">Range</span>
-                                    </button>
-                                    <button
-                                        onClick={resetScale}
-                                        className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors flex items-center"
-                                        title="Reset scale to initial values"
-                                    >
-                                        <FiRefreshCw className="h-3 w-3 mr-1" />
-                                        <span>Reset</span>
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={resetScale}
+                                    className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors"
+                                    title="Reset scale to initial values"
+                                >
+                                    Reset Scale
+                                </button>
                             )}
                         </div>
 
@@ -460,17 +360,16 @@ export default function ModelControls() {
                                                 }}
                                                 fieldId={`scale-${axis}`}
                                                 suffix="×"
-                                                min={scaleRange.min}
-                                                max={scaleRange.max}
-                                                step={scaleRange.step}
-                                                toFixed={2}
+                                                min={0.1}
+                                                max={3}
+                                                step={0.05}
                                             />
                                         </div>
                                         <input
                                             type="range"
-                                            min={scaleRange.min.toString()}
-                                            max={scaleRange.max.toString()}
-                                            step={scaleRange.step.toString()}
+                                            min="0.1"
+                                            max="3"
+                                            step="0.05"
                                             value={getDisplayScale(index)}
                                             onChange={(e) => {
                                                 const displayValue = parseFloat(

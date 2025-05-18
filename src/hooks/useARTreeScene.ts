@@ -9,7 +9,6 @@ import {
     WebGLRenderer,
     Group,
     TextureLoader,
-    Color,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
@@ -76,13 +75,11 @@ export const useARThreeScene = (
                     modelMesh.material = new MeshStandardMaterial({
                         metalnessMap: metalness,
                         roughnessMap: roughness,
-                        color: new Color(0xe0e0e0),
+                        color: "#c8c8c8",
                         metalness: 0.9,
-                        roughness: 0.1,
-                        envMapIntensity: 1.5,
+                        roughness: 0.3,
+                        envMapIntensity: 3.5,
                     });
-                    modelMesh.castShadow = true;
-                    modelMesh.receiveShadow = true;
 
                     // Add the mesh to our tracking group
                     modelGroup.add(modelMesh);
@@ -111,25 +108,14 @@ export const useARThreeScene = (
             }
         );
 
-        // Enhance lighting for better visibility and highlights
-        // Ambient light
-        scene.add(new AmbientLight(0xffffff, 0.8));
-
-        // Key light (main directional light)
-        const keyLight = new DirectionalLight(0xffffff, 2.5);
-        keyLight.position.set(1, 2, 1).normalize();
-        keyLight.castShadow = true;
-        scene.add(keyLight);
-
-        // Fill light (softer, from opposite direction)
-        const fillLight = new DirectionalLight(0xffffff, 1.8);
-        fillLight.position.set(-1, 0.5, -0.5).normalize();
-        scene.add(fillLight);
-
-        // Rim light (for edge highlighting)
-        const rimLight = new DirectionalLight(0xffffff, 1.5);
-        rimLight.position.set(0, -1, -0.5).normalize();
-        scene.add(rimLight);
+        // Add lighting
+        scene.add(new AmbientLight(0xffffff, 0.6));
+        const directionalLight = new DirectionalLight(0xffffff, 2.0);
+        directionalLight.position.set(0.9, 1, 0.6).normalize();
+        scene.add(directionalLight);
+        const directionalLight2 = new DirectionalLight(0xffffff, 1.5);
+        directionalLight2.position.set(-0.9, -1, -0.4).normalize();
+        scene.add(directionalLight2);
 
         // Setup camera
         const camera = new PerspectiveCamera(
@@ -141,15 +127,10 @@ export const useARThreeScene = (
         cameraRef.current = camera;
 
         // Setup renderer
-        const renderer = new WebGLRenderer({
-            antialias: true,
-            alpha: true,
-            powerPreference: "high-performance",
-        });
+        const renderer = new WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.xr.enabled = true;
-        renderer.shadowMap.enabled = true;
         rendererRef.current = renderer;
 
         // Capture container ref value
