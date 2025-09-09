@@ -33,6 +33,17 @@ export async function createTablesIfNotExist() {
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );`;
 
+    await sql`
+        CREATE TABLE IF NOT EXISTS screenshots (
+            id SERIAL PRIMARY KEY,
+            model_id INTEGER REFERENCES models(id) ON DELETE CASCADE,
+            user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+            filename VARCHAR(255) NOT NULL,
+            blob_url TEXT NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+    `;
+
     console.log("Database schema initialized");
 }
 
@@ -61,3 +72,6 @@ export async function migrateDatabase() {
         throw error;
     }
 }
+
+// Call the function to create tables if they don't exist
+// npx tsx src/db/setup.ts

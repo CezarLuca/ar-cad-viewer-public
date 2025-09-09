@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import QrCodeModal from "@/components/user-dashboard/QRCodeModal";
+import ModelScreenshots from "./ModelScreenshots";
 
 interface Model {
     id: number;
@@ -168,79 +169,105 @@ export default function UserModelsList() {
                 </div>
             )}
 
-            <ul className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {models.map((model) => (
-                    <li
+                    <div
                         key={model.id}
-                        className="border p-4 rounded bg-gray-200 shadow-sm"
+                        className="border p-4 rounded bg-gray-200 shadow-sm flex flex-col"
                     >
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="font-semibold text-gray-700">
-                                    {model.name}
-                                </h3>
-                                <p className="text-sm text-gray-700">
-                                    {new Date(
-                                        model.created_at
-                                    ).toLocaleString()}
-                                </p>
+                        <div
+                            className="flex-grow cursor-pointer"
+                            onClick={() => {
+                                // Navigate to 3D view when clicking on the card
+                                window.location.href = `/ar?model=${encodeURIComponent(
+                                    model.blob_url
+                                )}`;
+                            }}
+                        >
+                            {/* Screenshot section - larger */}
+                            <div className="mb-3 flex-grow">
+                                <div className="w-full h-48 md:h-64 relative">
+                                    <ModelScreenshots modelId={model.id} />
+                                </div>
                             </div>
-                            <div
-                                className="relative"
-                                ref={
-                                    openActionMenuModelId === model.id
-                                        ? menuRef
-                                        : null
-                                }
-                            >
-                                <button
-                                    onClick={() => toggleActionMenu(model.id)}
-                                    className="p-2 rounded-md text-gray-900 bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
-                                    aria-label="Model actions"
+
+                            {/* Info section */}
+                            <div className="flex justify-between items-center mt-2">
+                                {/* Model name and date */}
+                                <div>
+                                    <h3 className="font-semibold text-gray-700">
+                                        {model.name}
+                                    </h3>
+                                    <p className="text-sm text-gray-700">
+                                        {new Date(
+                                            model.created_at
+                                        ).toLocaleString()}
+                                    </p>
+                                </div>
+
+                                {/* Action menu button */}
+                                <div
+                                    className="relative"
+                                    ref={
+                                        openActionMenuModelId === model.id
+                                            ? menuRef
+                                            : null
+                                    }
+                                    onClick={(e) => e.stopPropagation()}
                                 >
-                                    <BurgerIcon />
-                                </button>
-                                {openActionMenuModelId === model.id && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 border border-gray-300">
-                                        <Link
-                                            href={`/ar?model=${encodeURIComponent(
-                                                model.blob_url
-                                            )}`}
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left border-b border-gray-300 hover:cursor-pointer"
-                                            onClick={() =>
-                                                setOpenActionMenuModelId(null)
-                                            }
-                                        >
-                                            View in 3D
-                                        </Link>
-                                        <button
-                                            onClick={() =>
-                                                handleShowQrCode(model)
-                                            }
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left border-b border-gray-300 hover:cursor-pointer"
-                                        >
-                                            Show QR Code
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                handleDeleteModel(model.id)
-                                            }
-                                            disabled={
-                                                deleteLoading === model.id
-                                            }
-                                            className="block px-4 py-2 text-sm text-red-600 hover:bg-red-200 w-full text-left disabled:text-gray-400 hover:cursor-pointer"
-                                        >
-                                            {deleteLoading === model.id
-                                                ? "Deleting..."
-                                                : "Delete"}
-                                        </button>
-                                    </div>
-                                )}
+                                    <button
+                                        onClick={() =>
+                                            toggleActionMenu(model.id)
+                                        }
+                                        className="p-2 rounded-md text-gray-900 bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                        aria-label="Model actions"
+                                    >
+                                        <BurgerIcon />
+                                    </button>
+                                    {openActionMenuModelId === model.id && (
+                                        <div className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 border border-gray-300">
+                                            <Link
+                                                href={`/ar?model=${encodeURIComponent(
+                                                    model.blob_url
+                                                )}`}
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left border-b border-gray-300 hover:cursor-pointer"
+                                                onClick={() =>
+                                                    setOpenActionMenuModelId(
+                                                        null
+                                                    )
+                                                }
+                                            >
+                                                View in 3D
+                                            </Link>
+                                            <button
+                                                onClick={() =>
+                                                    handleShowQrCode(model)
+                                                }
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left border-b border-gray-300 hover:cursor-pointer"
+                                            >
+                                                Show QR Code
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    handleDeleteModel(model.id)
+                                                }
+                                                disabled={
+                                                    deleteLoading === model.id
+                                                }
+                                                className="block px-4 py-2 text-sm text-red-600 hover:bg-red-200 w-full text-left disabled:text-gray-400 hover:cursor-pointer"
+                                            >
+                                                {deleteLoading === model.id
+                                                    ? "Deleting..."
+                                                    : "Delete"}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </li>
+                    </div>
                 ))}
-            </ul>
+            </div>
 
             {qrModalData && (
                 <QrCodeModal

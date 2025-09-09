@@ -9,11 +9,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const jsonResponse = await handleUpload({
             body,
             request,
-            onBeforeGenerateToken: async (
-                pathname: string /* clientPayload?: string */
-            ) => {
+            onBeforeGenerateToken: async (pathname: string) => {
                 // pathname is the filename passed from the client (e.g., file.name)
-
                 const session = await getToken({
                     req: request,
                     secret: process.env.NEXTAUTH_SECRET,
@@ -29,11 +26,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                     .substring(2, 10);
                 const uniqueFilename = `${Date.now()}-${randomString}-${sanitizedName}`;
 
+                // Determine content type based on file extension
+                const isScreenshot = pathname.startsWith("screenshot-");
+
+                const allowedContentTypes = isScreenshot
+                    ? ["image/png", "image/jpeg", "image/jpg"]
+                    : ["model/gltf-binary"];
+
                 return {
-                    allowedContentTypes: ["model/gltf-binary"],
+                    allowedContentTypes,
                     tokenPayload: JSON.stringify({
                         userId: session.id,
                         originalFilename: pathname,
+                        fileType: isScreenshot ? "screenshot" : "model",
                     }),
                     uniqueFilename: uniqueFilename,
                 };
@@ -43,7 +48,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                     try {
                         const parsedPayload = JSON.parse(tokenPayload);
                         console.log(
-                            "Blob upload completed for user:",
+                            `${parsedPayload.fileType} upload completed for user:`,
                             parsedPayload.userId,
                             blob
                         );
@@ -56,8 +61,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                         blob
                     );
                 }
-                // You can perform actions after upload is complete,
-                // but primary metadata saving will be done by the client calling /api/upload next.
             },
         });
 

@@ -4,7 +4,7 @@ import { useModelConfig } from "@/context/ModelConfigContext";
 import { useTracking } from "@/context/TrackingContext";
 
 const POSITION_SCALE = 0.1;
-const SIZE_SCALE = 100;
+const SIZE_SCALE = 0.1;
 
 interface TrackedObjectProps {
     object: React.RefObject<Group | Object3D | null>;
