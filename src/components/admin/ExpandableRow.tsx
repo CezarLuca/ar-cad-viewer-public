@@ -13,7 +13,7 @@ interface ExpandableRowProps {
         md: FieldInfo[];
     };
     isOpen: boolean;
-    tableType: "users" | "models"; // Identify which table we're in
+    tableType: "users" | "models";
 }
 
 export default function ExpandableRow({
@@ -25,19 +25,16 @@ export default function ExpandableRow({
     const [columnSpan, setColumnSpan] = useState(6);
 
     useEffect(() => {
-        // Handle responsive behavior on client side
         const handleResize = () => {
             const isSmallScreen = window.innerWidth < 640;
             const isMediumScreen = window.innerWidth < 768;
 
-            // Calculate visible fields
             const visibleFields = [
                 ...(isSmallScreen ? hiddenFields.sm : []),
                 ...(isMediumScreen ? hiddenFields.md : []),
             ];
             setFields(visibleFields);
 
-            // Calculate appropriate colSpan based on screen size and table type
             if (tableType === "users") {
                 if (isSmallScreen) {
                     setColumnSpan(4); // ID, Name, Role, Actions
@@ -57,10 +54,8 @@ export default function ExpandableRow({
             }
         };
 
-        // Initial check
         handleResize();
 
-        // Listen for window resize
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, [hiddenFields, tableType]);
@@ -68,15 +63,17 @@ export default function ExpandableRow({
     if (!isOpen || fields.length === 0) return null;
 
     return (
-        <tr className="bg-gray-50 border-b border-gray-300">
+        <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600">
             <td colSpan={columnSpan} className="py-2 sm:py-3 px-2 sm:px-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm transition-all duration-200 ease-in-out">
                     {fields.map((field, index) => (
                         <div key={index} className="flex flex-col py-1">
-                            <span className="font-semibold text-gray-700">
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">
                                 {field.label}:
                             </span>
-                            <span className="text-gray-600">{field.value}</span>
+                            <span className="text-gray-600 dark:text-gray-400">
+                                {field.value}
+                            </span>
                         </div>
                     ))}
                 </div>

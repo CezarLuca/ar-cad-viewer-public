@@ -1,0 +1,333 @@
+{
+    "admin": {
+        "userManagement": "Benutzerverwaltung",
+        "modelManagement": "Modellverwaltung",
+        "loading": "Lädt...",
+        "noUsersFound": "Keine Benutzer gefunden",
+        "noModelsFound": "Keine Modelle gefunden",
+        "deleteConfirmation": "Sind Sie sicher, dass Sie dieses Modell löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "deleteUserConfirmation": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "table": {
+            "id": "ID",
+            "name": "Name",
+            "email": "E-Mail",
+            "role": "Rolle",
+            "user": "Benutzer",
+            "size": "Größe",
+            "createdAt": "Erstellt am",
+            "actions": "Aktionen"
+        },
+        "actions": {
+            "view": "Anzeigen",
+            "delete": "Löschen"
+        },
+        "roles": {
+            "admin": "Admin",
+            "user": "Benutzer"
+        },
+        "fileSize": {
+            "bytes": "Bytes",
+            "kb": "KB",
+            "mb": "MB"
+        },
+        "errors": {
+            "fetchFailed": "Fehler beim Laden der Daten",
+            "loadingModels": "Fehler beim Laden der Modelle",
+            "loadingUsers": "Fehler beim Laden der Benutzer",
+            "deleteFailed": "Fehler beim Löschen"
+        }
+    },
+    "auth": {
+        "captcha": {
+            "title": "Sicherheitsüberprüfung",
+            "verified": "Überprüfung abgeschlossen!",
+            "instruction": "Ziehen Sie den Schieberegler, um das Feld über das Symbol auf der rechten Seite zu verschieben.",
+            "attempt": "Versuch {current} von {max}"
+        },
+        "checkInbox": "Prüfen Sie Ihren Posteingang!",
+        "completeRegistration": "Registrierung Abschließen",
+        "completeRegistrationButton": "Registrierung Abschließen",
+        "confirmPassword": "Passwort Bestätigen",
+        "confirmPasswordPlaceholder": "Bestätigen Sie Ihr Passwort",
+        "creatingAccount": "Konto wird erstellt...",
+        "email": "E-Mail",
+        "emailPlaceholder": "Ihre E-Mail-Adresse",
+        "errors": {
+            "accountCreatedSignInFailed": "Konto erstellt, aber Anmeldung fehlgeschlagen",
+            "allFieldsRequired": "Bitte füllen Sie alle Felder aus",
+            "emailFormat": "Ungültiges E-Mail-Format.",
+            "emailLength": "E-Mail muss zwischen 5 und 100 Zeichen lang sein.",
+            "emailRequired": "Bitte geben Sie Ihre E-Mail-Adresse ein.",
+            "expiredLink": "Ungültiger oder abgelaufener Registrierungslink",
+            "invalidCredentials": "Ungültige Anmeldedaten. Bitte versuchen Sie es erneut.",
+            "invalidLink": "Ungültiger oder fehlender Registrierungslink",
+            "loginFailed": "Fehler bei der Anmeldung",
+            "loginRequired": "Bitte geben Sie Ihre E-Mail-Adresse und Ihr Passwort ein.",
+            "nameFormat": "Name darf nur Buchstaben und Leerzeichen enthalten",
+            "nameLength": "Name muss zwischen 2 und 50 Zeichen lang sein",
+            "passwordLength": "Passwort muss zwischen 8 und 20 Zeichen lang sein",
+            "passwordMismatch": "Passwörter stimmen nicht überein",
+            "passwordStrength": "Passwort muss mindestens einen Kleinbuchstaben, einen Großbuchstaben, eine Zahl und ein Sonderzeichen enthalten (z.B. @, $, !, %, *, ?, &)",
+            "registrationFailed": "Fehler beim Abschließen der Registrierung",
+            "sendFailed": "Fehler beim Senden der Bestätigungs-E-Mail.",
+            "unknownError": "Ein Fehler ist aufgetreten",
+            "validateFailed": "Fehler beim Validieren des Registrierungslinks",
+            "tosRequired": "Sie müssen die Nutzungsbedingungen und Datenschutzerklärung akzeptieren, um fortzufahren"
+        },
+        "hide": "Verbergen",
+        "loading": "Lädt...",
+        "login": "Anmelden",
+        "name": "Name",
+        "namePlaceholder": "Ihr Name",
+        "password": "Passwort",
+        "passwordPlaceholder": "Wählen Sie ein Passwort",
+        "register": "Registrieren",
+        "sendVerificationLink": "Bestätigungslink senden",
+        "sending": "Wird gesendet...",
+        "show": "Anzeigen",
+        "signIn": "Anmelden",
+        "tryAgain": "Erneut Versuchen",
+        "tosConsent": {
+            "prefix": "Ich stimme den",
+            "termsLink": "Nutzungsbedingungen",
+            "and": "und der",
+            "privacyLink": "Datenschutzerklärung",
+            "dataProcessing": "zu. Ich stimme der Verarbeitung meiner personenbezogenen Daten einschließlich E-Mail-Adresse und hochgeladener GLB-Dateien zum Zwecke der Bereitstellung des AR CAD-Viewing-Dienstes zu."
+        },
+        "validatingLink": "Registrierungslink wird validiert...",
+        "verificationInstructions": "Klicken Sie auf den Link in der E-Mail, um Ihre Registrierung abzuschließen. Der Link läuft in 1 Stunde ab.",
+        "verificationSent": "Wir haben einen Bestätigungslink an"
+    },
+    "dashboard": {
+        "arTrackerDescription": "Drucken oder zeigen Sie dieses Tracker-Bild an, um Ihre 3D-Modelle in AR zu positionieren.",
+        "arTrackerTitle": "AR-Tracker",
+        "title": "Persönliches Dashboard",
+        "adminTitle": "Admin-Dashboard",
+        "uploadTitle": "Neues 3D-Modell Hochladen",
+        "viewTrackerDetails": "Tracker-Details Anzeigen",
+        "yourModelsTitle": "Ihre Modelle"
+    },
+    "fileUpload": {
+        "clearFile": "Datei Löschen",
+        "dragDrop": {
+            "subtitle": "Ziehen Sie die Datei über den Upload-Bereich.",
+            "title": "Lassen Sie Ihre .glb-Datei fallen"
+        },
+        "dropZone": {
+            "clickText": "Zum Hochladen Klicken",
+            "dragText": "oder per Drag & Drop",
+            "fileInfo": "Nur GLB-Dateien (MAX. 10MB)",
+            "releaseText": "Loslassen zum Ablegen"
+        },
+        "errors": {
+            "dropFailed": "Keine Datei abgelegt oder Datei konnte nicht gelesen werden.",
+            "emptyFile": "Datei ist leer",
+            "fileTooLarge": "Dateigröße überschreitet das 10MB-Limit",
+            "invalidDimensions": "Ungültige GLB-Datei: Modell hat ungültige Abmessungen",
+            "invalidMime": "Die Datei scheint keine gültige GLB-Datei zu sein",
+            "noFileSelected": "Keine Datei ausgewählt",
+            "noGeometry": "Ungültige GLB-Datei: Modell enthält keine Geometrie",
+            "noMeshes": "Ungültige GLB-Datei: Keine Mesh-Objekte im Modell gefunden",
+            "noScenes": "Ungültige GLB-Datei: Keine Szenen im Modell gefunden",
+            "onlyGlb": "Nur .glb-Dateien werden unterstützt",
+            "parseGlb": "Fehler beim Parsen der GLB-Datei: Die Datei könnte beschädigt oder ungültig sein",
+            "prefix": "Fehler",
+            "saveFailed": "Speichern der Modell-Metadaten fehlgeschlagen",
+            "unknownUpload": "Unbekannter Fehler beim Upload-Vorgang",
+            "validation": "Validierungsfehler",
+            "validationFailed": "Modellvalidierung fehlgeschlagen"
+        },
+        "loading": "Lädt...",
+        "modelDetails": {
+            "boundingBoxVolume": "Bounding-Box-Volumen",
+            "confidence": "Vertrauen",
+            "cubicUnits": "Kubikeinheiten",
+            "dimensions": "Abmessungen",
+            "estimatedVolume": "Geschätztes wahres Volumen",
+            "size": "Größe",
+            "title": "Modell-Details:",
+            "units": "Einheiten"
+        },
+        "modelName": "Modellname",
+        "modelNamePlaceholder": "Geben Sie einen Namen für Ihr Modell ein",
+        "success": {
+            "uploaded": "Modell erfolgreich hochgeladen und registriert"
+        },
+        "uploadButton": "Modell Hochladen",
+        "uploadLabel": ".glb CAD-Datei Hochladen",
+        "uploading": "Wird hochgeladen...",
+        "warnings": {
+            "largeDimensions": "Warnung: Modell hat sehr große Abmessungen. Erwägen Sie eine Skalierung."
+        }
+    },
+    "footer": {
+        "copyright": "© {year} AR CAD Viewer. Alle Rechte vorbehalten.",
+        "privacyPolicy": "Datenschutz",
+        "termsOfService": "Nutzungsbedingungen",
+        "github": "GitHub",
+        "contactAria": "Kontakt per E-Mail: {email}"
+    },
+    "hero": {
+        "getStarted": "Loslegen",
+        "title1": "AR Web Viewer",
+        "title2": "Hochladen und Visualisieren",
+        "title3": "Ihre 3D",
+        "words": {
+            "0": "Ideen",
+            "1": "Konzepte",
+            "2": "Designs",
+            "3": "Modelle"
+        }
+    },
+    "home": {
+        "arTrackingSetup": "AR-Tracking-Einrichtung",
+        "getTracker": "Holen Sie sich das AR-Tracking-Marker-Bild. Befolgen Sie die Anweisungen, um die Visualisierung von 3D-Modellen in AR einzurichten.",
+        "tryVisualizer": "Probieren Sie den 3D-Modell-Visualizer aus. Passen Sie die Eigenschaften an und platzieren Sie das Standard-3D-Teil im AR-Raum mit der Kamera-Durchsicht Ihres Telefons.",
+        "tryVisualizerButton": "3D-Modell-Visualizer Ausprobieren"
+    },
+    "modelControls": {
+        "position": "Position",
+        "rotation": "Rotation",
+        "scale": "Skalierung",
+        "range": "Bereich",
+        "reset": "Zurücksetzen",
+        "useRadians": "Radiant verwenden",
+        "scaleUnlock": "Skalierung entsperren",
+        "on": "Ein",
+        "off": "Aus",
+        "useNormalRange": "Normalen Bereich verwenden",
+        "useExpandedRange": "3x erweiterten Bereich verwenden",
+        "resetPositionTooltip": "Position auf Ausgangswerte zurücksetzen",
+        "resetRotationTooltip": "Rotation auf Ausgangswerte zurücksetzen",
+        "resetScaleTooltip": "Skalierung auf Ausgangswerte zurücksetzen"
+    },
+    "modelScreenshots": {
+        "loading": "Lädt...",
+        "error": "Fehler",
+        "noScreenshots": "Noch keine Screenshots",
+        "invalidData": "Ungültige Screenshot-Daten",
+        "viewScreenshot": "Screenshot {number} Anzeigen"
+    },
+    "navbar": {
+        "adminPanel": "Admin-Panel",
+        "arTracker": "AR-Tracker",
+        "dashboard": "Dashboard",
+        "enterAR": "AR Starten",
+        "exitAR": "AR Beenden",
+        "login": "Anmelden",
+        "logout": "Abmelden",
+        "register": "Registrieren",
+        "title": "AR CAD Viewer",
+        "welcome": "Willkommen, {name}"
+    },
+    "privacyPolicy": {
+        "title": "Datenschutzerklärung",
+        "effectiveDate": "Gültig ab: {date}. Diese Datenschutzerklärung beschreibt, wie {author} (\"wir\", \"uns\") personenbezogene Daten erhebt, verwendet und offenlegt, wenn Sie die AR/CAD Viewer Webanwendung (den \"Dienst\") nutzen. Platzhalter ersetzen und von Rechtsberatung prüfen lassen.",
+        "dataControllerTitle": "Datenverantwortlicher & Kontakt",
+        "dataControllerText": "Verantwortlicher: Cezar Luca. Kontakt:",
+        "dataWeCollectTitle": "Gesammelte Daten",
+        "dataWeCollect": {
+            "account": "Kontoinformationen (E-Mail, Name), falls Sie sich registrieren.",
+            "uploadedFiles": "Hochgeladene Dateien und Modelle (CAD/3D-Assets), die Sie zur Nutzung des Dienstes bereitstellen.",
+            "usage": "Nutzungs- und Telemetriedaten (besuchte Seiten, genutzte Funktionen) für Diagnose und Verbesserung.",
+            "device": "Geräte- und Verbindungsdaten (Browser, IP-Adresse, OS) für Sicherheit und Betrieb.",
+            "cookies": "Cookies und ähnliche Technologien — nur bei Bedarf und mit Zustimmung für Analytics."
+        },
+        "purposeTitle": "Zweck & Rechtsgrundlage",
+        "purposeText": "Wir verarbeiten personenbezogene Daten zur Bereitstellung des Dienstes (Erfüllung eines Vertrags), zum Betrieb, zur Sicherung und Verbesserung des Dienstes (berechtigte Interessen) sowie mit Ihrer Einwilligung für optionale Analysen oder Marketing. Wo gesetzlich erforderlich, bitten wir vor Verarbeitung um Einwilligung.",
+        "thirdPartiesTitle": "Dritte & Hosting",
+        "thirdPartiesText": "Wir nutzen Drittanbieter (z. B. Hosting, Analytics). Daten werden auf Servern von Vercel(AWS) und Neon Tech(AWS Europe Central 1 Frankfurt) gehostet. Finden Übermittlungen außerhalb der EU statt, nutzen wir geeignete Schutzmaßnahmen (z. B. SCCs) oder stellen sicher, dass der Anbieter einen angemessenen Schutz bietet.",
+        "retentionTitle": "Speicherung",
+        "retentionText": "Wir speichern personenbezogene Daten so lange, wie es zur Bereitstellung des Dienstes, zur Erfüllung gesetzlicher Verpflichtungen, zur Beilegung von Streitigkeiten und zur Durchsetzung von Vereinbarungen erforderlich ist. Aufbewahrungsfristen variieren je nach Datentyp.",
+        "rightsTitle": "Ihre Rechte (EU/GDPR)",
+        "rights": {
+            "access": "Zugriff auf die personenbezogenen Daten, die wir über Sie gespeichert haben.",
+            "rectification": "Berichtigung unrichtiger Daten.",
+            "erasure": "Löschung (\"Recht auf Vergessenwerden\") vorbehaltlich gesetzlicher Ausnahmen.",
+            "restriction": "Einschränkung oder Widerspruch gegen die Verarbeitung und Datenübertragbarkeit.",
+            "withdrawConsent": "Widerruf der Einwilligung, sofern die Verarbeitung auf Einwilligung beruht.",
+            "complaint": "Beschwerde bei einer Aufsichtsbehörde in Ihrem EU-Mitgliedstaat einreichen."
+        },
+        "cookiesTitle": "Cookies & Analytics",
+        "cookiesText": "Nicht notwendige Cookies (Analytics, optionale Funktionen) werden nur mit Ihrer Einwilligung verwendet. Essenzielle Cookies für Sicherheit und Basisbetrieb werden nach Bedarf eingesetzt.",
+        "securityTitle": "Sicherheit",
+        "securityText": "Wir setzen angemessene administrative, technische und physische Maßnahmen zum Schutz personenbezogener Daten um. Kein System ist vollständig sicher; benachrichtigen Sie uns bei Bedenken unter cezar.luca96@gmail.com.",
+        "childrenTitle": "Kinder",
+        "childrenText": "Der Dienst richtet sich nicht an Kinder unter 13 Jahren (oder das lokale anwendbare Alter). Wir erheben nicht wissentlich personenbezogene Daten von Kindern.",
+        "changesTitle": "Änderungen",
+        "changesText": "Wir können diese Richtlinie aktualisieren; wir veröffentlichen das Datum des Inkrafttretens. Wesentliche Änderungen werden ggf. wie vorgeschrieben kommuniziert."
+    },
+    "qrCodeModal": {
+        "scanCode": "Scannen Sie diesen Code, um in AR/3D anzuzeigen.",
+        "downloadQRCode": "QR-Code Herunterladen",
+        "close": "Schließen"
+    },
+    "screenshotOverlay": {
+        "closeAria": "Screenshot schließen",
+        "altScreenshot": "Screenshot-Vorschau",
+        "uploading": "Wird hochgeladen...",
+        "uploadButton": "Screenshot hochladen",
+        "capture": "Aufnehmen",
+        "cancel": "Abbrechen",
+        "couldNotFindModel": "Modell-ID konnte nicht gefunden werden. Stellen Sie sicher, dass dies eines Ihrer hochgeladenen Modelle ist.",
+        "uploadFailed": "Upload des Screenshots fehlgeschlagen. Bitte versuchen Sie es erneut."
+    },
+    "termsOfService": {
+        "title": "Nutzungsbedingungen",
+        "effectiveDate": "Gültig ab: {date}. Diese Bedingungen regeln Ihre Nutzung der AR/CAD Viewer Webanwendung, bereitgestellt von {author}. Durch die Nutzung des Dienstes stimmen Sie diesen Bedingungen zu.",
+        "useOfServiceTitle": "Nutzung des Dienstes",
+        "useOfService": "Sie dürfen den Dienst in Übereinstimmung mit diesen Bedingungen und geltendem Recht nutzen. Sie sind verantwortlich für Ihr Konto, Ihre Anmeldeinformationen und alle Aktivitäten, die unter Ihrem Konto stattfinden.",
+        "userContentTitle": "Benutzerinhalte & Lizenz",
+        "userContent": "Sie behalten das Eigentum an Dateien und Modellen, die Sie hochladen. Durch das Hochladen gewähren Sie uns eine nicht-exklusive, weltweite, gebührenfreie Lizenz zum Speichern, Anzeigen und Verarbeiten Ihrer Inhalte, soweit dies zur Bereitstellung des Dienstes erforderlich ist.",
+        "prohibitedTitle": "Verbotene Nutzungen",
+        "prohibited": "Laden Sie keine illegalen, rechtsverletzenden, schädlichen oder anstößigen Inhalte hoch. Wir können Inhalte entfernen oder den Zugriff darauf unterbinden, die gegen diese Bedingungen verstoßen.",
+        "terminationTitle": "Beendigung",
+        "termination": "Wir können den Zugriff bei Verstößen gegen diese Bedingungen oder aus rechtlichen Gründen aussetzen oder beenden. Benutzer können ihre Konten und Daten wie vom Dienst vorgesehen löschen.",
+        "disclaimerTitle": "Haftungsausschluss & Haftung",
+        "disclaimer": "Der Dienst wird ohne Gewähr bereitgestellt. Soweit gesetzlich zulässig, schließen wir Gewährleistungen aus und begrenzen die Haftung für Schäden, die aus der Nutzung des Dienstes entstehen.",
+        "indemnificationTitle": "Schadloshaltung",
+        "indemnification": "Sie erklären sich damit einverstanden, {author} von Ansprüchen freizustellen und schadlos zu halten, die aus Ihrer Verletzung dieser Bedingungen oder Ihren Inhalten resultieren.",
+        "governingLawTitle": "Anwendbares Recht",
+        "governingLaw": "Diese Bedingungen unterliegen dem Recht der EU. Streitigkeiten sollten zunächst durch Verhandlung versucht werden zu lösen; Sie können gegebenenfalls Beschwerden bei zuständigen Verbraucherbehörden einreichen.",
+        "contactTitle": "Kontakt",
+        "contactText": "Bei Fragen:"
+    },
+    "tracker": {
+        "chromeFlags": "chrome://flags",
+        "description": "Dieses Tracker-Bild wird verwendet, um 3D-Modelle in der erweiterten Realität zu platzieren. Drucken oder zeigen Sie es in einer Größe von 50x50 Millimetern (2x2 Zoll) für beste Ergebnisse an.",
+        "device": "Android-Gerät mit Chrome-Browser",
+        "downloadTracker": "Tracker Herunterladen",
+        "instructions": {
+            "step1": "Laden Sie das Tracker-Bild herunter.",
+            "step2": "Drucken Sie das Bild in der Größe {size} (ca. 2x2 Zoll).",
+            "step3": "Platzieren Sie den gedruckten Tracker auf einer flachen Oberfläche mit guter Beleuchtung.",
+            "step4": "Sie müssen ein {device} verwenden.",
+            "step5": "Gehen Sie zum Link {link} und suchen Sie im Suchfeld für Flags nach {flag} und aktivieren Sie es. (Möglicherweise müssen Sie den Browser neu starten.)",
+            "step6": "Richten Sie im AR-Modus die Kamera Ihres Geräts auf den Tracker, um Ihr 3D-Modell in der erweiterten Realität zu platzieren."
+        },
+        "instructionsTitle": "Anweisungen:",
+        "size": "50x50 Millimetern",
+        "tips": {
+            "tip1": "Stellen Sie sicher, dass der gesamte Tracker in Ihrer Kameraansicht sichtbar ist.",
+            "tip2": "Vermeiden Sie Schatten oder Blendung auf dem gedruckten Tracker.",
+            "tip3": "Für beste Ergebnisse drucken Sie auf nicht glänzendem Papier.",
+            "tip4": "Bei Verwendung auf dem Bildschirm behalten Sie die 50x50mm Abmessungen bei."
+        },
+        "tipsTitle": "Tipps:",
+        "title": "AR-Tracker-Bild",
+        "webxrFlag": "WebXR Incubations"
+    },
+    "ui": {
+        "language": "Sprache"
+    },
+    "userModelsList": {
+        "loadingModels": "Ihre Modelle werden geladen...",
+        "noModelsUploaded": "Sie haben noch keine Modelle hochgeladen.",
+        "deleteConfirmation": "Sind Sie sicher, dass Sie dieses Modell löschen möchten?",
+        "deleting": "Wird gelöscht...",
+        "delete": "Löschen",
+        "viewIn3D": "In 3D Anzeigen",
+        "showQRCode": "QR-Code Anzeigen",
+        "modelActions": "Modellaktionen"
+    }
+}

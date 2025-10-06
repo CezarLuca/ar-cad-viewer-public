@@ -4,14 +4,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { useTranslations } from "@/hooks/useTranslations";
 
-const words = [
-    { text: "Ideas", imgPath: "/images/ideas.svg" },
-    { text: "Concepts", imgPath: "/images/concepts.svg" },
-    { text: "Designs", imgPath: "/images/designs.svg" },
-    { text: "Models", imgPath: "/images/code.svg" },
+const defaultTexts = ["Ideas", "Concepts", "Designs", "Models"];
+const imagePaths = [
+    "/images/ideas.svg",
+    "/images/concepts.svg",
+    "/images/designs.svg",
+    "/images/code.svg",
 ];
+
 const HeroSection = () => {
+    const { t, loading } = useTranslations("hero");
+
+    const words = imagePaths.map((imgPath, i) => ({
+        text: loading ? defaultTexts[i] : t(`words.${i}`),
+        imgPath,
+    }));
+
     useGSAP(() => {
         gsap.fromTo(
             ".hero-text h1",
@@ -33,10 +43,10 @@ const HeroSection = () => {
                     <header className="flex flex-col justify-center md:w-full w-screen md:px-20 px-5">
                         <div className="flex flex-col gap-7 dark:text-gray-50 text-gray-800 text-shadow-md text-shadow-gray-600">
                             <div className="hero-text flex flex-col justify-center md:text-[60px] text-[30px] font-semibold relative z-10 pointer-events-none">
-                                <h1>AR Web Viewer</h1>
-                                <h1>Upload and Visualize</h1>
+                                <h1>{t("title1")}</h1>
+                                <h1>{t("title2")}</h1>
                                 <h1>
-                                    Your 3D{" "}
+                                    {t("title3")}{" "}
                                     <span className="slide">
                                         <span className="wrapper">
                                             {words.map((word) => (
@@ -66,7 +76,7 @@ const HeroSection = () => {
                         href="/auth/login"
                         className="bg-gray-600/70 text-gray-50 px-6 py-3 rounded-lg hover:bg-gray-800/50 border-2 border-gray-400 hover:border-gray-200 shadow-md shadow-gray-400/30 transition-colors text-2xl"
                     >
-                        Get Started
+                        {t("getStarted")}
                     </Link>
                 </div>
             </section>

@@ -28,7 +28,6 @@ export default function ARCanvas() {
         ) as HTMLCanvasElement;
         if (!canvas) return;
 
-        // Calculate the cropping rectangle (centered)
         const canvasRect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / canvasRect.width;
         const cropSize = frameSize * scaleX;
@@ -36,7 +35,6 @@ export default function ARCanvas() {
         const cropX = (canvas.width - cropSize) / 2;
         const cropY = (canvas.height - cropSize) / 2;
 
-        // Create a temporary canvas to draw the cropped area
         const tempCanvas = document.createElement("canvas");
         tempCanvas.width = cropSize;
         tempCanvas.height = cropSize;
@@ -59,7 +57,6 @@ export default function ARCanvas() {
         // setIsFraming(false);
     };
 
-    // Start framing mode
     const startScreenshot = () => setIsFraming(true);
 
     return (
@@ -91,13 +88,11 @@ export default function ARCanvas() {
                                 />
                             </Suspense>
                         </Canvas>
-                        {/* Screenshot Button triggers framing mode */}
                         {!isFraming && (
                             <ScreenshotButton
                                 startScreenshot={startScreenshot}
                             />
                         )}
-                        {/* Framing Overlay */}
                         {isFraming && (
                             <ScreenshotOverlay
                                 onCapture={handleScreenshot}
@@ -107,7 +102,6 @@ export default function ARCanvas() {
                     </div>
                 )}
 
-                {/* Controls Overlay for regular scene */}
                 {!isARPresenting && !isFraming && (
                     <>
                         <div className="absolute top-0 left-0 right-0 bottom-0 z-20 pointer-events-none">

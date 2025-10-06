@@ -19,14 +19,9 @@ export default async function Dashboard() {
 
     return (
         <>
-            <DashboardLayout>
-                <div className="p-6">
-                    <h1 className="text-2xl dark:text-gray-300 text-gray-700 font-bold mb-6">
-                        Personal Dashboard
-                    </h1>
-                    <ThreeJsBackground />
-                    <DashboardContent />
-                </div>
+            <DashboardLayout titleKey="title">
+                <ThreeJsBackground />
+                <DashboardContent />
             </DashboardLayout>
             <Footer />
         </>

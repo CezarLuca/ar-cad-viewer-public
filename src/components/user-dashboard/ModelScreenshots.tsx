@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Image from "next/image";
+import { useTranslations } from "@/hooks/useTranslations";
 
 interface Screenshot {
     id: number;
@@ -21,6 +22,7 @@ export default function ModelScreenshots({ modelId }: ModelScreenshotsProps) {
     const [invalidData, setInvalidData] = useState<boolean>(false);
     const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
     const autoRotateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const { t } = useTranslations("modelScreenshots");
 
     const fetchScreenshots = useCallback(async () => {
         try {
@@ -154,7 +156,7 @@ export default function ModelScreenshots({ modelId }: ModelScreenshotsProps) {
     if (loading) {
         return (
             <div className="w-full h-full rounded bg-gray-200 animate-pulse flex items-center justify-center">
-                <span className="sr-only">Loading...</span>
+                <span className="sr-only">{t("loading")}</span>
             </div>
         );
     }
@@ -162,7 +164,7 @@ export default function ModelScreenshots({ modelId }: ModelScreenshotsProps) {
     if (error) {
         return (
             <div className="w-full h-full rounded bg-red-100 flex items-center justify-center">
-                <span className="text-xs text-red-500">Error</span>
+                <span className="text-xs text-red-500">{t("error")}</span>
             </div>
         );
     }
@@ -171,7 +173,7 @@ export default function ModelScreenshots({ modelId }: ModelScreenshotsProps) {
         return (
             <div className="w-full h-full rounded bg-gray-500 flex items-center justify-center">
                 <span className="text-2xl text-gray-800 text-center">
-                    No screenshots yet
+                    {t("noScreenshots")}
                 </span>
             </div>
         );
@@ -195,7 +197,7 @@ export default function ModelScreenshots({ modelId }: ModelScreenshotsProps) {
         return (
             <div className="w-full h-full rounded bg-gray-400 flex items-center justify-center">
                 <span className="text-gray-800 text-lg">
-                    {"Invalid screenshot data"}
+                    {t("invalidData")}
                 </span>
             </div>
         );
@@ -218,7 +220,7 @@ export default function ModelScreenshots({ modelId }: ModelScreenshotsProps) {
             {/* Display the active screenshot */}
             <Image
                 src={currentScreenshot.blob_url}
-                alt={`Model screenshot ${safeIndex + 1}`}
+                alt={t("viewScreenshot", { number: safeIndex + 1 })}
                 className="rounded object-cover"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -237,7 +239,9 @@ export default function ModelScreenshots({ modelId }: ModelScreenshotsProps) {
                                     ? "bg-white w-6"
                                     : "bg-white/50 w-2 hover:bg-white/75"
                             }`}
-                            aria-label={`View screenshot ${idx + 1}`}
+                            aria-label={t("viewScreenshot", {
+                                number: idx + 1,
+                            })}
                         />
                     ))}
                 </div>

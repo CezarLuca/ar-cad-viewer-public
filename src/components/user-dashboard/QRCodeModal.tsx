@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "@/hooks/useTranslations";
 
 // Dynamically import ThreeJsBackground to avoid SSR issues
 const ThreeJsBackground = dynamic(
@@ -31,6 +32,7 @@ const QrCodeModal = ({
     onClose,
 }: QRCodeModalProps) => {
     const [qrSize, setQrSize] = useState(getQrSize());
+    const { t } = useTranslations("qrCodeModal");
 
     useEffect(() => {
         const handleResize = () => setQrSize(getQrSize());
@@ -74,21 +76,21 @@ const QrCodeModal = ({
                         />
                     </div>
                     <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 mb-5">
-                        Scan this code to view in AR/3D.
+                        {t("scanCode")}
                     </p>
                 </div>
                 <div className="flex flex-col space-y-3">
                     <button
                         onClick={handleDownloadQr}
-                        className="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md w-full shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150"
+                        className="px-4 py-2 bg-gray-100 text-gray-800 text-base font-medium rounded-md w-full shadow-md hover:bg-gray-300 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-150"
                     >
-                        Download QR Code
+                        {t("downloadQRCode")}
                     </button>
                     <button
                         onClick={onClose}
                         className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-base font-medium rounded-md w-full shadow-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-gray-600 transition-colors duration-150"
                     >
-                        Close
+                        {t("close")}
                     </button>
                 </div>
             </div>

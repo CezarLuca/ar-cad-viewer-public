@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import QrCodeModal from "@/components/user-dashboard/QRCodeModal";
 import ModelScreenshots from "./ModelScreenshots";
+import { useTranslations } from "@/hooks/useTranslations";
 
 interface Model {
     id: number;
@@ -49,6 +50,7 @@ export default function UserModelsList() {
         number | null
     >(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const { t } = useTranslations("userModelsList");
 
     useEffect(() => {
         async function fetchModels() {
@@ -79,7 +81,6 @@ export default function UserModelsList() {
     }, [session]);
 
     useEffect(() => {
-        // Close menu when clicking outside
         function handleClickOutside(event: MouseEvent) {
             if (
                 menuRef.current &&
@@ -95,7 +96,7 @@ export default function UserModelsList() {
     }, [menuRef]);
 
     async function handleDeleteModel(id: number) {
-        if (!confirm("Are you sure you want to delete this model?")) {
+        if (!confirm(t("deleteConfirmation"))) {
             setOpenActionMenuModelId(null);
             return;
         }
@@ -114,7 +115,6 @@ export default function UserModelsList() {
                 throw new Error(data.error || "Failed to delete model");
             }
 
-            // Remove the deleted model from the state
             setModels(models.filter((model) => model.id !== id));
         } catch (err) {
             setDeleteError(
@@ -152,14 +152,10 @@ export default function UserModelsList() {
     };
 
     if (loading)
-        return <div className="text-gray-800">Loading your models...</div>;
+        return <div className="text-gray-800">{t("loadingModels")}</div>;
     if (error) return <div className="text-red-500">{error}</div>;
     if (models.length === 0)
-        return (
-            <div className="text-gray-800">
-                You haven&apos;t uploaded any models yet.
-            </div>
-        );
+        return <div className="text-gray-800">{t("noModelsUploaded")}</div>;
 
     return (
         <div>
@@ -178,22 +174,18 @@ export default function UserModelsList() {
                         <div
                             className="flex-grow cursor-pointer"
                             onClick={() => {
-                                // Navigate to 3D view when clicking on the card
                                 window.location.href = `/ar?model=${encodeURIComponent(
                                     model.blob_url
                                 )}`;
                             }}
                         >
-                            {/* Screenshot section - larger */}
                             <div className="mb-3 flex-grow">
                                 <div className="w-full h-48 md:h-64 relative">
                                     <ModelScreenshots modelId={model.id} />
                                 </div>
                             </div>
 
-                            {/* Info section */}
                             <div className="flex justify-between items-center mt-2">
-                                {/* Model name and date */}
                                 <div>
                                     <h3 className="font-semibold text-gray-700">
                                         {model.name}
@@ -205,7 +197,6 @@ export default function UserModelsList() {
                                     </p>
                                 </div>
 
-                                {/* Action menu button */}
                                 <div
                                     className="relative"
                                     ref={
@@ -220,7 +211,7 @@ export default function UserModelsList() {
                                             toggleActionMenu(model.id)
                                         }
                                         className="p-2 rounded-md text-gray-900 bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
-                                        aria-label="Model actions"
+                                        aria-label={t("modelActions")}
                                     >
                                         <BurgerIcon />
                                     </button>
@@ -237,7 +228,7 @@ export default function UserModelsList() {
                                                     )
                                                 }
                                             >
-                                                View in 3D
+                                                {t("viewIn3D")}
                                             </Link>
                                             <button
                                                 onClick={() =>
@@ -245,7 +236,7 @@ export default function UserModelsList() {
                                                 }
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left border-b border-gray-300 hover:cursor-pointer"
                                             >
-                                                Show QR Code
+                                                {t("showQRCode")}
                                             </button>
                                             <button
                                                 onClick={() =>
@@ -257,8 +248,8 @@ export default function UserModelsList() {
                                                 className="block px-4 py-2 text-sm text-red-600 hover:bg-red-200 w-full text-left disabled:text-gray-400 hover:cursor-pointer"
                                             >
                                                 {deleteLoading === model.id
-                                                    ? "Deleting..."
-                                                    : "Delete"}
+                                                    ? t("deleting")
+                                                    : t("delete")}
                                             </button>
                                         </div>
                                     )}

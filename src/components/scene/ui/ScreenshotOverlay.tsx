@@ -4,6 +4,7 @@ import { upload } from "@vercel/blob/client";
 import Image from "next/image";
 import { useScreenshot } from "@/context/ScreenshotContext";
 import { useModelUrl } from "@/context/ModelUrlContext";
+import { useTranslations } from "@/hooks/useTranslations";
 
 interface ScreenshotOverlayProps {
     onCapture: () => void;
@@ -35,6 +36,7 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
     const overlayRef = useRef<HTMLDivElement>(null);
     const { modelUrl } = useModelUrl();
     const [isUploading, setIsUploading] = useState(false);
+    const { t } = useTranslations("screenshotOverlay");
 
     // Responsive frame size calculation
     useEffect(() => {
@@ -43,7 +45,6 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
             const height = window.innerHeight;
 
             if (width < 640) {
-                // For small devices: account for border width (8px total)
                 const availableWidth = width - 24;
                 setFrameSize(availableWidth);
             } else {
@@ -89,7 +90,6 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
 
     async function fetchModelIdByUrl(url: string): Promise<number | null> {
         try {
-            // Get all user models
             const response = await fetch("/api/models/user");
             if (!response.ok) {
                 console.error("Failed to fetch user models");
@@ -98,7 +98,6 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
 
             const data = await response.json();
 
-            // Find the model with matching URL
             const matchingModel = data.models.find((model: Model) => {
                 return model.blob_url === url;
             });
@@ -128,14 +127,12 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
     async function deleteOldestScreenshot(screenshots: Screenshot[]) {
         if (!screenshots || screenshots.length === 0) return false;
 
-        // Sort screenshots by creation date (oldest first)
         const sorted = [...screenshots].sort(
             (a, b) =>
                 new Date(a.created_at).getTime() -
                 new Date(b.created_at).getTime()
         );
 
-        // Get the oldest screenshot
         const oldestScreenshot = sorted[0];
 
         try {
@@ -181,21 +178,17 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
         setIsUploading(true);
 
         try {
-            // Get the model ID using the full model URL
             const modelId = await fetchModelIdByUrl(modelUrl);
 
             if (!modelId) {
-                alert(
-                    "Could not find model ID. Make sure this is one of your uploaded models."
-                );
+                alert(t("couldNotFindModel"));
                 setIsUploading(false);
                 return;
             }
 
-            // Fetch all screenshots for this model
             const existingScreenshots = await fetchModelScreenshots(modelId);
 
-            // Check if we need to delete an old screenshot (if we have 4 already)
+            // Check if needed to delete an old screenshot (if we have 4 already)
             if (existingScreenshots && existingScreenshots.length >= 4) {
                 const deleted = await deleteOldestScreenshot(
                     existingScreenshots
@@ -207,7 +200,6 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
                 }
             }
 
-            // Continue with the regular upload process
             const blob = dataURLtoBlob(screenshot);
 
             // Extract model name from URL for filename only
@@ -216,10 +208,8 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
             const timestamp = Date.now();
             const filename = `screenshot-${timestamp}-${modelName}.png`;
 
-            // Upload the screenshot blob to Vercel Blob storage
             const blobUrl = await uploadToBlobStore(blob, filename);
 
-            // Save the metadata to your database
             const result = await saveScreenshotMetadata({
                 modelId,
                 filename,
@@ -231,13 +221,12 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
             setIsFraming(false);
         } catch (error) {
             console.error("Error uploading screenshot:", error);
-            alert("Failed to upload screenshot. Please try again.");
+            alert(t("uploadFailed"));
         } finally {
             setIsUploading(false);
         }
     }
 
-    // If screenshot exists, show the result overlay
     if (screenshot) {
         return (
             <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center">
@@ -248,13 +237,13 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
                             setScreenshot(null);
                             setIsFraming(false);
                         }}
-                        aria-label="Close screenshot"
+                        aria-label={t("closeAria")}
                     >
                         ×
                     </button>
                     <Image
                         src={screenshot}
-                        alt="Screenshot"
+                        alt={t("altScreenshot")}
                         className="max-w-[90vw] max-h-[90vh] rounded"
                         width={frameSize}
                         height={frameSize}
@@ -267,7 +256,7 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
                             onClick={handleUpload}
                             disabled={isUploading}
                         >
-                            {isUploading ? "Uploading..." : "Upload Screenshot"}
+                            {isUploading ? t("uploading") : t("uploadButton")}
                         </button>
                     </div>
                 </div>
@@ -275,13 +264,11 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
         );
     }
 
-    // Otherwise, show the framing overlay
     return (
         <div
             ref={overlayRef}
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
         >
-            {/* SVG overlay with rectangular transparent hole */}
             <svg
                 className="absolute inset-0 w-full h-full pointer-events-auto"
                 style={{ display: "block", pointerEvents: "none" }}
@@ -307,7 +294,6 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
                     mask="url(#rect-mask)"
                 />
             </svg>
-            {/* Framing rectangle border */}
             <div
                 className="absolute flex items-center justify-center"
                 style={{
@@ -321,19 +307,18 @@ const ScreenshotOverlay: React.FC<ScreenshotOverlayProps> = ({
             >
                 <div className="border-4 border-blue-400 rounded-lg w-full h-full bg-transparent" />
             </div>
-            {/* Buttons */}
             <div className="absolute bottom-10 left-1/2 pr-8 -translate-x-1/2 flex gap-4 pointer-events-auto">
                 <button
                     onClick={onCapture}
                     className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700"
                 >
-                    Capture
+                    {t("capture")}
                 </button>
                 <button
                     onClick={onCancel}
                     className="bg-gray-300 text-gray-800 px-6 py-2 rounded shadow hover:bg-gray-400"
                 >
-                    Cancel
+                    {t("cancel")}
                 </button>
             </div>
         </div>

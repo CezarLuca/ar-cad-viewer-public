@@ -10,6 +10,7 @@ import {
     FiRefreshCw,
 } from "react-icons/fi";
 import EditableValue from "./EditableValue";
+import { useTranslations } from "@/hooks/useTranslations";
 
 const CADSCALE = 0.01;
 
@@ -33,6 +34,7 @@ const X3Icon = ({ expanded }: { expanded: boolean }) => (
 
 export default function ModelControls() {
     const { config, updateConfig } = useModelConfig();
+    const { t } = useTranslations("modelControls");
     const [expandedSections, setExpandedSections] = useState({
         position: false,
         rotation: false,
@@ -159,7 +161,7 @@ export default function ModelControls() {
                                 onClick={() => toggleSection("position")}
                                 className="flex items-center text-left font-medium text-sm text-gray-800 hover:text-gray-950 transition-colors whitespace-nowrap"
                             >
-                                <span>Position</span>
+                                <span>{t("position")}</span>
                                 {expandedSections.position ? (
                                     <FiChevronDown className="h-4 w-4 ml-2" />
                                 ) : (
@@ -180,22 +182,24 @@ export default function ModelControls() {
                                         } rounded transition-colors flex items-center`}
                                         title={
                                             expandedRange.position
-                                                ? "Use normal range"
-                                                : "Use 3x expanded range"
+                                                ? t("useNormalRange")
+                                                : t("useExpandedRange")
                                         }
                                     >
                                         <X3Icon
                                             expanded={expandedRange.position}
                                         />
-                                        <span className="ml-1">Range</span>
+                                        <span className="ml-1">
+                                            {t("range")}
+                                        </span>
                                     </button>
                                     <button
                                         onClick={resetPosition}
                                         className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors flex items-center"
-                                        title="Reset position to initial values"
+                                        title={t("resetPositionTooltip")}
                                     >
                                         <FiRefreshCw className="h-3 w-3 mr-1" />
-                                        <span>Reset</span>
+                                        <span>{t("reset")}</span>
                                     </button>
                                 </div>
                             )}
@@ -261,7 +265,7 @@ export default function ModelControls() {
                                 onClick={() => toggleSection("rotation")}
                                 className="flex items-center text-left font-medium text-sm text-gray-800 hover:text-gray-950 transition-colors whitespace-nowrap"
                             >
-                                <span>Rotation</span>
+                                <span>{t("rotation")}</span>
                                 {expandedSections.rotation ? (
                                     <FiChevronDown className="h-4 w-4 ml-2" />
                                 ) : (
@@ -273,10 +277,10 @@ export default function ModelControls() {
                                 <button
                                     onClick={resetRotation}
                                     className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors flex items-center"
-                                    title="Reset scale to initial values"
+                                    title={t("resetRotationTooltip")}
                                 >
                                     <FiRefreshCw className="h-3 w-3 mr-1" />
-                                    <span>Reset</span>
+                                    <span>{t("reset")}</span>
                                 </button>
                             )}
                         </div>
@@ -285,7 +289,7 @@ export default function ModelControls() {
                             <div className="pt-2 space-y-3">
                                 <div className="flex items-center justify-start mb-2">
                                     <span className="text-xs font-medium text-gray-800">
-                                        Use radians:
+                                        {t("useRadians")}:
                                     </span>
                                     <button
                                         onClick={toggleRadiansMode}
@@ -295,7 +299,7 @@ export default function ModelControls() {
                                                 : "bg-gray-200 hover:bg-gray-300 text-gray-700"
                                         }`}
                                     >
-                                        {useRadians ? "On" : "Off"}
+                                        {useRadians ? t("on") : t("off")}
                                     </button>
                                 </div>
 
@@ -379,7 +383,7 @@ export default function ModelControls() {
                                 onClick={() => toggleSection("scale")}
                                 className="flex items-center text-left font-medium text-sm text-gray-800 hover:text-gray-950 transition-colors whitespace-nowrap"
                             >
-                                <span>Scale</span>
+                                <span>{t("scale")}</span>
                                 {expandedSections.scale ? (
                                     <FiChevronDown className="h-4 w-4 ml-2" />
                                 ) : (
@@ -400,22 +404,24 @@ export default function ModelControls() {
                                         } rounded transition-colors flex items-center`}
                                         title={
                                             expandedRange.scale
-                                                ? "Use normal range"
-                                                : "Use expanded range"
+                                                ? t("useNormalRange")
+                                                : t("useExpandedRange")
                                         }
                                     >
                                         <X3Icon
                                             expanded={expandedRange.scale}
                                         />
-                                        <span className="ml-1">Range</span>
+                                        <span className="ml-1">
+                                            {t("range")}
+                                        </span>
                                     </button>
                                     <button
                                         onClick={resetScale}
                                         className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors flex items-center"
-                                        title="Reset scale to initial values"
+                                        title={t("resetScaleTooltip")}
                                     >
                                         <FiRefreshCw className="h-3 w-3 mr-1" />
-                                        <span>Reset</span>
+                                        <span>{t("reset")}</span>
                                     </button>
                                 </div>
                             )}
@@ -426,7 +432,7 @@ export default function ModelControls() {
                                 {/* Asymmetric scale toggle */}
                                 <div className="flex items-center justify-start mb-2">
                                     <span className="text-xs font-medium text-gray-800">
-                                        Scale unlock:
+                                        {t("scaleUnlock")}:
                                     </span>
                                     <button
                                         onClick={toggleAsymmetricScale}
@@ -436,7 +442,7 @@ export default function ModelControls() {
                                                 : "bg-gray-200 hover:bg-gray-300 text-gray-700"
                                         }`}
                                     >
-                                        {asymmetricScale ? "On" : "Off"}
+                                        {asymmetricScale ? t("on") : t("off")}
                                     </button>
                                 </div>
 
